@@ -1,0 +1,75 @@
+/* Layouts — whole-canvas arrangements for a full-screen scene page. Every
+   layout is a `tally-stage` with named regions, so a scene page only picks
+   one and fills the slots. */
+
+/* Announcement: the starting-soon / be-right-back / ending screen. A card in
+   the middle, a strip of chips under it, a visualizer along the foot, a clock
+   in a corner. The stage carries its own soft backdrop so the screen reads on
+   a black scene as well as over a camera. */
+.tally-layout-announce {
+	display: grid;
+	grid-template-rows: 1fr auto;
+	background:
+		radial-gradient(60% 50% at 50% 40%, color-mix(in oklab, var(--tally-accent) 14%, transparent), transparent 70%),
+		var(--tally-n-950);
+}
+
+.tally-layout-announce[data-backdrop="none"] {
+	background: transparent;
+}
+
+.tally-layout-announce[data-backdrop="scrim"] {
+	background: var(--tally-scrim);
+}
+
+.tally-layout-announce__main {
+	display: grid;
+	place-items: center;
+	padding: var(--tally-gutter);
+}
+
+.tally-layout-announce__foot {
+	position: relative;
+	height: calc(var(--tally-unit) * 44);
+	padding: 0 var(--tally-gutter);
+	mask-image: linear-gradient(to top, #000 60%, transparent);
+}
+
+.tally-layout-announce__corner {
+	position: absolute;
+	top: var(--tally-gutter);
+	right: var(--tally-gutter);
+	display: flex;
+	gap: calc(var(--tally-unit) * 3);
+}
+
+.tally-layout-announce__brand {
+	position: absolute;
+	top: var(--tally-gutter);
+	left: var(--tally-gutter);
+}
+
+/* The Tally wordmark — live text with the recording light on its shoulder.
+   Type it as <span class="tally-brand"><b>Tally</b><i class="tally-dot"></i></span>
+   or put a streamer's own name in the <b>. */
+.tally-brand {
+	display: inline-flex;
+	align-items: flex-start;
+	gap: 0.12em;
+	font-size: var(--tally-text-lg);
+	font-weight: var(--tally-weight-semibold);
+	letter-spacing: var(--tally-tracking-tight);
+	line-height: 1;
+	color: var(--tally-ink);
+}
+
+.tally-brand b {
+	font-weight: inherit;
+	color: inherit;
+}
+
+.tally-brand .tally-dot {
+	width: 0.28em;
+	height: 0.28em;
+	margin-top: 0.08em;
+}

@@ -1,0 +1,43 @@
+/* Frame — an empty, rounded, outlined rectangle for a webcam to sit behind.
+   Place the Browser Source over the camera in OBS; the frame has a hole in
+   it. The name chip sits on the bottom edge.
+
+   <div class="tally-frame" style="--tally-frame-w: 640px; --tally-frame-h: 360px">
+     <span class="tally-frame__chip tally-chip">@imswarnil</span>
+   </div>
+
+   `tally-frame--accent` draws the border in the accent; `tally-frame--round`
+   makes it a circle for a small corner cam. */
+
+.tally-frame {
+	--tally-frame-w: 100vw;
+	--tally-frame-h: 100vh;
+	--tally-frame-border: calc(var(--tally-unit) * 1);
+	--tally-frame-color: var(--tally-ink);
+	position: relative;
+	width: var(--tally-frame-w);
+	height: var(--tally-frame-h);
+	border: var(--tally-frame-border) solid var(--tally-frame-color);
+	border-radius: var(--tally-radius-lg);
+	box-shadow: var(--tally-shadow);
+	animation: tally-fade-in var(--tally-enter) var(--tally-ease-out) backwards;
+}
+
+.tally-frame--accent {
+	--tally-frame-color: var(--tally-accent);
+}
+
+.tally-frame--round {
+	border-radius: 50%;
+}
+
+.tally-frame__chip {
+	position: absolute;
+	left: 50%;
+	bottom: 0;
+	transform: translate(-50%, 50%);
+}
+
+.tally-frame--round .tally-frame__chip {
+	transform: translate(-50%, 0);
+}

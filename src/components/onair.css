@@ -1,0 +1,79 @@
+/* On air — the tally light itself. A pill with the dot and a word; the word
+   and the colour follow OBS's real state through Tally.obs, so it says LIVE
+   while streaming, REC while only recording, and OFF AIR otherwise.
+
+   <div class="tally-onair" data-state="off">
+     <i class="tally-dot"></i>
+     <span class="tally-onair__label">Off air</span>
+   </div>
+
+   data-state: off | live | rec | both */
+
+.tally-onair {
+	--tally-onair-color: var(--tally-off);
+	display: inline-flex;
+	align-items: center;
+	gap: calc(var(--tally-unit) * 2.5);
+	padding: calc(var(--tally-unit) * 2) calc(var(--tally-unit) * 4) calc(var(--tally-unit) * 2) calc(var(--tally-unit) * 3);
+	border-radius: var(--tally-radius-full);
+	font-family: var(--tally-font-mono);
+	font-size: var(--tally-text-sm);
+	font-weight: var(--tally-weight-semibold);
+	letter-spacing: var(--tally-tracking-wide);
+	text-transform: uppercase;
+	color: var(--tally-ink);
+	transition: background-color 300ms var(--tally-ease-out);
+	animation: tally-fade-in var(--tally-enter) var(--tally-ease-out) backwards;
+}
+
+.tally-onair .tally-dot {
+	width: 0.7em;
+	height: 0.7em;
+	background: var(--tally-onair-color);
+	--tally-accent-glow: color-mix(in oklab, var(--tally-onair-color) 55%, transparent);
+	transition: background-color 300ms var(--tally-ease-out);
+}
+
+.tally-onair[data-state="live"],
+.tally-onair[data-state="both"] {
+	--tally-onair-color: var(--tally-live);
+}
+
+.tally-onair[data-state="rec"] {
+	--tally-onair-color: var(--tally-rec);
+}
+
+.tally-onair[data-state="live"] .tally-dot,
+.tally-onair[data-state="rec"] .tally-dot,
+.tally-onair[data-state="both"] .tally-dot {
+	animation: tally-pulse var(--tally-pulse) var(--tally-ease-in-out) infinite;
+}
+
+/* The solid variant fills the pill with the state colour — a real lamp. */
+.tally-onair--solid[data-state="live"],
+.tally-onair--solid[data-state="rec"],
+.tally-onair--solid[data-state="both"] {
+	background: var(--tally-onair-color);
+	border-color: transparent;
+	color: var(--tally-on-accent);
+}
+
+.tally-onair--solid[data-state="live"] .tally-dot,
+.tally-onair--solid[data-state="rec"] .tally-dot,
+.tally-onair--solid[data-state="both"] .tally-dot {
+	background: var(--tally-on-accent);
+	--tally-accent-glow: rgb(255 255 255 / 50%);
+}
+
+.tally-onair[data-tally-visible="false"] {
+	animation: tally-fade-out var(--tally-exit) var(--tally-ease-in-out) forwards;
+}
+
+@keyframes tally-fade-in {
+	from { opacity: 0; transform: translateY(8px); }
+	to { opacity: 1; transform: none; }
+}
+
+@keyframes tally-fade-out {
+	to { opacity: 0; transform: translateY(8px); }
+}

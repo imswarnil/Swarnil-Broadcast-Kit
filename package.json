@@ -1,0 +1,27 @@
+{
+	"name": "tally",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Tally — stream overlays, audio visualizers and scene layouts for OBS Studio. Add a URL as a Browser Source; nothing to install.",
+	"homepage": "https://obs.imswarnil.com",
+	"repository": "github:imswarnil/Tally",
+	"license": "MIT",
+	"type": "module",
+	"engines": {
+		"node": ">=22"
+	},
+	"scripts": {
+		"dev": "node scripts/dev.mjs",
+		"build": "node scripts/build.mjs",
+		"check": "node scripts/check.mjs",
+		"scenes": "node scripts/scenes.mjs",
+		"pack": "node scripts/pack.mjs",
+		"preview": "npm run build && wrangler dev",
+		"cf:deploy": "npm run build && npm run check && wrangler deploy"
+	},
+	"devDependencies": {
+		"esbuild": "^0.28.2",
+		"geist": "^1.7.2",
+		"wrangler": "^4.138.0"
+	}
+}

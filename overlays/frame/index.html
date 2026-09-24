@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tally · Webcam frame</title>
+<link rel="stylesheet" href="../assets/tally.css">
+<script type="module">
+	const q = new URLSearchParams(location.search);
+	const f = document.querySelector('.tally-frame');
+	if (q.get('w')) f.style.setProperty('--tally-frame-w', `${parseInt(q.get('w'), 10)}px`);
+	if (q.get('h')) f.style.setProperty('--tally-frame-h', `${parseInt(q.get('h'), 10)}px`);
+</script>
+<script type="module" src="../assets/tally.js"></script>
+<style>
+	/* The frame sits in the middle of its source with room for the chip. */
+	.tally-stage { display: grid; place-items: center; }
+</style>
+</head>
+<body>
+<div class="tally-stage">
+	<div class="tally-frame" style="--tally-frame-w: 640px; --tally-frame-h: 360px" data-tally-variant="variant" data-tally-base="tally-frame">
+		<span class="tally-frame__chip tally-chip tally-chip--ink" data-tally-param="label" data-tally-default="@imswarnil" data-tally-optional>@imswarnil</span>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+/* Chip — a small mono label: a handle, a resolution, a topic. Chips sit in
+   a `tally-chips` row.
+
+   <span class="tally-chip">@imswarnil</span>
+   <span class="tally-chip tally-chip--accent">New</span> */
+
+.tally-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: calc(var(--tally-unit) * 2);
+}
+
+.tally-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: calc(var(--tally-unit) * 1.5);
+	padding: calc(var(--tally-unit) * 1.5) calc(var(--tally-unit) * 3);
+	border-radius: var(--tally-radius-full);
+	background: var(--tally-glass-soft);
+	border: 1px solid var(--tally-glass-line);
+	font-family: var(--tally-font-mono);
+	font-size: var(--tally-text-xs);
+	font-weight: var(--tally-weight-medium);
+	letter-spacing: 0.02em;
+	color: var(--tally-ink-dim);
+	white-space: nowrap;
+}
+
+.tally-chip--accent {
+	background: var(--tally-accent);
+	border-color: transparent;
+	color: var(--tally-on-accent);
+}
+
+.tally-chip--ink {
+	background: var(--tally-ink);
+	border-color: transparent;
+	color: var(--tally-n-950);
+}

@@ -1,0 +1,53 @@
+/* Clock and countdown — numbers in Geist Mono with tabular figures, so the
+   digits never jitter as they change.
+
+   <time class="tally-clock" data-tally-clock>12:00</time>
+   <time class="tally-count" data-tally-count="15m"><span data-part="mm">15</span>:<span data-part="ss">00</span></time> */
+
+.tally-clock,
+.tally-count {
+	display: inline-flex;
+	align-items: baseline;
+	font-family: var(--tally-font-mono);
+	font-variant-numeric: tabular-nums;
+	font-weight: var(--tally-weight-medium);
+	letter-spacing: var(--tally-tracking-tight);
+	color: var(--tally-ink);
+}
+
+.tally-clock {
+	gap: 0.3em;
+	padding: calc(var(--tally-unit) * 2.5) calc(var(--tally-unit) * 5);
+	border-radius: var(--tally-radius-full);
+	font-size: var(--tally-text-md);
+	animation: tally-fade-in var(--tally-enter) var(--tally-ease-out) backwards;
+}
+
+.tally-clock__meridiem {
+	font-size: 0.7em;
+	color: var(--tally-ink-faint);
+}
+
+.tally-count {
+	font-size: var(--tally-text-3xl);
+	font-weight: var(--tally-weight-semibold);
+	line-height: 1;
+}
+
+.tally-count [data-part] {
+	display: inline-block;
+	min-width: 1.2ch;
+}
+
+.tally-count__sep {
+	color: var(--tally-accent);
+	animation: tally-blink 1s steps(1) infinite;
+}
+
+.tally-count[data-done] .tally-count__sep {
+	animation: none;
+}
+
+@keyframes tally-blink {
+	50% { opacity: 0.25; }
+}

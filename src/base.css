@@ -1,0 +1,114 @@
+/* Base — what every overlay page starts from. The page is TRANSPARENT: OBS
+   composites it over the scene, so the canvas is the video, never a colour.
+   OBS's own default Browser Source CSS says the same
+   (`body { background-color: rgba(0,0,0,0) }`); this repeats it so a file
+   opened in a normal browser behaves identically. */
+
+@font-face {
+	font-family: "Geist";
+	src: url("../assets/fonts/Geist-Variable.woff2") format("woff2");
+	font-weight: 100 900;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Geist Mono";
+	src: url("../assets/fonts/GeistMono-Variable.woff2") format("woff2");
+	font-weight: 100 900;
+	font-display: swap;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+[hidden] {
+	display: none !important;
+}
+
+html {
+	background: transparent;
+	color: var(--tally-ink);
+	font-family: var(--tally-font-sans);
+	font-size: 16px;
+	line-height: 1.3;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+body {
+	min-height: 100vh;
+	background: transparent;
+	overflow: hidden;
+}
+
+/* A page can lay itself out on the 1080p canvas with these four. */
+.tally-stage {
+	position: relative;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+}
+
+.tally-pin {
+	position: absolute;
+	inset: auto auto var(--tally-gutter) var(--tally-gutter);
+}
+
+.tally-pin[data-at="top-left"] { inset: var(--tally-gutter) auto auto var(--tally-gutter); }
+.tally-pin[data-at="top-right"] { inset: var(--tally-gutter) var(--tally-gutter) auto auto; }
+.tally-pin[data-at="bottom-right"] { inset: auto var(--tally-gutter) var(--tally-gutter) auto; }
+.tally-pin[data-at="bottom-left"] { inset: auto auto var(--tally-gutter) var(--tally-gutter); }
+.tally-pin[data-at="top"] { inset: var(--tally-gutter) 0 auto 0; }
+.tally-pin[data-at="bottom"] { inset: auto 0 var(--tally-gutter) 0; }
+.tally-pin[data-at="center"] { inset: 0; display: grid; place-items: center; }
+
+/* Glass — the one panel every component is cut from. */
+.tally-glass {
+	background: var(--tally-glass);
+	border: 1px solid var(--tally-glass-line);
+	box-shadow: var(--tally-shadow);
+	backdrop-filter: blur(var(--tally-glass-blur)) saturate(140%);
+	-webkit-backdrop-filter: blur(var(--tally-glass-blur)) saturate(140%);
+}
+
+/* The dot — the same recording light the logo wears, as a reusable part. */
+.tally-dot {
+	display: inline-block;
+	flex: none;
+	width: 0.5em;
+	height: 0.5em;
+	border-radius: 50%;
+	background: var(--tally-accent);
+	box-shadow: 0 0 0 0 var(--tally-accent-glow);
+}
+
+.tally-dot[data-pulse] {
+	animation: tally-pulse var(--tally-pulse) var(--tally-ease-in-out) infinite;
+}
+
+@keyframes tally-pulse {
+	0% { box-shadow: 0 0 0 0 var(--tally-accent-glow); }
+	70% { box-shadow: 0 0 0 0.6em transparent; }
+	100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* Screen-reader-only text: overlays are seen, but the markup stays honest. */
+.tally-sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+/* Visibility: `?hidden=1` or Tally.hide() sets this; the component's own
+   exit animation plays, then it is gone. */
+[data-tally-visible="false"] {
+	pointer-events: none;
+}

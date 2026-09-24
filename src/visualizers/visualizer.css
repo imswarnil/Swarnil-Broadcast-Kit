@@ -1,0 +1,26 @@
+/* Visualizer — one <canvas> that Tally.viz paints in a chosen style. The
+   colours are read from these variables at draw time, so `?accent=` and the
+   tone reach the canvas like everything else.
+
+   <canvas class="tally-viz" data-tally-viz="bars"></canvas>
+
+   Styles: bars | wave | ring | dots. Modifiers change the geometry only:
+   `tally-viz--mirror` reflects bars around the middle,
+   `tally-viz--cap` draws a falling peak cap over each bar. */
+
+.tally-viz {
+	--tally-viz-color: var(--tally-accent);
+	--tally-viz-color-2: var(--tally-ink);
+	--tally-viz-gap: 0.35;      /* share of a bar slot left empty, 0–0.8 */
+	--tally-viz-radius: 3;      /* bar corner radius in px at 1x */
+	--tally-viz-line: 3;        /* wave stroke width in px at 1x */
+	--tally-viz-min: 0.04;      /* floor a silent bar rests at, 0–1 */
+	display: block;
+	width: 100%;
+	height: 100%;
+	animation: tally-fade-in var(--tally-enter) var(--tally-ease-out) backwards;
+}
+
+.tally-viz--mono {
+	--tally-viz-color: var(--tally-ink);
+}

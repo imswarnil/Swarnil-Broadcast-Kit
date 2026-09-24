@@ -1,0 +1,96 @@
+/* Lower third — a name and a line under it, with the accent as a bar on the
+   left. Slides in from the left edge on load; `data-tally-visible="false"`
+   slides it back out.
+
+   <div class="tally-lower-third">
+     <span class="tally-lower-third__bar"></span>
+     <div class="tally-lower-third__text">
+       <strong class="tally-lower-third__name">Swarnil Singhai</strong>
+       <span class="tally-lower-third__title">Salesforce Architect · imswarnil.com</span>
+     </div>
+   </div>
+
+   Variants: `tally-lower-third--pill` (no bar, rounded), `tally-lower-third--stacked`
+   (the title above the name, for a topic-first card). */
+
+.tally-lower-third {
+	--tally-lt-pad-y: calc(var(--tally-unit) * 3.5);
+	--tally-lt-pad-x: calc(var(--tally-unit) * 6);
+	display: inline-flex;
+	align-items: stretch;
+	max-width: min(60vw, 900px);
+	border-radius: var(--tally-radius-md);
+	overflow: hidden;
+	transform-origin: left center;
+	animation: tally-lt-in var(--tally-enter) var(--tally-ease-out) backwards;
+}
+
+.tally-lower-third[data-tally-visible="false"] {
+	animation: tally-lt-out var(--tally-exit) var(--tally-ease-in-out) forwards;
+}
+
+.tally-lower-third__bar {
+	flex: none;
+	width: calc(var(--tally-unit) * 1.5);
+	background: var(--tally-accent);
+}
+
+.tally-lower-third__text {
+	display: flex;
+	flex-direction: column;
+	gap: calc(var(--tally-unit) * 0.5);
+	padding: var(--tally-lt-pad-y) var(--tally-lt-pad-x);
+	min-width: 0;
+}
+
+.tally-lower-third__name {
+	font-size: var(--tally-text-lg);
+	font-weight: var(--tally-weight-semibold);
+	letter-spacing: var(--tally-tracking-tight);
+	line-height: 1.1;
+	color: var(--tally-ink);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.tally-lower-third__title {
+	font-size: var(--tally-text-sm);
+	font-weight: var(--tally-weight-medium);
+	color: var(--tally-ink-dim);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.tally-lower-third--pill {
+	border-radius: var(--tally-radius-full);
+}
+
+.tally-lower-third--pill .tally-lower-third__bar {
+	display: none;
+}
+
+.tally-lower-third--pill .tally-lower-third__text {
+	padding-inline: calc(var(--tally-lt-pad-x) * 1.25);
+}
+
+.tally-lower-third--stacked .tally-lower-third__text {
+	flex-direction: column-reverse;
+}
+
+.tally-lower-third--stacked .tally-lower-third__title {
+	font-family: var(--tally-font-mono);
+	font-size: var(--tally-text-xs);
+	letter-spacing: var(--tally-tracking-wide);
+	text-transform: uppercase;
+}
+
+@keyframes tally-lt-in {
+	from { opacity: 0; transform: translateX(-24px); clip-path: inset(0 100% 0 0); }
+	to { opacity: 1; transform: none; clip-path: inset(0 0 0 0); }
+}
+
+@keyframes tally-lt-out {
+	to { opacity: 0; transform: translateX(-24px); clip-path: inset(0 100% 0 0); }
+}

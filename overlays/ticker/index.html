@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tally · Ticker</title>
+<link rel="stylesheet" href="../assets/tally.css">
+<script type="module">
+	// Items are separated by a pipe; join them with the accent dot.
+	const q = new URLSearchParams(location.search);
+	const t = document.querySelector('.tally-ticker__text');
+	const items = (q.get('text') || t.textContent).split('|').map((s) => s.trim()).filter(Boolean);
+	t.textContent = items.join('  ·  ');
+</script>
+<script type="module" src="../assets/tally.js"></script>
+<style>
+	.tally-stage { display: flex; align-items: flex-end; }
+</style>
+</head>
+<body>
+<div class="tally-stage">
+	<div class="tally-ticker tally-glass">
+		<span class="tally-ticker__tag" data-tally-param="tag" data-tally-default="Now">Now</span>
+		<div class="tally-ticker__track"><span class="tally-ticker__text">Building a Salesforce app live | Questions in chat | imswarnil.com</span></div>
+	</div>
+</div>
+</body>
+</html>
