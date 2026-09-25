@@ -133,24 +133,42 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 }
 .bar__in { display: flex; align-items: center; gap: 1.5rem; height: 58px; }
 .bar__mark {
-	display: inline-flex; align-items: center; gap: 0.55rem;
+	display: inline-flex; align-items: center; gap: 0.5rem;
 	font-weight: 600; letter-spacing: -0.02em; text-decoration: none; margin-right: auto;
+	white-space: nowrap;
 }
-.bar nav { display: flex; gap: 1.25rem; font-size: 0.94rem; }
-.bar nav a { color: var(--ink-dim); text-decoration: none; }
-.bar nav a:hover, .bar nav a[aria-current] { color: var(--ink); }
+.mark { width: 20px; height: 20px; flex: none; }
+.mark__ring { fill: none; stroke: var(--line-strong); stroke-width: 1.6; }
+.mark__dot { fill: var(--accent); }
+.bar__full { color: var(--ink-dim); font-weight: 500; }
+
+.bar nav { display: flex; gap: 0.15rem; font-size: 0.9rem; flex: none; }
+.bar nav a {
+	color: var(--ink-dim); text-decoration: none; white-space: nowrap;
+	display: inline-flex; align-items: center; gap: 0.42rem;
+	padding: 0.4rem 0.62rem; border-radius: 999px;
+	transition: color 0.16s ease, background 0.16s ease;
+}
+/* the icons are 24-grid SVGs with no intrinsic size, so without this they
+   render at whatever the box gives them, which is the whole bar */
+.bar nav a svg { width: 16px; height: 16px; flex: none; }
+.bar nav a:hover { color: var(--ink); background: var(--surface-2); }
+.bar nav a[aria-current] { color: var(--ink); background: var(--surface-2); }
 
 /* The theme button. It carries both glyphs and shows the one for the theme you
    would get by pressing it, so the control says what it does rather than what
    is currently true. */
 .theme {
 	appearance: none; cursor: pointer;
-	width: 34px; height: 34px; flex: none;
-	display: grid; place-items: center;
-	background: transparent; color: var(--ink-dim);
-	border: 1px solid var(--line); border-radius: 999px;
+	min-height: 34px; flex: none;
+	display: inline-flex; align-items: center; gap: 0.4rem;
+	padding: 0 0.7rem;
+	background: var(--surface); color: var(--ink-dim);
+	border: 1px solid var(--line-strong); border-radius: 999px;
+	font: inherit; font-size: 0.84rem; font-weight: 500;
 	transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
+.theme__label { letter-spacing: -0.01em; }
 .theme:hover { color: var(--ink); background: var(--surface-2); border-color: var(--line-strong); }
 .theme svg { width: 16px; height: 16px; display: none; }
 .theme .sun { display: block; }
@@ -160,9 +178,15 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 	:root:not([data-theme]) .theme .sun { display: none; }
 	:root:not([data-theme]) .theme .moon { display: block; }
 }
-@media (max-width: 40rem) {
-	.bar nav { gap: 0.9rem; font-size: 0.86rem; }
-	.bar__mark span:last-child { display: none; }
+@media (max-width: 68rem) {
+	.bar__full { display: none; }
+	.bar nav a > span { display: none; }
+	.bar nav a { padding: 0.45rem; }
+}
+@media (max-width: 34rem) {
+	.bar__in { gap: 0.6rem; }
+	.theme__label { display: none; }
+	.theme { padding: 0 0.5rem; }
 }
 
 .dot {
@@ -176,9 +200,65 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 	50% { box-shadow: 0 0 0 7px rgb(245 39 63 / 0%); }
 }
 
+/* ---- background patterns ---------------------------------------------------
+
+   The same grid and dot patterns the kit's own Backdrop source draws, at an
+   opacity that reads as texture rather than decoration. Pure gradients, so
+   there is no image to load and they re-tint with the theme on their own. */
+
+.pattern { position: relative; isolation: isolate; }
+.pattern::before {
+	content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+	background-image:
+		linear-gradient(to right, var(--line) 1px, transparent 1px),
+		linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+	background-size: 72px 72px;
+	/* fade it out before the edges so it never fights the text */
+	-webkit-mask-image: radial-gradient(120% 90% at 50% 0%, #000 20%, transparent 78%);
+	mask-image: radial-gradient(120% 90% at 50% 0%, #000 20%, transparent 78%);
+	opacity: 0.7;
+}
+.pattern--dots::before {
+	background-image: radial-gradient(var(--line-strong) 1px, transparent 1px);
+	background-size: 26px 26px;
+	opacity: 0.55;
+}
+
 /* ---- hero ---------------------------------------------------------------- */
 
 .hero { padding: clamp(3rem, 9vw, 6rem) 0 2.5rem; }
+
+.hero--split { padding-bottom: clamp(2.5rem, 6vw, 4rem); }
+.hero__grid {
+	display: grid; gap: clamp(2rem, 5vw, 3.5rem);
+	grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+	align-items: center;
+}
+@media (max-width: 58rem) {
+	.hero__grid { grid-template-columns: 1fr; }
+}
+.hero__words h1 { max-width: 14ch; }
+.hero__shot { margin: 0; }
+.hero__shot img {
+	display: block; width: 100%; height: auto;
+	border: 1px solid var(--line); border-radius: var(--radius);
+	background: var(--shot-bg);
+	box-shadow: 0 24px 60px -30px rgb(0 0 0 / 65%);
+}
+.hero__shot figcaption {
+	margin-top: 0.6rem; font-size: 0.82rem; color: var(--ink-faint);
+}
+
+.facts {
+	display: flex; flex-wrap: wrap; gap: 0 2.2rem; margin: 2rem 0 0;
+	border-top: 1px solid var(--line); padding-top: 1.1rem;
+}
+.facts div { display: flex; align-items: baseline; gap: 0.4rem; }
+.facts dt {
+	font-family: var(--mono); font-size: 1.25rem; font-weight: 600;
+	letter-spacing: -0.03em;
+}
+.facts dd { margin: 0; color: var(--ink-faint); font-size: 0.82rem; }
 .hero h1 {
 	font-size: clamp(2.4rem, 6.4vw, 4.2rem);
 	line-height: 1.04;
@@ -390,3 +470,177 @@ footer p { margin: 0.35rem 0 0; max-width: 62ch; }
 	border: 1px solid var(--line-strong); border-radius: 999px; padding: 0.35rem 0.9rem;
 }
 .lightbox__bar button:hover { color: var(--ink); background: var(--surface-2); }
+
+/* ---- the builder ----------------------------------------------------------
+
+   Three columns on a desk and one on anything narrower. The canvas is drawn at
+   its real 1920 × 1080 and scaled with a transform, so every number in the
+   interface is already in canvas units — which is why the export needs no
+   conversion and the drag maths is two divisions.  */
+
+.builder { padding-block: clamp(1.6rem, 4vw, 2.6rem); }
+.builder__head { padding-bottom: 1.6rem; }
+.builder__head h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 0.4rem 0 0; letter-spacing: -0.03em; }
+.builder__head .lede { font-size: 1rem; margin-top: 0.7rem; }
+
+.builder__grid {
+	display: grid; gap: 1rem;
+	grid-template-columns: 13.5rem minmax(0, 1fr) 15rem;
+	align-items: start;
+}
+@media (max-width: 78rem) {
+	.builder__grid { grid-template-columns: minmax(0, 1fr); }
+	.builder__props { order: 3; }
+}
+
+.builder__side {
+	background: var(--surface); border: 1px solid var(--line);
+	border-radius: var(--radius); padding: 0.9rem 1rem 1.1rem;
+	position: sticky; top: 5rem;
+}
+@media (max-width: 78rem) { .builder__side { position: static; } }
+.builder__side h3 {
+	font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+	color: var(--ink-faint); margin: 1rem 0 0.5rem;
+}
+.builder__side h3:first-child { margin-top: 0; }
+
+.palette__grid { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.chip-btn {
+	font: inherit; font-size: 0.8rem; cursor: pointer;
+	background: var(--surface-2); color: var(--ink-dim);
+	border: 1px solid var(--line); border-radius: 999px;
+	padding: 0.28rem 0.65rem;
+	transition: color 0.14s ease, border-color 0.14s ease;
+}
+.chip-btn:hover { color: var(--ink); border-color: var(--line-strong); }
+
+.builder__bar {
+	display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.8rem;
+	padding: 0.7rem 0.9rem; margin-bottom: 0.7rem;
+	background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.builder__bar .btn { min-height: 34px; padding: 0.3rem 0.9rem; font-size: 0.86rem; }
+.builder__bar .btn--primary { margin-left: auto; }
+@media (max-width: 40rem) { .builder__bar .btn--primary { margin-left: 0; } }
+
+.field { display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.55rem; }
+.field > span { font-size: 0.72rem; color: var(--ink-faint); }
+.field input, .field select {
+	font: inherit; font-size: 0.85rem; color: var(--ink);
+	background: var(--bg); border: 1px solid var(--line);
+	border-radius: 8px; padding: 0.32rem 0.5rem; min-width: 0;
+}
+.field input[type="color"] { padding: 0.1rem; height: 30px; width: 44px; }
+.field input[type="range"] { padding: 0; width: 7rem; }
+.field--inline { flex-direction: row; align-items: center; gap: 0.4rem; margin: 0; }
+.field--inline > span { white-space: nowrap; }
+.field--check input { width: 16px; height: 16px; }
+.field--pair { flex-direction: row; gap: 0.5rem; }
+.field--pair label { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; min-width: 0; }
+.field--pair span { font-size: 0.72rem; color: var(--ink-faint); }
+.field--pair input { width: 100%; }
+
+.props__head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem; }
+.props__head strong { font-size: 0.95rem; }
+.props__order { display: flex; gap: 0.4rem; margin-top: 0.6rem; }
+.btn--ghost {
+	font: inherit; font-size: 0.78rem; cursor: pointer; min-height: 0;
+	background: transparent; color: var(--ink-dim);
+	border: 1px solid var(--line); border-radius: 999px; padding: 0.22rem 0.6rem;
+}
+.btn--ghost:hover { color: var(--ink); background: var(--surface-2); }
+.props__head .btn--ghost { margin-left: auto; }
+.muted { color: var(--ink-faint); font-size: 0.85rem; margin: 0; }
+
+.builder__stage {
+	position: relative; overflow: hidden;
+	aspect-ratio: 16 / 9; width: 100%;
+	display: grid; place-items: center;
+	background: #0a0a0a; border: 1px solid var(--line); border-radius: var(--radius);
+	background-image:
+		linear-gradient(to right, rgb(255 255 255 / 5%) 1px, transparent 1px),
+		linear-gradient(to bottom, rgb(255 255 255 / 5%) 1px, transparent 1px);
+	background-size: 40px 40px;
+}
+.builder__canvas {
+	position: relative; width: 1920px; height: 1080px; flex: none;
+	transform-origin: center; background: #000;
+	--accent: #f5273f;
+	font-family: var(--sans);
+}
+
+/* ---- the nodes ------------------------------------------------------------- */
+
+.node { position: absolute; cursor: grab; }
+.node:active { cursor: grabbing; }
+.node.is-ground { cursor: default; }
+.node__body { width: 100%; height: 100%; display: flex; align-items: center; gap: 14px; color: #fff; }
+.node__tag {
+	position: absolute; top: -26px; left: 0; font-size: 15px;
+	color: rgb(255 255 255 / 45%); letter-spacing: 0.04em; text-transform: uppercase;
+	opacity: 0; transition: opacity 0.12s ease; pointer-events: none;
+}
+.node:hover .node__tag, .node.is-selected .node__tag { opacity: 1; }
+.node.is-selected::after {
+	content: ""; position: absolute; inset: -4px; pointer-events: none;
+	border: 2px solid var(--accent); border-radius: 6px;
+}
+
+.pv-card { background: rgb(12 12 12 / 78%); border: 1px solid rgb(255 255 255 / 14%); border-radius: 14px; padding: 18px 26px; }
+.pv-pill { background: rgb(12 12 12 / 78%); border: 1px solid rgb(255 255 255 / 14%); border-radius: 999px; padding: 0 22px; font-size: 22px; font-weight: 600; letter-spacing: 0.06em; }
+.pv-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); flex: none; }
+.pv-value { background: var(--accent); border-radius: 999px; padding: 2px 12px; font-size: 20px; }
+.pv-bar { width: 6px; align-self: stretch; margin: 4px 0; background: var(--accent); border-radius: 3px; flex: none; }
+.pv-lower strong { display: block; font-size: 40px; font-weight: 600; letter-spacing: -0.02em; }
+.pv-lower span { display: block; font-size: 22px; color: rgb(255 255 255 / 72%); }
+.pv-ticker { gap: 18px; font-size: 22px; overflow: hidden; white-space: nowrap; }
+.pv-tag { background: var(--accent); border-radius: 999px; padding: 4px 16px; font-size: 18px; flex: none; }
+.pv-frame { border: 3px solid rgb(255 255 255 / 40%); border-radius: 20px; position: relative; }
+.pv-chip { position: absolute; left: 12px; bottom: 12px; background: rgb(12 12 12 / 78%); border: 1px solid rgb(255 255 255 / 14%); border-radius: 999px; padding: 4px 14px; font-size: 18px; }
+.pv-bigcard { flex-direction: column; align-items: flex-start; justify-content: center; gap: 8px; }
+.pv-bigcard.is-centre { align-items: center; text-align: center; }
+.pv-eyebrow { color: var(--accent); font-size: 18px; letter-spacing: 0.1em; text-transform: uppercase; }
+.pv-bigcard strong { font-size: 56px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
+.pv-bigcard span { font-size: 24px; color: rgb(255 255 255 / 72%); }
+.pv-ground { background: #1b1b1b; border-radius: 0; }
+.pv-ground[data-mode="grid"] { background-image: linear-gradient(to right, rgb(255 255 255 / 8%) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / 8%) 1px, transparent 1px); background-size: 72px 72px; }
+.pv-ground[data-mode="dots"] { background-image: radial-gradient(rgb(255 255 255 / 14%) 2px, transparent 2px); background-size: 48px 48px; }
+.pv-ground[data-mode="stripes"] { background-image: repeating-linear-gradient(45deg, rgb(255 255 255 / 7%) 0 2px, transparent 2px 96px); }
+.pv-ground[data-mode="rings"] { background-image: repeating-radial-gradient(circle at 50% 50%, rgb(255 255 255 / 8%) 0 2px, transparent 2px 120px); }
+.pv-ground[data-mode="aurora"] { background: radial-gradient(60% 60% at 30% 35%, #1d4f4a 0%, transparent 70%), radial-gradient(55% 55% at 72% 62%, #23324f 0%, transparent 70%), #101314; }
+.pv-ground[data-mode="plasma"] { background: linear-gradient(120deg, #191d2c, #2a1b2b, #14232a); }
+.pv-ground[data-mode="stars"] { background-image: radial-gradient(rgb(255 255 255 / 55%) 1.5px, transparent 1.5px); background-size: 90px 90px; background-color: #0d0d0f; }
+.pv-ground[data-mode="checkers"] { background-image: conic-gradient(rgb(255 255 255 / 5%) 0 25%, transparent 0 50%, rgb(255 255 255 / 5%) 0 75%, transparent 0); background-size: 320px 320px; }
+.pv-ground[data-mode="gradient"] { background: linear-gradient(135deg, #1b1b1b, #30343c); }
+.pv-ground[data-mode="vignette"] { background: radial-gradient(70% 70% at 50% 50%, transparent 40%, rgb(0 0 0 / 85%) 100%), #1b1b1b; }
+.pv-ground[data-mode="scrim"] { background: linear-gradient(to top, #1b1b1b 10%, transparent 85%); }
+.pv-viz { align-items: flex-end; gap: 6px; padding: 0 4px; }
+.pv-viz i { flex: 1; background: var(--accent); border-radius: 3px 3px 0 0; }
+.pv-viz i:nth-child(3n) { height: 62%; }
+.pv-viz i:nth-child(3n+1) { height: 34%; }
+.pv-viz i:nth-child(3n+2) { height: 84%; }
+.pv-viz[data-style="wave"] i { height: 14%; align-self: center; border-radius: 3px; }
+.pv-viz[data-style="ring"] { border: 14px solid var(--accent); border-radius: 50%; }
+.pv-viz[data-style="ring"] i { display: none; }
+.pv-meter, .pv-progress, .pv-counter, .pv-stats, .pv-qr { flex-direction: column; align-items: stretch; justify-content: center; gap: 10px; }
+.pv-meter b, .pv-progress b, .pv-counter b, .pv-stats b { font-size: 18px; color: rgb(255 255 255 / 60%); letter-spacing: 0.08em; text-transform: uppercase; }
+.pv-track { display: flex; gap: 3px; height: 16px; background: rgb(255 255 255 / 10%); border-radius: 8px; overflow: hidden; }
+.pv-track i { flex: 1; background: var(--accent); border-radius: 2px; }
+.pv-progress .pv-track { display: block; }
+.pv-progress .pv-track i { display: block; height: 100%; border-radius: 8px; }
+.pv-counter strong { font-size: 48px; font-weight: 700; font-family: var(--mono); }
+.pv-stats div { display: flex; justify-content: space-between; font-size: 20px; }
+.pv-stats span { font-family: var(--mono); }
+.pv-timer { justify-content: center; }
+.pv-timer strong { font-size: 54px; font-family: var(--mono); font-weight: 700; margin: 0 auto; }
+.pv-timer.is-ring { border-radius: 50%; border: 14px solid var(--accent); background: transparent; aspect-ratio: 1; }
+.pv-qr { align-items: center; }
+.pv-code { width: 60%; aspect-ratio: 1; background: #fff; border-radius: 8px; }
+.pv-qr b { font-size: 20px; text-transform: none; letter-spacing: 0; color: #fff; }
+
+.builder__canvas[data-tone="light"] .pv-card,
+.builder__canvas[data-tone="light"] .pv-pill { background: rgb(255 255 255 / 86%); border-color: rgb(0 0 0 / 10%); color: #16171a; }
+.builder__canvas[data-tone="light"] .node__body { color: #16171a; }
+.builder__canvas[data-tone="solid"] .pv-card,
+.builder__canvas[data-tone="solid"] .pv-pill { background: #1b1b1b; }

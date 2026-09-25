@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NAME, SHORT, REPO, BUILT_FOR, SOURCES, SCENES, STEPS, APIS, FAQ } from './content.mjs';
+import { icons, mark } from './icons.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -28,13 +29,14 @@ const esc = (s) => String(s).replace(/&(?![a-z#]+;)/g, '&amp;').replace(/</g, '&
 const prose = (s) => String(s).replace(/\s+/g, ' ').trim();
 
 const NAV = [
-	['/', 'Overview'],
-	['/scenes/', 'Scenes'],
-	['/sources/', 'Sources'],
-	['/setup/', 'Setup'],
+	['/', 'Overview', 'overview'],
+	['/scenes/', 'Scenes', 'scenes'],
+	['/sources/', 'Sources', 'sources'],
+	['/builder/', 'Builder', 'builder'],
+	['/docs/', 'Docs', 'docs'],
 ];
 
-function page({ url, title, description, body }) {
+function page({ url, title, description, body, script }) {
 	const full = url === '/' ? `${NAME} — native overlays for OBS Studio` : `${title} · ${SHORT}`;
 	return `<!doctype html>
 <html lang="en">
@@ -64,9 +66,9 @@ try { var t = localStorage.getItem("sbk-theme"); if (t === "light" || t === "dar
 <a class="skip" href="#main">Skip to content</a>
 <header class="bar">
 	<div class="wrap wide bar__in">
-		<a class="bar__mark" href="/"><i class="dot" aria-hidden="true"></i><span>${esc(SHORT)}</span><span> Broadcast Kit</span></a>
-		<nav>${NAV.map(([u, l]) => `<a href="${u}"${u === url ? ' aria-current="page"' : ''}>${l}</a>`).join('')}</nav>
-		<button class="theme" type="button" data-theme-toggle aria-label="Switch between the light and dark theme">
+		<a class="bar__mark" href="/">${mark}<span>${esc(SHORT)}</span><span class="bar__full">Swarnil Broadcast Kit</span></a>
+		<nav>${NAV.map(([u, l, i]) => `<a href="${u}"${u === url ? ' aria-current="page"' : ''}>${icons[i]}<span>${l}</span></a>`).join('')}</nav>
+		<button class="theme" type="button" data-theme-toggle title="Switch between the light and dark theme" aria-label="Switch between the light and dark theme"><span class="theme__label">Theme</span>
 			<svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
 			<svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
 		</button>
@@ -84,6 +86,7 @@ ${body}
 	</div>
 </footer>
 <script src="/site.js" type="module"></script>
+${script ? `<script src="${script}" type="module"></script>` : ''}
 </body>
 </html>
 `;
@@ -103,19 +106,31 @@ const sourcesByTag = () => {
 
 function home() {
 	const body = `
-<section class="hero">
-	<div class="wrap wide">
-		<p class="eyebrow"><i class="dot" aria-hidden="true"></i> Native OBS plugin</p>
-		<h1>Overlays OBS draws itself.</h1>
-		<p class="lede">A tally light that knows when you are live, a level meter in real decibels,
-		live subscriber and member counts, a QR code people can scan, a camera frame in 9:16, and a
-		transition — ${SOURCES.length} sources and a full show of ${SCENES.length} scenes. No browser
-		source, no web server, no URL to paste.</p>
-		<p class="btns">
-			<a class="btn btn--primary" href="${REPO}/releases">Download the plugin</a>
-			<a class="btn" href="/setup/">How to set it up</a>
-			<a class="btn" href="${REPO}">Source on GitHub</a>
-		</p>
+<section class="hero hero--split pattern">
+	<div class="wrap wide hero__grid">
+		<div class="hero__words">
+			<p class="eyebrow"><i class="dot" aria-hidden="true"></i> Native OBS plugin</p>
+			<h1>Overlays OBS draws itself.</h1>
+			<p class="lede">A tally light that knows when you are live, a level meter in real
+			decibels, live subscriber and member counts, a QR code people can scan, a camera frame in
+			9:16, filters for your picture and your voice, and a transition — ${SOURCES.length} pieces
+			and a show of ${SCENES.length} scenes. No browser source, no web server, no URL to paste.</p>
+			<p class="btns">
+				<a class="btn btn--primary" href="${REPO}/releases">Download the plugin</a>
+				<a class="btn" href="/builder/">Design a scene</a>
+				<a class="btn" href="/docs/">Set it up</a>
+			</p>
+			<dl class="facts">
+				<div><dt>${SOURCES.filter((s) => !s.tag.includes('Filter') && s.tag !== 'Transition').length}</dt><dd>sources</dd></div>
+				<div><dt>${SOURCES.filter((s) => s.tag.includes('Filter')).length}</dt><dd>filters</dd></div>
+				<div><dt>${SCENES.length}</dt><dd>scenes</dd></div>
+				<div><dt>0</dt><dd>browser sources</dd></div>
+			</dl>
+		</div>
+		<figure class="hero__shot">
+			<img src="/screens/live.jpg" alt="The Live scene: a lower third, a camera frame and a ticker over a dark canvas" width="1600" height="900">
+			<figcaption>The Live scene, exactly as the plugin builds it.</figcaption>
+		</figure>
 	</div>
 </section>
 
@@ -193,7 +208,7 @@ function home() {
 				(a) => `<div class="card"><h3>${esc(a.name.split('—')[0].trim())}</h3><p>${prose(a.name.split('—')[1] || '')}</p></div>`
 			).join('')}
 		</div>
-		<p class="btns"><a class="btn" href="/setup/#apis">How to get each key</a></p>
+		<p class="btns"><a class="btn" href="/docs/#apis">How to get each key</a></p>
 	</div>
 </section>
 `;
@@ -207,7 +222,7 @@ function home() {
 
 function scenes() {
 	const body = `
-<section class="hero">
+<section class="hero pattern">
 	<div class="wrap wide">
 		<p class="eyebrow">Scenes</p>
 		<h1>A whole show, in one menu item.</h1>
@@ -250,7 +265,7 @@ function scenes() {
 
 function sources() {
 	const body = `
-<section class="hero">
+<section class="hero pattern pattern--dots">
 	<div class="wrap wide">
 		<p class="eyebrow">Sources</p>
 		<h1>${SOURCES.length} sources in OBS’s own menu.</h1>
@@ -288,11 +303,65 @@ ${sourcesByTag()
 	});
 }
 
+function builder() {
+	const body = `
+<section class="builder">
+	<div class="wrap wide builder__head">
+		<div>
+			<p class="eyebrow">Builder</p>
+			<h1>Design a scene. Import it into OBS.</h1>
+			<p class="lede">Place the pieces, set the words, and export a scene collection. What
+			comes out is the real thing — the same source ids and setting keys the plugin registers —
+			so the import builds native sources, not a picture of them.</p>
+		</div>
+	</div>
+
+	<div class="builder__grid wrap wide">
+		<aside class="builder__side">
+			<h3>Start from</h3>
+			<div class="palette__grid" id="start"></div>
+			<div id="palette"></div>
+		</aside>
+
+		<div class="builder__main">
+			<div class="builder__bar">
+				<label class="field field--inline"><span>Scene</span><input id="scene-name" value="SBK Scene"></label>
+				<label class="field field--inline"><span>Accent</span><input id="accent" type="color" value="#f5273f"></label>
+				<label class="field field--inline"><span>Scale</span><input id="scale" type="range" min="0.5" max="2" step="0.05" value="1"><output id="scale-out">1.00×</output></label>
+				<label class="field field--inline"><span>Tone</span><select id="tone"><option value="glass">glass</option><option value="solid">solid</option><option value="light">light</option></select></label>
+				<label class="field field--inline field--check"><input id="snap" type="checkbox" checked><span>Snap</span></label>
+				<button class="btn btn--ghost" id="clear" type="button">Clear</button>
+				<button class="btn btn--primary" id="export" type="button">Export for OBS</button>
+			</div>
+			<div class="builder__stage" id="stage"><div class="builder__canvas" id="canvas"></div></div>
+			<p class="note" id="export-note" hidden></p>
+			<p class="note">Drag to move, arrow keys to nudge (hold shift for a bigger step), delete to
+			remove. The canvas is 1920 × 1080 and the preview is a schematic — it shows where things
+			sit and how they read, not the plugin's own drawing, which is done with shaders and real
+			hinted type.</p>
+		</div>
+
+		<aside class="builder__side builder__props">
+			<h3>Selected</h3>
+			<div id="props"></div>
+		</aside>
+	</div>
+</section>
+`;
+	return page({
+		url: '/builder/',
+		title: 'Builder',
+		description: `Design an OBS scene from ${NAME}'s pieces in the browser and export a scene collection you can import straight into OBS.`,
+		body,
+		script: '/builder/app.js',
+	});
+}
+
 function setup() {
 	const body = `
-<section class="hero">
+<section class="hero pattern">
 	<div class="wrap wide">
-		<p class="eyebrow">Setup</p>
+		<p class="eyebrow">Docs</p>
 		<h1>Installed in a minute, set up in five.</h1>
 		<p class="lede">macOS, OBS Studio 30 or newer. Built and tested against ${esc(BUILT_FOR)}.</p>
 	</div>
@@ -337,6 +406,20 @@ function setup() {
 		included. Begin a key field with <code>@</code> and a file path —
 		<code>@/Users/you/.youtube-key</code> — and the kit reads it from there instead, so a
 		collection you share carries no secret.</p>
+	</div>
+</section>
+
+<section id="builder-note">
+	<div class="wrap wide">
+		<h2>Designing a scene</h2>
+		<p class="sub">The <a href="/builder/">builder</a> places the kit's pieces on a 1920 × 1080
+		canvas and exports a scene collection. In OBS: <strong>Scene Collection → Import</strong>,
+		pick the file it saved. The sources it creates are the real ones — the export carries the
+		same ids and setting keys the plugin registers, so nothing is approximated on the way in.</p>
+		<p class="note">It saves what you place, so closing the tab does not lose the layout. The
+		preview is a schematic rather than a copy of the plugin's drawing; anything that looked
+		pixel-perfect there would only drift away from the real thing the first time a shader
+		changed.</p>
 	</div>
 </section>
 
@@ -394,8 +477,8 @@ cd Swarnil-Broadcast-Kit
 </section>
 `;
 	return page({
-		url: '/setup/',
-		title: 'Setup',
+		url: '/docs/',
+		title: 'Docs',
 		description: `How to install ${NAME} in OBS Studio, put your camera under the frames, add the transition, and wire up live YouTube and Ghost counts with your own API keys.`,
 		body,
 	});
@@ -410,7 +493,16 @@ fs.mkdirSync(DIST, { recursive: true });
 write(path.join(DIST, 'index.html'), home());
 write(path.join(DIST, 'scenes/index.html'), scenes());
 write(path.join(DIST, 'sources/index.html'), sources());
-write(path.join(DIST, 'setup/index.html'), setup());
+write(path.join(DIST, 'builder/index.html'), builder());
+write(path.join(DIST, 'docs/index.html'), setup());
+/* the page used to live at /setup/ and something out there will still link to
+   it; a meta refresh costs one file and never breaks */
+write(
+	path.join(DIST, 'setup/index.html'),
+	`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Docs · ${SHORT}</title>` +
+		`<meta name="description" content="This page moved to /docs/."><meta http-equiv="refresh" content="0; url=/docs/">` +
+		`<link rel="canonical" href="${BASE}docs/"></head><body><p>Moved to <a href="/docs/">/docs/</a>.</p></body></html>\n`
+);
 
 copy(path.join(ROOT, 'site/site.css'), path.join(DIST, 'site.css'));
 copy(path.join(ROOT, 'site/site.js'), path.join(DIST, 'site.js'));
@@ -420,6 +512,10 @@ for (const f of fs.readdirSync(path.join(ROOT, 'docs/screens')))
    someone presses Connect from here */
 for (const f of ['index.html', 'sha256.js'])
 	copy(path.join(ROOT, 'remote', f), path.join(DIST, 'remote', f));
+/* the builder's palette is shared between the generator and the browser, so the
+   same file is served rather than a second copy of the truth */
+copy(path.join(ROOT, 'site/builder.mjs'), path.join(DIST, 'builder/builder.mjs'));
+copy(path.join(ROOT, 'site/builder-app.js'), path.join(DIST, 'builder/app.js'));
 for (const f of ['Geist-Regular.ttf', 'Geist-Medium.ttf', 'Geist-SemiBold.ttf', 'GeistMono-Regular.ttf'])
 	copy(path.join(ROOT, 'fonts', f), path.join(DIST, 'fonts', f));
 
@@ -440,7 +536,7 @@ write(
 	})
 );
 
-const urls = ['', 'scenes/', 'sources/', 'setup/'];
+const urls = ['', 'scenes/', 'sources/', 'builder/', 'docs/'];
 write(
 	path.join(DIST, 'sitemap.xml'),
 	`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +

@@ -468,6 +468,15 @@ export const APIS = [
 
 export const FAQ = [
 	{
+		q: 'Can I design a scene without installing anything?',
+		a: `Yes — the <a href="/builder/">builder</a> runs in the browser. Place the pieces, set the
+		words, and export a scene collection. What comes out is the real thing: the same source ids
+		and setting keys the plugin registers, so <strong>Scene Collection → Import</strong> in OBS
+		builds native sources, not a picture of them. The preview is a schematic — it shows where
+		things sit and how they read, not the plugin's own drawing, which is done with shaders and
+		real hinted type.`,
+	},
+	{
 		q: 'Can I control it from my phone?',
 		a: `Yes — the kit ships a remote that drives OBS over the WebSocket server OBS already has.
 		Scenes, stream and record, the mic, the transition, and a button for every hotkey the kit
