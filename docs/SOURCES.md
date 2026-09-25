@@ -24,7 +24,16 @@ Sizes below are at scale 1 on a 1080p canvas.
 | **SBK Progress** | A goal: solid, segments or a thin line, as value / target or a percentage. Hotkeys: *nudge the goal up / down*. |
 | **SBK Clock** | The time in the mono face, 12- or 24-hour, seconds optional. |
 | **SBK Countdown** | To a duration or a time of day, with a word at zero. Restarts when shown. Hotkey: *restart the countdown*. |
-| **SBK Wipe** | A transition: bar, dip through the accent, slide, iris or blinds, in any of four directions. Added from the Scene Transitions panel's **+**. |
+| **SBK Wipe** | A transition: bar, dip through the accent, slide, push, iris, blinds, or a band of accent that crosses the frame and takes the cut with it — a stinger with no video file. Any of four directions. Added from the Scene Transitions panel's **+**. |
+
+## Filters
+
+These appear under **Filters** on a source or a whole scene, not in the **+** menu.
+
+| Filter | What it does |
+| --- | --- |
+| **SBK Round Corners** | Rounds the corners of the picture itself. A frame drawn on top is a rectangle with a hole in it — the camera's square corners are still there underneath, so it only looks rounded against a matching background. This cuts the picture, so anything can sit behind it. Radius as a percentage of the shorter side (one setting suits a webcam box and a full-frame share) or in pixels, plus an inner border. |
+| **SBK Scanlines** | A CRT treatment: scanline spacing, depth and roll; aperture mask and triad width; colour fringing; barrel curvature; vignette, grain and mains flicker. Four presets — Fine, CRT, VHS, Arcade — each of which just fills in the sliders so you can start from one and move on. |
 
 ## Audio
 
@@ -56,6 +65,30 @@ Keys typed into a source are saved in the scene collection as plain text.
 Begin a key field with `@` and a path — `@/Users/you/.youtube-key` — and the kit
 reads it from the file, so a collection you share carries no secret.
 
+## The camera and the microphone
+
+Building the collection adds both: a **Camera** source with **SBK Round Corners**
+already on it, placed under the frame in every scene that has one and cropped to
+fit rather than squashed; and a microphone on OBS's own Mic/Aux channel, which is
+what `@mic` means to the meter and the visualizer. An input you have already
+chosen is left alone. Both are ordinary sources — swap the device, disable them,
+or delete them.
+
+**Tools → Broadcast Kit: add my camera and microphone** does the same for a scene
+you built yourself.
+
+## The phone remote
+
+`remote/serve.command` prints an address to open on a phone on the same network.
+The remote drives OBS through the WebSocket server OBS already ships: scenes,
+stream and record, the mic, the transition, and a button for every hotkey the kit
+registers, discovered from OBS rather than hard-coded.
+
+It must be served over plain `http` from your own machine. A page loaded over
+`https` cannot open the unencrypted `ws://` connection obs-websocket speaks —
+browsers block it — so a hosted copy could never reach your OBS. Nothing goes
+through the website, and the password stays in that phone's browser.
+
 ## The Tools menu
 
 - **Broadcast Kit: build the show here** — the thirteen scenes into the current
@@ -65,13 +98,13 @@ reads it from the file, so a collection you share carries no secret.
   Broadcast Kit* with those scenes, switched to.
 - **Broadcast Kit: add the live pack to this scene** — a light, a lower third, a
   ticker and a frame dropped into the current scene, placed.
+- **Broadcast Kit: add my camera and microphone** — the same devices, into the
+  scene you are on.
 - **Broadcast Kit: use the Broadcast Kit profile** — switches to the installed
   profile.
 
 Every built source is an ordinary source: select it, open Properties, change
 anything. The scenes are a starting point, not a template you are locked into.
-The frames are left empty on purpose — add your own camera and drag it below the
-frame in the Sources list.
 
 ## Hotkeys
 

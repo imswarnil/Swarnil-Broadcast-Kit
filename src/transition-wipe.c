@@ -30,6 +30,8 @@ static void wipe_update(void *data, obs_data_t *s)
 		   : astrcmpi(st, "slide") == 0  ? 2.0f
 		   : astrcmpi(st, "iris") == 0   ? 3.0f
 		   : astrcmpi(st, "blinds") == 0 ? 4.0f
+		   : astrcmpi(st, "push") == 0   ? 5.0f
+		   : astrcmpi(st, "bars") == 0   ? 6.0f
 						 : 0.0f;
 	const char *d = obs_data_get_string(s, "direction");
 	w->dir = astrcmpi(d, "right-left") == 0 ? 1.0f : astrcmpi(d, "top-bottom") == 0 ? 2.0f
@@ -115,6 +117,8 @@ static obs_properties_t *wipe_properties(void *data)
 	obs_property_list_add_string(st, "Slide — the new scene pushes the old off", "slide");
 	obs_property_list_add_string(st, "Iris — a circle opens from the middle", "iris");
 	obs_property_list_add_string(st, "Blinds", "blinds");
+	obs_property_list_add_string(st, "Push — both scenes move together", "push");
+	obs_property_list_add_string(st, "Bars — a band of accent takes the cut with it", "bars");
 	obs_property_t *d = obs_properties_add_list(p, "direction", "Direction", OBS_COMBO_TYPE_LIST,
 						    OBS_COMBO_FORMAT_STRING);
 	obs_property_list_add_string(d, "Left to right", "left-right");

@@ -289,7 +289,10 @@ pre code { background: none; border: 0; padding: 0; font-size: inherit; }
 .shot {
 	border: 1px solid var(--line); border-radius: var(--radius);
 	overflow: hidden; background: var(--shot-bg); display: block;
+	width: 100%; padding: 0; cursor: zoom-in;
+	transition: border-color 0.18s ease;
 }
+button.shot:hover { border-color: var(--line-strong); }
 .shot img { display: block; width: 100%; height: auto; }
 .scene h3 { margin-top: 0.85rem; }
 .scene p { color: var(--ink-dim); font-size: 0.94rem; margin: 0.25rem 0 0; }
@@ -348,3 +351,26 @@ footer p { margin: 0.35rem 0 0; max-width: 62ch; }
 	background: var(--surface); border: 1px solid var(--line-strong);
 	padding: 0.5rem 0.9rem; border-radius: 8px;
 }
+
+/* ---- the lightbox ---------------------------------------------------------- */
+
+#lightbox {
+	border: 0; padding: 0; background: transparent;
+	max-width: min(96vw, 1600px); max-height: 92vh;
+	color: var(--ink);
+}
+#lightbox::backdrop { background: rgb(0 0 0 / 86%); backdrop-filter: blur(4px); }
+#lightbox img {
+	display: block; width: 100%; height: auto; border-radius: var(--radius);
+	border: 1px solid var(--line-strong); background: #000;
+}
+.lightbox__bar {
+	display: flex; align-items: center; gap: 1rem; padding: 0.7rem 0.2rem 0;
+}
+.lightbox__bar strong { font-weight: 600; }
+.lightbox__bar button {
+	margin-left: auto; font: inherit; font-size: 0.9rem; cursor: pointer;
+	background: transparent; color: var(--ink-dim);
+	border: 1px solid var(--line-strong); border-radius: 999px; padding: 0.35rem 0.9rem;
+}
+.lightbox__bar button:hover { color: var(--ink); background: var(--surface-2); }

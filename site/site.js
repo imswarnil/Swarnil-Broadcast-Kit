@@ -34,6 +34,34 @@ matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
 	if (!stored) delete root.dataset.theme;
 });
 
+/* ---- the lightbox ---------------------------------------------------------- */
+
+/* The shots are buttons rather than links, so this is the only way to see one
+   full size — which means it has to work with the keyboard and close the way a
+   dialog is expected to. <dialog> gives Escape and the backdrop for free. */
+const box = document.getElementById('lightbox');
+if (box) {
+	const img = box.querySelector('img');
+	const title = box.querySelector('strong');
+	for (const btn of document.querySelectorAll('[data-shot]')) {
+		btn.addEventListener('click', () => {
+			img.src = btn.dataset.shot;
+			img.alt = 'The ' + btn.dataset.title + ' scene, full size';
+			title.textContent = btn.dataset.title;
+			box.showModal();
+		});
+	}
+	box.querySelector('[data-close]').addEventListener('click', () => box.close());
+	/* clicking the darkness closes it; clicking the picture does not */
+	box.addEventListener('click', (e) => {
+		if (e.target === box) box.close();
+	});
+	/* drop the source on close so a big JPEG is not held for the whole session */
+	box.addEventListener('close', () => {
+		img.removeAttribute('src');
+	});
+}
+
 /* ---- deep links ----------------------------------------------------------- */
 
 const flash = () => {

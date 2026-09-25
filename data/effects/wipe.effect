@@ -5,6 +5,9 @@
 // 2 slide   — the new scene pushes the old one off
 // 3 iris    — a circle opens from the middle
 // 4 blinds  — several bars sweep together
+// 5 push    — both scenes move together, the old one shoved out of frame
+// 6 bars    — a band of the accent crosses the whole frame and takes the cut
+//             with it, which is a stinger without needing a video file
 
 uniform float4x4 ViewProj;
 uniform texture2d tex_a;
@@ -96,6 +99,31 @@ float4 PSWipe(VertInOut vert_in) : TARGET
 		float4 col = lerp(a, b, m);
 		float ring = smoothstep(edge - soft * 2.0, edge - soft, r) * (1.0 - smoothstep(edge, edge + soft, r));
 		return over(col, float4(accent.rgb, accent.a * ring));
+	}
+
+	if (style < 5.5) {                                  // push
+		float2 off = dir < 0.5   ? float2(1.0, 0.0)
+			   : dir < 1.5   ? float2(-1.0, 0.0)
+			   : dir < 2.5   ? float2(0.0, 1.0)
+					 : float2(0.0, -1.0);
+		float e = smoothstep(0.0, 1.0, t);
+		float4 sa = tex_a.Sample(def_sampler, uv + off * e);
+		float4 sb = tex_b.Sample(def_sampler, uv - off * (1.0 - e));
+		return lerp(sa, sb, step(1.0 - e, axis(uv)));
+	}
+
+	if (style < 6.5) {                                  // bars — a stinger with no video
+		// the band crosses in the first half and leaves in the second, and the
+		// cut happens behind it while the frame is covered
+		float x = axis(uv);
+		float w = max(bar_width, 0.15);
+		float head = t * (1.0 + w * 2.0);
+		float band = smoothstep(head - w, head - w + soft, x) * (1.0 - smoothstep(head - soft, head, x));
+		float4 col = t < 0.5 ? a : b;
+		float4 out_col = over(col, float4(accent.rgb, accent.a * band));
+		// a thinner, brighter leading edge so the band reads as moving
+		float edge = smoothstep(head - soft * 2.0, head - soft, x) * (1.0 - smoothstep(head - soft, head, x));
+		return over(out_col, float4(1.0, 1.0, 1.0, edge * 0.5 * accent.a));
 	}
 
 	float n = max(bars, 1.0);                           // blinds

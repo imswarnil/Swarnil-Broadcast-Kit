@@ -3,6 +3,38 @@
 All notable changes to Swarnil Broadcast Kit (called Tally until 0.3.0). The format follows [Keep a Changelog](https://keepachangelog.com/);
 versions follow [SemVer](https://semver.org/).
 
+## [0.4.0] — 2026-09-25
+
+Filters, real devices, and a remote.
+
+### Added
+- **`SBK Round Corners`** — a *filter* that rounds the corners of the picture
+  rather than covering them. A frame drawn on top is a rectangle with a hole in
+  it; the camera's square corners are still underneath, so it only ever looked
+  rounded against a matching background. Radius as a percentage of the shorter
+  side, so one setting suits a webcam box and a full-frame share.
+- **`SBK Scanlines`** — a CRT treatment for any source or whole scene:
+  scanlines, aperture mask, colour fringing, barrel curvature, vignette, grain
+  and flicker, with Fine / CRT / VHS / Arcade presets that just fill the sliders.
+- **The camera and the microphone are set up for you.** Building the collection
+  adds a camera with the rounding filter already on it, placed under the frame in
+  every scene that has one and cropped rather than squashed, and puts a
+  microphone on OBS's Mic/Aux channel — which is what `@mic` means to the meter
+  and the visualizer. An input you already chose is left alone.
+- **A phone remote** (`remote/`) driving OBS through the WebSocket server OBS
+  already ships: scenes, stream and record, the mic, the transition, and a button
+  for every hotkey the kit registers — read from OBS rather than hard-coded, so a
+  new one appears without the remote changing. It carries its own SHA-256,
+  because `crypto.subtle` does not exist at `http://192.168.x.x`.
+- **Two more transitions** — a push, and a band of accent that crosses the frame
+  and takes the cut with it, which is a stinger with no video file to render.
+- The scene shots on the site open full size, and the site has a theme toggle
+  that follows the system until you choose, applied before the first paint.
+
+### Notes
+- The screenshots on the site are still camera-free. A self-test run now contains
+  whatever the webcam is pointed at, and those images are published.
+
 ## [0.3.0] — 2026-09-25
 
 Renamed from **Tally** to **Swarnil Broadcast Kit**. Everything is `sbk_` now;

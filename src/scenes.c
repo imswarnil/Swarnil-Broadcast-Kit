@@ -167,6 +167,127 @@ static obs_scene_t *fresh_scene(const char *name)
 	return obs_scene_create(name);
 }
 
+/* ---- the real devices ------------------------------------------------------
+
+    The kit used to leave the camera and the microphone to you, on the grounds
+    that creating a capture switches the webcam light on. That is true, and it
+    also meant a freshly built show was thirteen scenes of empty rectangles with
+    no way to tell whether any of it worked. Building the collection is an
+    explicit menu action, so the devices go in — and every one of them is an
+    ordinary source you can swap, disable or delete.  */
+
+#define CAM_NAME "Camera"
+#define MIC_NAME "Mic"
+
+/* The first real entry in a source type's device list. OBS only fills that list
+   when the source exists, so one is made, asked, and thrown away. */
+static char *first_device(const char *source_id, const char *prop)
+{
+	obs_source_t *tmp = obs_source_create_private(source_id, NULL, NULL);
+	if (!tmp)
+		return NULL;
+	obs_properties_t *props = obs_source_properties(tmp);
+	char *out = NULL;
+	if (props) {
+		obs_property_t *p = obs_properties_get(props, prop);
+		if (p) {
+			size_t n = obs_property_list_item_count(p);
+			for (size_t i = 0; i < n; i++) {
+				const char *v = obs_property_list_item_string(p, i);
+				if (v && *v) {
+					out = bstrdup(v);
+					break;
+				}
+			}
+		}
+		obs_properties_destroy(props);
+	}
+	obs_source_release(tmp);
+	return out;
+}
+
+/* The shared camera, with its corners actually rounded rather than covered by
+   something rounded. Borrowed like everything else comp() returns. */
+static obs_source_t *camera(void)
+{
+	obs_source_t *existing = obs_get_source_by_name(CAM_NAME);
+	if (existing)
+		return hold(existing);
+
+	char *dev = first_device("macos-avcapture", "device");
+	if (!dev) {
+		SBK_LOG(LOG_INFO, "no camera found — the frames are left empty for you to fill");
+		return NULL;
+	}
+	obs_data_t *st = obs_data_create();
+	obs_data_set_string(st, "device", dev);
+	obs_source_t *src = obs_source_create("macos-avcapture", CAM_NAME, st, NULL);
+	obs_data_release(st);
+	bfree(dev);
+	if (!src) {
+		SBK_LOG(LOG_WARNING, "could not open the camera");
+		return NULL;
+	}
+
+	/* the filter, not an overlay: the corners are gone from the picture, so
+	   anything can sit behind it */
+	obs_source_t *f = obs_source_create_private("sbk_round", "Round corners", NULL);
+	if (f) {
+		obs_source_filter_add(src, f);
+		obs_source_release(f);
+	}
+	SBK_LOG(LOG_INFO, "camera added with rounded corners");
+	return hold(src);
+}
+
+/* The microphone goes on OBS's own Mic/Aux channel rather than into one scene,
+   because that is where the mixer expects it and it is what "@mic" means to the
+   meter and the visualizer. An input the user has already chosen is left alone. */
+static void ensure_mic(void)
+{
+	obs_source_t *existing = obs_get_output_source(3);
+	if (existing) {
+		obs_source_release(existing);
+		return;
+	}
+	char *dev = first_device("coreaudio_input_capture", "device_id");
+	if (!dev) {
+		SBK_LOG(LOG_INFO, "no audio input found — the meters will paint the demo signal");
+		return;
+	}
+	obs_data_t *st = obs_data_create();
+	obs_data_set_string(st, "device_id", dev);
+	obs_source_t *mic = obs_source_create("coreaudio_input_capture", MIC_NAME, st, NULL);
+	obs_data_release(st);
+	bfree(dev);
+	if (!mic) {
+		SBK_LOG(LOG_WARNING, "could not open the audio input");
+		return;
+	}
+	obs_set_output_source(3, mic);
+	obs_source_release(mic);
+	SBK_LOG(LOG_INFO, "microphone set on the Mic/Aux channel");
+}
+
+/* Put a source in a box of a given size, cropping rather than squashing — which
+   is what you want for a camera whose shape never matches the hole. */
+static void put_box(obs_scene_t *scene, obs_source_t *src, float x, float y, float w, float h, uint32_t align)
+{
+	if (!scene || !src)
+		return;
+	obs_sceneitem_t *it = obs_scene_add(scene, src);
+	if (!it)
+		return;
+	struct vec2 pos, bounds;
+	vec2_set(&pos, x * K, y * K);
+	vec2_set(&bounds, w * K, h * K);
+	obs_sceneitem_set_alignment(it, align);
+	obs_sceneitem_set_pos(it, &pos);
+	obs_sceneitem_set_bounds_type(it, OBS_BOUNDS_SCALE_OUTER);
+	obs_sceneitem_set_bounds_alignment(it, OBS_ALIGN_CENTER);
+	obs_sceneitem_set_bounds(it, &bounds);
+}
+
 /* ---- the pieces every scene is assembled from --------------------------- */
 
 static const uint32_t TL = OBS_ALIGN_TOP | OBS_ALIGN_LEFT;
@@ -221,6 +342,7 @@ static obs_source_t *backdrop(const char *name, const char *mode, const char *ex
 int sbk_build_scenes(void)
 {
 	measure();
+	ensure_mic();
 	int n = 0;
 
 	/* 1. Starting soon — the countdown screen people sit on */
@@ -263,6 +385,8 @@ int sbk_build_scenes(void)
 	/* 3. Live — the everyday scene: camera under the frame, lower third, ticker */
 	{
 		obs_scene_t *sc = fresh_scene("SBK · Live");
+		/* first added is furthest back, so the camera lands under its frame */
+		put_box(sc, camera(), 1920 - EDGE, 560, 640, 360, TR);
 		put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
 		put(sc, comp("sbk_lower_third", "SBK · Lower third", NULL), EDGE, 900, BL);
 		put(sc, comp("sbk_frame", "SBK · Cam frame",
@@ -275,6 +399,7 @@ int sbk_build_scenes(void)
 	/* 4. Talking head — the camera is the whole picture, so the chrome shrinks */
 	{
 		obs_scene_t *sc = fresh_scene("SBK · Talking head");
+		put_box(sc, camera(), MIDX, EDGE, 1664, 936, TC);
 		put(sc, comp("sbk_frame", "SBK · Cam frame full",
 			     "{\"aspect\":\"16x9\",\"size\":2.6,\"style\":\"corner\",\"bracket\":96.0,\"label\":\"\","
 			     "\"line\":\"accent\",\"weight\":4.0}"),
@@ -292,6 +417,7 @@ int sbk_build_scenes(void)
 	/* 5. Screen share — the code has the frame, so everything hugs the edges */
 	{
 		obs_scene_t *sc = fresh_scene("SBK · Screen share");
+		put_box(sc, camera(), 1920 - EDGE, 1080 - EDGE, 420, 236, BR);
 		put(sc, comp("sbk_frame", "SBK · Cam frame small",
 			     "{\"aspect\":\"16x9\",\"size\":0.66,\"style\":\"ring\",\"radius\":16.0,\"label\":\"@imswarnil\","
 			     "\"chip_at\":\"bottom-left\"}"),
@@ -334,6 +460,7 @@ int sbk_build_scenes(void)
 	/* 7. Q&A — the question gets the left half and the camera the right */
 	{
 		obs_scene_t *sc = fresh_scene("SBK · Q&A");
+		put_box(sc, camera(), 1920 - EDGE, 360, 760, 428, TR);
 		put(sc, backdrop("SBK · Backdrop scrim", "scrim", "\"reach\":0.85"), 0, 0, TL);
 		put(sc, comp("sbk_chip", "SBK · QA chip",
 			     "{\"label\":\"Question\",\"variant\":\"accent\",\"dot\":\"none\"}"),
@@ -437,6 +564,7 @@ int sbk_build_scenes(void)
 	{
 		obs_scene_t *sc = fresh_scene("SBK · Vertical");
 		put(sc, backdrop("SBK · Backdrop hex", "hex", "\"drift\":3.0,\"pitch\":60.0"), 0, 0, TL);
+		put_box(sc, camera(), MIDX, 1080 - 30, 439, 781, OBS_ALIGN_BOTTOM | OBS_ALIGN_CENTER);
 		put(sc, comp("sbk_frame", "SBK · Cam frame vertical",
 			     "{\"aspect\":\"9x16\",\"size\":1.22,\"style\":\"ring\",\"radius\":24.0,"
 			     "\"label\":\"@imswarnil\",\"chip_at\":\"bottom-left\"}"),
@@ -643,4 +771,21 @@ void sbk_scenes_free(void)
 	for (size_t i = 0; i < sizeof(g_fmt_ring) / sizeof(g_fmt_ring[0]); i++)
 		dstr_free(&g_fmt_ring[i]);
 	release_held();
+}
+
+/* For a scene someone built by hand: the same camera, with the same rounded
+   corners, and the microphone on the Mic/Aux channel. */
+void sbk_add_devices(void)
+{
+	measure();
+	ensure_mic();
+	obs_source_t *scene_src = obs_frontend_get_current_scene();
+	obs_scene_t *sc = obs_scene_from_source(scene_src);
+	if (sc) {
+		obs_source_t *cam = camera();
+		if (cam)
+			put_box(sc, cam, 1920 - EDGE, 1080 - EDGE, 480, 270, BR);
+	}
+	release_held();
+	obs_source_release(scene_src);
 }

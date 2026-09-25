@@ -11,9 +11,9 @@ Light source is named after.
 ## What it is, in one breath
 
 C built with CMake against `/Applications/OBS.app`, the same way every plugin in
-`~/OBS/` is built. Sixteen `sbk_*` sources in OBS's "+" menu, one transition in
-the Scene Transitions panel, four Tools-menu actions that build a thirteen-scene
-show, and a profile. Type is OBS's own `text_ft2_source` as a private child;
+`~/OBS/` is built. Fifteen `sbk_*` sources in OBS's "+" menu, two filters under Filters,
+one transition in the Scene Transitions panel, five Tools-menu actions that build
+a thirteen-scene show, and a profile. Type is OBS's own `text_ft2_source` as a private child;
 every box is `card.effect`; anything that animates draws into an `sbk_stage`
 (offscreen render target) and is presented with an alpha and an offset.
 
@@ -56,10 +56,13 @@ src/sbk-net.c        polled GET on a worker + JSON dot-path walk
 src/sbk-qr.c         QR encoder, versions 1–16, all four ECC levels
 src/source-*.c       onair lower-third ticker frame visualizer meter stats counter
                      qr card backdrop chip progress clock countdown
+src/filter-round.c   rounds the SOURCE's corners, not an overlay over them
+src/filter-scanlines.c  the CRT treatment, with presets
 src/transition-wipe.c
 src/scenes.c         the show, live pack, profile, self-test
 data/effects/        card frame viz backdrop qr wipe blit
 site/                content.mjs (the registry), build.mjs, check.mjs, site.css
+remote/              the phone remote: index.html + a hand-rolled sha256.js
 docs/screens/        real self-test frames; the site uses them
 profile/Swarnil Broadcast Kit/basic.ini + profile/install.command
 ```
@@ -86,6 +89,23 @@ profile/Swarnil Broadcast Kit/basic.ini + profile/install.command
   `obs_queue_task`. Sleeping on the UI thread collapsed thirteen shots into one.
 - `obs_get_lagged_frames()` is a total since OBS started; the stats panel reports
   the recent change instead, or it reads as a fault on a healthy machine.
+- A **filter** must call `obs_source_skip_video_filter` on any path where it does
+  not render, or the source vanishes rather than passing through untouched.
+- A device list is only populated once a source of that type exists, so
+  `first_device()` creates one privately, reads its properties and drops it.
+- **`crypto.subtle` does not exist outside a secure context.** The remote is
+  opened at `http://192.168.x.x`, which is not one, so it carries its own
+  SHA-256. Do not "simplify" that back to the Web Crypto API.
+- **A page served over https cannot open a `ws://` socket.** obs-websocket has no
+  wss, so the remote can only ever be served over http from the user's own
+  machine. The copy on the site says so when you press Connect.
+
+## Screenshots are published
+
+`docs/screens/*.jpg` go straight onto obs.imswarnil.com. Since the collection now
+adds a real camera, a self-test run contains **whatever the webcam is pointed at**.
+Remove or hide the `Camera` source before taking shots meant for the site, and
+never commit a run that has a person in it without asking first.
 
 ## Verifying a build
 

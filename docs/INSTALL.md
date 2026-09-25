@@ -8,8 +8,8 @@ Quit OBS, copy the bundle into your user plugin folder, start OBS again:
 ~/Library/Application Support/obs-studio/plugins/sbk.plugin
 ```
 
-**Sources → +** then lists sixteen *SBK …* sources and the **Tools** menu has
-four *Broadcast Kit:* items.
+**Sources → +** then lists fifteen *SBK …* sources, **Filters** on any source
+gains two more, and the **Tools** menu has five *Broadcast Kit:* items.
 
 The kit sets type in **Geist** and **Geist Mono**. Copy the files in `fonts/`
 into `~/Library/Fonts`, or pick any installed font in a source's *Look → Font*.
@@ -30,6 +30,21 @@ A plugin you built yourself is never quarantined.
 **Scene Transitions** panel's **+** button — the frontend API has no call to add
 one, which is why this step is by hand for every transition plugin there has
 ever been. Set the duration beside it: 300–500 ms suits the bar.
+
+## The phone remote
+
+```bash
+./remote/serve.command
+```
+
+It prints an address to open on a phone on the same network, and the address to
+type into the remote. First turn OBS's own server on: **Tools → WebSocket Server
+Settings → Enable**, then *Show Connect Info* for the port and password.
+
+It has to be plain `http` from your machine. A page over `https` cannot open the
+unencrypted `ws://` connection obs-websocket speaks, so the copy at
+obs.imswarnil.com/remote/ can show you the interface but will never reach your
+OBS. Nothing goes through the website either way.
 
 ## The profile
 

@@ -1,0 +1,85 @@
+// Rounds the corners of whatever source this filter sits on, and can draw a
+// border just inside the edge.
+//
+// This is the piece an overlay frame can never be. A frame drawn on top is a
+// rectangle with a hole in it: the camera's own square corners are still there
+// underneath, so the "rounded" webcam only looks rounded against a background
+// that happens to match. A filter cuts the picture itself, so the corners are
+// actually gone and anything can sit behind it.
+
+uniform float4x4 ViewProj;
+uniform texture2d image;
+
+uniform float2 size;        // the source, px
+uniform float  radius;      // px
+uniform float  border;      // px, 0 = none
+uniform float4 border_color;
+uniform float  softness;    // edge feather, px
+uniform float  inset;       // pull the whole shape in, px — room for the border to sit on
+uniform float4 fill;        // shows through where the picture is cut away (usually clear)
+
+sampler_state def_sampler {
+	Filter   = Linear;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float rounded_box(float2 p, float2 b, float r)
+{
+	float2 q = abs(p) - b + r;
+	return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+
+float4 over(float4 dst, float4 src)
+{
+	float a = src.a + dst.a * (1.0 - src.a);
+	if (a <= 0.0001)
+		return float4(0.0, 0.0, 0.0, 0.0);
+	return float4((src.rgb * src.a + dst.rgb * dst.a * (1.0 - src.a)) / a, a);
+}
+
+float4 PSRound(VertInOut vert_in) : TARGET
+{
+	float4 col = image.Sample(def_sampler, vert_in.uv);
+
+	float2 px = vert_in.uv * size;
+	float2 p = px - size * 0.5;
+	float2 half_size = size * 0.5 - inset;
+	float r = min(radius, min(half_size.x, half_size.y));
+	float d = rounded_box(p, half_size, r);
+
+	float s = max(softness, 0.5);
+	float inside = 1.0 - smoothstep(-s, s, d);
+
+	// the picture, cut to the shape, over whatever fill was asked for
+	float4 out_col = over(float4(fill.rgb, fill.a * (1.0 - inside)), float4(col.rgb, col.a * inside));
+
+	if (border > 0.05) {
+		float inner = 1.0 - smoothstep(-s, s, d + border);
+		float ring = max(inside - inner, 0.0);
+		out_col = over(out_col, float4(border_color.rgb, border_color.a * ring));
+	}
+	return out_col;
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSRound(vert_in);
+	}
+}

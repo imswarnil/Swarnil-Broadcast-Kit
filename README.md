@@ -1,7 +1,7 @@
 # Swarnil Broadcast Kit
 
-**Native OBS Studio overlays: sixteen sources, a transition, and a show of
-thirteen scenes — drawn by OBS itself.**
+**Native OBS Studio overlays: fifteen sources, two filters, a transition and a
+show of thirteen scenes — drawn by OBS itself.**
 
 No browser source, no web server, no URL to paste. Drop `sbk.plugin` into OBS
 and *Sources → +* fills up with **SBK …** sources drawn by libobs: type is OBS's
@@ -43,7 +43,9 @@ Browser Source has no way to do:
 | **SBK Chip** | One badge: a handle, a count, a “Q&A”, with a dot that can light only when you are live. |
 | **SBK Progress** | A goal, nudged up and down on a hotkey. |
 | **SBK Clock** · **SBK Countdown** | The time, and a countdown to a duration or a time of day. |
-| **SBK Wipe** | A real transition: bar, dip, slide, iris or blinds, carrying the accent. |
+| **SBK Round Corners** | *A filter.* Rounds your camera's corners — the picture itself, not a frame over it. |
+| **SBK Scanlines** | *A filter.* A CRT treatment for any source: scanlines, aperture mask, fringing, curvature, grain. Four presets. |
+| **SBK Wipe** | A real transition: bar, dip, slide, push, iris, blinds, or a band of accent that takes the cut with it. |
 
 Every source shares a **Look** group — one accent colour, a scale slider that
 grows type, padding and radius together, a tone (glass, solid or light) and a
@@ -56,9 +58,9 @@ font. Give every source the same accent and the scene changes together.
 2. Copy the files in `fonts/` into `~/Library/Fonts` — or pick any installed
    font in a source's *Look*.
 3. Open OBS. **Tools → Broadcast Kit: create the scene collection** builds the
-   show and switches to it.
-4. Put your own camera under the frames, and add **SBK Wipe** from the Scene
-   Transitions panel's **+**.
+   show, switches to it, and puts your camera and microphone in — the camera
+   with its corners genuinely rounded by a filter, not covered by one.
+4. Add **SBK Wipe** from the Scene Transitions panel's **+**.
 
 From source, `./build.command` does all of it. See [docs/INSTALL.md](docs/INSTALL.md).
 
@@ -77,6 +79,19 @@ Keys typed into a source are saved in the scene collection as plain text.
 Begin the field with `@` and a path — `@/Users/you/.youtube-key` — and the kit
 reads the key from the file instead.
 
+## Control it from your phone
+
+`remote/serve.command` serves a remote on your own network. It drives OBS
+through the WebSocket server OBS already has: scenes, stream and record, the
+mic, the transition, and a button for every hotkey the kit registers — read out
+of OBS rather than hard-coded.
+
+It has to be served over plain `http` from your own machine, and that is not a
+shortcut: a page loaded over `https` cannot open the unencrypted `ws://`
+connection obs-websocket speaks, so a hosted copy could never reach your OBS.
+Nothing goes through the website, and the password stays in that phone's
+browser.
+
 ## Develop it
 
 ```
@@ -89,10 +104,12 @@ src/sbk-audio.c       program mix, channels or any source → FFT → bands and 
 src/sbk-net.c         the polled HTTPS GET, and the JSON dot-path walk
 src/sbk-qr.c          a QR encoder: byte mode, versions 1–16, all four ECC levels
 src/source-*.c        one file per source
+src/filter-*.c        rounded corners, and the CRT treatment
 src/transition-wipe.c the transition
 src/scenes.c          the show, the live pack, the profile switch, the self-test
 data/effects/         card, frame, viz, backdrop, qr, wipe, blit
 site/                 the documentation site (plain Node, no dependencies)
+remote/               the phone remote: one page, one hand-rolled SHA-256, no build
 docs/screens/         real frames from the self-test, used by the site
 deps/include/         libobs headers for OBS 32.2.2 (GPL-2.0; see deps/README.md)
 ```

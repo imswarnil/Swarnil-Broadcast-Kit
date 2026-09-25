@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(sbk VERSION 0.3.0 LANGUAGES C)
+project(sbk VERSION 0.4.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -25,6 +25,8 @@ add_library(sbk MODULE
     src/source-stats.c
     src/source-counter.c
     src/source-qr.c
+    src/filter-round.c
+    src/filter-scanlines.c
     src/transition-wipe.c
     src/scenes.c)
 

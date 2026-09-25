@@ -1,0 +1,123 @@
+// A CRT treatment for any source: scanlines, an aperture mask, the colour
+// fringing a badly aligned tube had, barrel curvature, a vignette, grain and
+// mains flicker.
+//
+// Every part is separately dialled to zero, because the difference between "a
+// tasteful hint of a monitor" and "unwatchable" is entirely in the amounts. The
+// defaults are the tasteful end: fine scanlines and nothing else.
+
+uniform float4x4 ViewProj;
+uniform texture2d image;
+
+uniform float2 size;        // the source, px
+uniform float  time;
+
+uniform float  line_height; // px between scanlines
+uniform float  line_depth;  // 0..1, how dark the dark line gets
+uniform float  line_roll;   // px per second the lines drift
+uniform float  mask;        // 0..1 aperture-grille strength
+uniform float  mask_width;  // px per RGB triad
+uniform float  fringe;      // px of chromatic aberration at the edges
+uniform float  curve;       // barrel distortion
+uniform float  vignette;    // 0..1
+uniform float  grain;       // 0..1
+uniform float  flicker;     // 0..1
+uniform float  bright;      // gain back the light the lines take away
+
+sampler_state def_sampler {
+	Filter   = Linear;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float hash(float2 p)
+{
+	return frac(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
+}
+
+float4 PSScan(VertInOut vert_in) : TARGET
+{
+	float2 uv = vert_in.uv;
+
+	// barrel: push the corners out from the middle
+	if (curve > 0.0001) {
+		float2 c = uv * 2.0 - 1.0;
+		float r2 = dot(c, c);
+		c *= 1.0 + curve * r2;
+		uv = c * 0.5 + 0.5;
+		// outside the tube is black, not a smeared edge pixel
+		if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0)
+			return float4(0.0, 0.0, 0.0, 1.0);
+	}
+
+	float4 col;
+	if (fringe > 0.01) {
+		// the fringe grows toward the edges, the way a real misconvergence does
+		float2 c = uv - 0.5;
+		float2 off = c * (fringe / max(size.x, 1.0));
+		col.r = image.Sample(def_sampler, uv + off).r;
+		col.g = image.Sample(def_sampler, uv).g;
+		col.b = image.Sample(def_sampler, uv - off).b;
+		col.a = image.Sample(def_sampler, uv).a;
+	} else {
+		col = image.Sample(def_sampler, uv);
+	}
+
+	float2 px = uv * size;
+
+	if (line_depth > 0.001) {
+		// a raised cosine rather than a hard stripe: at one or two pixels a
+		// square wave aliases into moiré the moment anything moves
+		float phase = (px.y + time * line_roll) / max(line_height, 1.0);
+		float wave = 0.5 + 0.5 * cos(phase * 6.2831853);
+		col.rgb *= 1.0 - line_depth * wave;
+	}
+
+	if (mask > 0.001) {
+		float t = frac(px.x / max(mask_width, 1.0)) * 3.0;
+		float3 tint = float3(t < 1.0 ? 1.0 : 0.0, (t >= 1.0 && t < 2.0) ? 1.0 : 0.0, t >= 2.0 ? 1.0 : 0.0);
+		col.rgb *= lerp(float3(1.0, 1.0, 1.0), tint * 1.6, mask);
+	}
+
+	if (bright > 0.001)
+		col.rgb *= 1.0 + bright;
+
+	if (vignette > 0.001) {
+		float2 c = uv - 0.5;
+		float r = length(c * float2(1.0, size.y / max(size.x, 1.0)) * 2.0);
+		col.rgb *= 1.0 - vignette * smoothstep(0.35, 1.25, r);
+	}
+
+	if (grain > 0.001) {
+		float n = hash(floor(px) + floor(time * 24.0));
+		col.rgb += (n - 0.5) * grain * 0.35;
+	}
+
+	if (flicker > 0.001)
+		col.rgb *= 1.0 - flicker * 0.08 * (0.5 + 0.5 * sin(time * 47.0));
+
+	col.rgb = saturate(col.rgb);
+	return col;
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSScan(vert_in);
+	}
+}

@@ -164,6 +164,41 @@ export const SOURCES = [
 		],
 	},
 	{
+		id: 'sbk_round',
+		name: 'SBK Round Corners',
+		tag: 'Filter',
+		one: 'Rounds the corners of your camera — the picture itself, not a frame over it.',
+		body: `A frame drawn on top is a rectangle with a hole in it: the camera's square corners are
+		still there underneath, so the “rounded” webcam only looks rounded against a background that
+		happens to match. This is a filter, so the corners are actually gone and anything can sit
+		behind them. Add it to the camera under <em>Filters</em>, and put <strong>SBK Cam Frame</strong>
+		over the top if you also want a chip or corner brackets.`,
+		props: [
+			['Radius', 'As a percentage of the shorter side, so one setting suits a small webcam box and a full-frame share — or in pixels'],
+			['Border', 'Drawn just inside the cut edge, in any colour'],
+			['Pull the shape in', 'Room for the border to sit on without eating the picture'],
+		],
+		note: 'A filter, not a source. It appears under Filters on a source or a scene, not in the + menu.',
+	},
+	{
+		id: 'sbk_scanlines',
+		name: 'SBK Scanlines',
+		tag: 'Filter',
+		one: 'A CRT treatment for any source: scanlines, aperture mask, fringing, curvature, grain.',
+		body: `Every part dials to zero on its own, because the whole difference between a tasteful
+		hint of a monitor and something unwatchable is the amounts. Four presets cover what people
+		actually reach for — <em>Fine</em>, <em>CRT</em>, <em>VHS</em>, <em>Arcade</em> — and each one
+		just fills in the sliders, so you can start from one and move on. The scanlines are a raised
+		cosine rather than a hard stripe: at one or two pixels a square wave turns into moiré the
+		moment anything moves.`,
+		props: [
+			['Scanlines', 'Spacing, depth, roll speed, and the brightness to win back'],
+			['Tube', 'Aperture mask and triad width, colour fringing, barrel curvature'],
+			['Wear', 'Vignette, grain, mains flicker'],
+		],
+		note: 'Put it on one source, or on a whole scene to treat everything at once.',
+	},
+	{
 		id: 'sbk_card',
 		name: 'SBK Card',
 		tag: 'Scenes',
@@ -354,6 +389,14 @@ export const APIS = [
 ];
 
 export const FAQ = [
+	{
+		q: 'Can I control it from my phone?',
+		a: `Yes — the kit ships a remote that drives OBS over the WebSocket server OBS already has.
+		Scenes, stream and record, the mic, the transition, and a button for every hotkey the kit
+		registers, discovered from OBS rather than hard-coded. It runs from your own machine on your
+		own network: <code>remote/serve.command</code> prints the address to open on your phone.
+		Nothing goes through this site, and the password never leaves your browser.`,
+	},
 	{
 		q: 'Why a plugin and not a browser source?',
 		a: `Because the things worth having cannot be done in a page. A browser source cannot read

@@ -91,7 +91,7 @@ ${body}
 /* ---- the pages ------------------------------------------------------------ */
 
 const sourcesByTag = () => {
-	const order = ['Indicator', 'Titles', 'Camera', 'Audio', 'Live data', 'Scenes', 'Transition'];
+	const order = ['Indicator', 'Titles', 'Camera', 'Filter', 'Audio', 'Live data', 'Scenes', 'Transition'];
 	const seen = new Map();
 	for (const s of SOURCES) {
 		if (!seen.has(s.tag)) seen.set(s.tag, []);
@@ -220,10 +220,14 @@ function scenes() {
 		<div class="grid grid--2">
 			${SCENES.map(
 				(s) => `<article class="scene" id="${s.img}">
-			<span class="shot"><img src="/screens/${s.img}.jpg" alt="The ${esc(s.name)} scene" loading="lazy" width="1600" height="900"></span>
+			<button class="shot" type="button" data-shot="/screens/${s.img}.jpg" data-title="${esc(s.name)}" aria-label="See the ${esc(s.name)} scene full size"><img src="/screens/${s.img}.jpg" alt="The ${esc(s.name)} scene" loading="lazy" width="1600" height="900"></button>
 			<h3>${esc(s.name)}</h3><p>${prose(s.body)}</p>
 		</article>`
 			).join('')}
+		<dialog id="lightbox" aria-label="Scene, full size">
+			<img alt="">
+			<div class="lightbox__bar"><strong></strong><button type="button" data-close>Close</button></div>
+		</dialog>
 		</div>
 		<p class="note" style="margin-top:2rem">The frames are empty where your camera and screen
 		capture go. The kit draws treatments, not captures: creating a camera on your behalf would
@@ -332,6 +336,35 @@ function setup() {
 	</div>
 </section>
 
+<section id="remote">
+	<div class="wrap wide">
+		<h2>The phone remote</h2>
+		<p class="sub">Scenes, stream and record, the mic, the transition, and a button for every
+		hotkey the kit registers — read out of OBS rather than hard-coded, so one added to the plugin
+		later turns up without the remote changing.</p>
+		<div class="steps">
+			<div class="step"><span class="step__n">1</span><div><h3>Turn OBS's own server on</h3>
+			<p><strong>Tools → WebSocket Server Settings</strong>, tick <em>Enable</em>, then
+			<em>Show Connect Info</em> for the port and password. This is OBS's server, not
+			something the kit runs.</p></div></div>
+			<div class="step"><span class="step__n">2</span><div><h3>Serve the remote on your network</h3>
+			<p>Double-click <code>remote/serve.command</code>. It prints the address to open on your
+			phone and the address to type into the remote.</p></div>
+			<pre><code>./remote/serve.command</code></pre></div>
+			<div class="step"><span class="step__n">3</span><div><h3>Open it on the phone</h3>
+			<p>Same wifi, the address it printed. Put in the password once and it is remembered on
+			that phone.</p></div></div>
+		</div>
+		<p class="note">It has to be served over plain <code>http</code> from your own machine, and
+		that is not a shortcut. A page loaded over <code>https</code> cannot open the unencrypted
+		<code>ws://</code> connection obs-websocket speaks — browsers block it — so a copy hosted
+		here could never connect to your OBS. <a href="/remote/">The remote is on this site</a> if
+		you want to see it, and it will tell you the same thing if you press Connect.</p>
+		<p class="note">Nothing goes through this site either way. The page talks straight to your
+		machine, and the password is kept in that phone's browser and nowhere else.</p>
+	</div>
+</section>
+
 <section>
 	<div class="wrap wide">
 		<h2>Building it yourself</h2>
@@ -379,6 +412,10 @@ copy(path.join(ROOT, 'site/site.css'), path.join(DIST, 'site.css'));
 copy(path.join(ROOT, 'site/site.js'), path.join(DIST, 'site.js'));
 for (const f of fs.readdirSync(path.join(ROOT, 'docs/screens')))
 	copy(path.join(ROOT, 'docs/screens', f), path.join(DIST, 'screens', f));
+/* the remote, as it actually ships — it explains its own https limitation when
+   someone presses Connect from here */
+for (const f of ['index.html', 'sha256.js'])
+	copy(path.join(ROOT, 'remote', f), path.join(DIST, 'remote', f));
 for (const f of ['Geist-Regular.ttf', 'Geist-Medium.ttf', 'Geist-SemiBold.ttf', 'GeistMono-Regular.ttf'])
 	copy(path.join(ROOT, 'fonts', f), path.join(DIST, 'fonts', f));
 
