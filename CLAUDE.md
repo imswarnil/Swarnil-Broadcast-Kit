@@ -109,6 +109,17 @@ profile/Swarnil Broadcast Kit/basic.ini + profile/install.command
   process and crashes on the first widget.
 - **Audio filter state is per channel.** A compressor whose detector is the sum
   of two channels pumps audibly on anything panned.
+- **Scenes and sources share one namespace.** `obs_get_source_by_name` finds a
+  scene too, so a source named after a scene resolves to the scene, which is
+  then asked to contain itself — OBS refuses and logs nothing, and the item
+  simply never appears. `scenes.c`'s `comp()` now refuses such a name loudly.
+- **A source named in the collection must not be a brand logo, and a brand
+  colour must be legible.** The marks in `glyph.effect` are generic on purpose;
+  `source-social.c` drops a brand colour below a luminance threshold back to the
+  ink, because two of the platforms are black.
+- **The display capture is as private as the camera.** `screen_capture` is hidden
+  by the clean self-test alongside `macos-avcapture`, or a published screenshot
+  carries the desktop.
 - **A page served over https cannot open a `ws://` socket.** obs-websocket has no
   wss, so the remote can only ever be served over http from the user's own
   machine. The copy on the site says so when you press Connect.
