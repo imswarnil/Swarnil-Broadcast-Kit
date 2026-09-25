@@ -295,19 +295,19 @@ export const SOURCES = [
 ];
 
 export const SCENES = [
-	{ img: 'starting-soon', name: 'Starting soon', body: 'The countdown screen people sit on. A card, a countdown, a drifting grid, the clock, and a spectrum along the foot.' },
-	{ img: 'welcome', name: 'Welcome', body: 'The first seconds, with nothing to read. A gradient, a line of type, and a chip that lights up when you go live.' },
-	{ img: 'live', name: 'Live', body: 'The everyday scene: your camera under the frame, a lower third, the ticker, the light in the corner.' },
-	{ img: 'talking-head', name: 'Talking head', body: 'The camera is the whole picture, so the chrome shrinks to corner brackets, a minimal name and a bare dot.' },
-	{ img: 'screen-share', name: 'Screen share', body: 'The code has the frame. A small camera box, a chapter chip, a segment progress bar, and a mic meter so silence never goes unnoticed.' },
-	{ img: 'interview', name: 'Interview', body: 'Two cameras, two names on split lower thirds, and nothing else competing.' },
-	{ img: 'qa', name: 'Q&A', body: 'The question takes the left half on a split card; the camera takes the right behind a scrim.' },
-	{ img: 'support', name: 'Support', body: 'The ask, with something to scan: a membership QR, a live member count with a goal, and a live subscriber count beside it.' },
-	{ img: 'vertical', name: 'Vertical', body: 'A 9:16 box inside the landscape canvas. Frame yourself inside it and the same take cuts to a Short.' },
-	{ img: 'brb', name: 'Be right back', body: 'A drifting dot grid, a waveform, and a five-minute countdown that restarts every time you switch to it.' },
-	{ img: 'trouble', name: 'Technical difficulties', body: 'The one scene that should look wrong on purpose. A vignette, the card in full accent, and the canvas edge lit red.' },
-	{ img: 'ending', name: 'Ending', body: 'The ask, with the goal it is asking for: a subscriber bar, a subscribe chip, and drifting stripes.' },
-	{ img: 'desk', name: 'Desk (private)', body: 'Not for the stream. Open it as a windowed projector on a second monitor: stats, a program meter, a mic meter, a clock.' },
+	{ img: 'starting-soon', name: 'Starting soon', body: 'The countdown screen people sit on. A card, a countdown, a drifting grid, the clock, and a spectrum along the foot.' , uses: ['Backdrop (drifting grid)', 'Visualizer (bars)', 'Light', 'Clock', 'Card', 'Countdown'] },
+	{ img: 'welcome', name: 'Welcome', body: 'The first seconds, with nothing to read. A gradient, a line of type, and a chip that lights up when you go live.' , uses: ['Backdrop (gradient)', 'Visualizer (line)', 'Card', 'Chip', 'Light (bar)'] },
+	{ img: 'live', name: 'Live', body: 'The everyday scene: your camera under the frame, a lower third, the ticker, the light in the corner.' , uses: ['Camera', 'Ticker', 'Lower Third', 'Cam Frame', 'Light'] },
+	{ img: 'talking-head', name: 'Talking head', body: 'The camera is the whole picture, so the chrome shrinks to corner brackets, a minimal name and a bare dot.' , uses: ['Camera', 'Cam Frame (brackets)', 'Lower Third (minimal)', 'Chip', 'Light (dot)'] },
+	{ img: 'screen-share', name: 'Screen share', body: 'The code has the frame. A small camera box, a chapter chip, a segment progress bar, and a mic meter so silence never goes unnoticed.' , uses: ['Camera', 'Cam Frame', 'Chip', 'Progress (segments)', 'Meter', 'Light (badge)'] },
+	{ img: 'interview', name: 'Interview', body: 'Two cameras, two names on split lower thirds, and nothing else competing.' , uses: ['Cam Frame ×2', 'Lower Third (split) ×2', 'Ticker', 'Light'] },
+	{ img: 'qa', name: 'Q&A', body: 'The question takes the left half on a split card; the camera takes the right behind a scrim.' , uses: ['Camera', 'Backdrop (scrim)', 'Chip', 'Card (split)', 'Cam Frame (inset)', 'Ticker', 'Light'] },
+	{ img: 'support', name: 'Support', body: 'The ask, with something to scan: a membership QR, a live member count with a goal, and a live subscriber count beside it.' , uses: ['Backdrop (rings)', 'Card', 'QR', 'Counter (Ghost)', 'Counter (YouTube)', 'Ticker', 'Light'] },
+	{ img: 'vertical', name: 'Vertical', body: 'A 9:16 box inside the landscape canvas. Frame yourself inside it and the same take cuts to a Short.' , uses: ['Backdrop (hex)', 'Camera', 'Cam Frame (9:16)', 'Card', 'Light (dot)'] },
+	{ img: 'brb', name: 'Be right back', body: 'A drifting dot grid, a waveform, and a five-minute countdown that restarts every time you switch to it.' , uses: ['Backdrop (dots)', 'Visualizer (wave)', 'Light', 'Clock', 'Card', 'Countdown'] },
+	{ img: 'trouble', name: 'Technical difficulties', body: 'The one scene that should look wrong on purpose. A vignette, the card in full accent, and the canvas edge lit red.' , uses: ['Backdrop (vignette)', 'Card (accent)', 'Light (canvas edge)'] },
+	{ img: 'ending', name: 'Ending', body: 'The ask, with the goal it is asking for: a subscriber bar, a subscribe chip, and drifting stripes.' , uses: ['Backdrop (stripes)', 'Visualizer (dots)', 'Card', 'Progress', 'Chip', 'QR', 'Light'] },
+	{ img: 'desk', name: 'Desk (private)', body: 'Not for the stream. Open it as a windowed projector on a second monitor: stats, a program meter, a mic meter, a clock.' , uses: ['Backdrop', 'Stats', 'Meter (program)', 'Meter (mic)', 'Clock', 'Light'] },
 ];
 
 export const STEPS = [

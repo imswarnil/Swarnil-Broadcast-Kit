@@ -297,6 +297,18 @@ button.shot:hover { border-color: var(--line-strong); }
 .scene h3 { margin-top: 0.85rem; }
 .scene p { color: var(--ink-dim); font-size: 0.94rem; margin: 0.25rem 0 0; }
 
+/* what a scene is actually made of — the bit that turns a screenshot into
+   something you could rebuild by hand */
+.uses {
+	list-style: none; display: flex; flex-wrap: wrap; gap: 0.3rem;
+	margin: 0.7rem 0 0; padding: 0;
+}
+.uses li {
+	font-size: 0.72rem; color: var(--ink-faint);
+	border: 1px solid var(--line); border-radius: 999px;
+	padding: 0.12rem 0.55rem; white-space: nowrap;
+}
+
 /* ---- steps --------------------------------------------------------------- */
 
 .steps { counter-reset: s; display: grid; gap: 0.9rem; }

@@ -222,6 +222,7 @@ function scenes() {
 				(s) => `<article class="scene" id="${s.img}">
 			<button class="shot" type="button" data-shot="/screens/${s.img}.jpg" data-title="${esc(s.name)}" aria-label="See the ${esc(s.name)} scene full size"><img src="/screens/${s.img}.jpg" alt="The ${esc(s.name)} scene" loading="lazy" width="1600" height="900"></button>
 			<h3>${esc(s.name)}</h3><p>${prose(s.body)}</p>
+			${s.uses ? `<ul class="uses">${s.uses.map((u) => `<li>${esc(u)}</li>`).join('')}</ul>` : ''}
 		</article>`
 			).join('')}
 		<dialog id="lightbox" aria-label="Scene, full size">
