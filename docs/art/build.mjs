@@ -85,8 +85,8 @@ function banner(t) {
 	p.push(wordmark(t, 72, 64, 1.25));
 
 	p.push(text(72, 196, 'Overlays OBS draws itself.', { size: 46, weight: 700, fill: t.ink, track: -1.4 }));
-	p.push(text(72, 240, 'A native plugin, not a browser source: seventeen sources, six filters,', { size: 17, fill: t.dim }));
-	p.push(text(72, 266, 'two transitions, a control dock and a show of twenty scenes.', { size: 17, fill: t.dim }));
+	p.push(text(72, 240, 'A native plugin, not a browser source: twenty sources, six filters,', { size: 17, fill: t.dim }));
+	p.push(text(72, 266, 'two transitions, a control dock and a show of twenty-two scenes.', { size: 17, fill: t.dim }));
 
 	const pills = ['Tally light', 'Level meter in dB', 'Live counters', 'QR', 'CRT filter', 'Voice chain'];
 	let px = 72;

@@ -8,7 +8,7 @@ Quit OBS, copy the bundle into your user plugin folder, start OBS again:
 ~/Library/Application Support/obs-studio/plugins/sbk.plugin
 ```
 
-**Sources → +** then lists seventeen *SBK …* sources, **Filters** on any source
+**Sources → +** then lists twenty *SBK …* sources, **Filters** on any source
 gains four video filters and two audio ones, **Docks → Broadcast Kit** is the
 control panel, and the **Tools** menu has five *Broadcast Kit:* items.
 
@@ -46,6 +46,18 @@ It has to be plain `http` from your machine. A page over `https` cannot open the
 unencrypted `ws://` connection obs-websocket speaks, so the copy at
 obs.imswarnil.com/remote/ can show you the interface but will never reach your
 OBS. Nothing goes through the website either way.
+
+## The display capture
+
+Two of the scenes — *Two up* and *Three up* — put a real display capture in the
+big frame. macOS asks for **Screen Recording** permission the first time OBS
+tries; until it is given the capture is black, which is the system telling you
+rather than a fault in the kit. Grant it in **System Settings → Privacy &
+Security → Screen Recording**, then restart OBS.
+
+The clean self-test hides the display capture along with the camera, for the same
+reason it hides the camera: a published screenshot must not carry whatever
+happens to be on the desktop.
 
 ## The profile
 
@@ -130,7 +142,7 @@ touch ~/Library/Application\ Support/obs-studio/.sbk-selftest-clean   # camera h
 ```
 
 Start OBS. Once it has loaded, the kit creates the scene collection, walks all
-twenty scenes and takes a program screenshot of each into the profile's
+twenty-two scenes and takes a program screenshot of each into the profile's
 recording folder. The trigger file is deleted, so it fires once.
 
 The **clean** variant hides every camera item for the walk and puts them back

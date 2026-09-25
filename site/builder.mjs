@@ -38,6 +38,41 @@ export const PALETTE = [
 		],
 	},
 	{
+		id: 'sbk_logo', name: 'Logo', group: 'Brand', size: [140, 140],
+		settings: { mark: 'ring', loop: 'orbit', mark_size: 96, speed: 3.2, variant: 'none' },
+		fields: [
+			['mark', 'Mark', ['ring', 'play', 'camera', 'at', 'chat', 'heart', 'bell', 'star', 'share', 'globe', 'code', 'person', 'bookmark', 'plus', 'arrow']],
+			['loop', 'Loop', ['orbit', 'breathe', 'pulse', 'spin', 'draw', 'bob', 'none']],
+			['mark_size', 'Mark size', 'number'],
+			['speed', 'One cycle takes (seconds)', 'number'],
+			['caption', 'Caption', 'text'],
+		],
+	},
+	{
+		id: 'sbk_social', name: 'Social', group: 'Titles', size: [420, 96],
+		settings: { mode: 'rotate', rotate: 8.0, brand: true, show_name: true, variant: 'card',
+			accounts: 'youtube: @imswarnil\nx: @imswarnil\ninstagram: @imswarnil\nweb: imswarnil.com' },
+		fields: [
+			['accounts', 'Accounts, one per line as platform: handle', 'text'],
+			['mode', 'Shape', ['rotate', 'bar', 'stack']],
+			['rotate', 'Change every (seconds)', 'number'],
+			['brand', 'Each platform\u2019s own colour', 'bool'],
+			['variant', 'Variant', ['card', 'glass', 'none', 'accent', 'outline']],
+		],
+	},
+	{
+		id: 'sbk_prompt', name: 'Prompt', group: 'Titles', size: [520, 108],
+		settings: { edge: 'right', every: 180.0, hold: 8.0, width: 520, variant: 'card',
+			lines: 'heart: Enjoying this? | A like costs you nothing and helps a lot.\nbell: Subscribe | There is a new build every Thursday.' },
+		fields: [
+			['lines', 'What it asks, one per line as mark: Title | Body', 'text'],
+			['edge', 'Comes in from', ['right', 'left', 'top', 'bottom']],
+			['every', 'Every (seconds)', 'number'],
+			['hold', 'Stays for (seconds)', 'number'],
+			['only_live', 'Only when on air', 'bool'],
+		],
+	},
+	{
 		id: 'sbk_ticker', name: 'Ticker', group: 'Titles', size: [1920, 56],
 		settings: { width: 1920, tag: 'Now', text: 'Building a Salesforce app live | Questions in chat', variant: 'strip' },
 		fields: [

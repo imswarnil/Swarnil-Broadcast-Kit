@@ -3,6 +3,58 @@
 All notable changes to Swarnil Broadcast Kit (called Tally until 0.3.0). The format follows [Keep a Changelog](https://keepachangelog.com/);
 versions follow [SemVer](https://semver.org/).
 
+## [0.7.0] — 2026-09-26
+
+The mark, the handles, the ask, and two layouts that put a screen and a camera
+in the same frame at different shapes.
+
+### Added
+- **`SBK Logo`**, a channel bug that is alive. Your PNG or one of fifteen drawn
+  marks, with a loop: breathe, pulse, spin, a dot going round it, a ring drawing
+  itself on and off, or a bob. It is driven by the clock, so it is already
+  moving the first time the scene goes out — a page in a Browser Source cannot
+  promise that, because a browser will not start anything until something has
+  been clicked. Blown up to 400 px with a caption under it, the same source is
+  the card a sign-off lands on.
+- **`SBK Social`**, where to find you, in three shapes: a bar of every handle
+  along an edge, a stack of them in a corner, and one at a time on a timer. The
+  third is the one worth having — a row of six handles is read by nobody, and
+  the same six shown for eight seconds each are read by everyone. Accounts are
+  typed one per line as `platform: handle`.
+- **`SBK Prompt`**, the like-and-subscribe card, on a timer. It slides in from an
+  edge, holds, and slides back out, working through your lines. Two decisions
+  make it bearable rather than irritating: it is genuinely off screen in
+  between rather than parked behind your camera at zero opacity, and it can be
+  told to stay quiet unless you are actually on air, so a rehearsal is not spent
+  being asked to subscribe. A hotkey brings it in now.
+- **A mark set**, fifteen of them, drawn as distance fields in `glyph.effect` and
+  shared by all three: play, camera, at-sign, chat, heart, bell, star, share,
+  globe, code, person, bookmark, plus, the recording ring, and an arrow. They are
+  **generic on purpose** — never a company's logo. A platform is told apart by
+  its colour and its name in type, which is what keeps this kit free to give
+  away and what stops it going stale the week somebody redraws their mark.
+- **Two layout scenes with a real display capture.** *Two up* gives the screen a
+  wide 21:9 crop so code has room for long lines and puts a 9:16 camera column
+  beside it, because matching the two aspect ratios would waste half the picture
+  on a desk. *Three up* runs a 16:9 screen across the top with a square host and
+  a 4:5 guest under it — square because it crops a talking head without cutting
+  the shoulders, 4:5 because it is the shape every remote call hands you — and a
+  meter under each, so a silent guest is visible at a glance.
+- The social bar, the prompt and the logo bug are now in the show: handles
+  stacked on Starting soon, the ask on Live and Screen share, the bug on Talking
+  head and Two up, and every handle plus a drawing ring on Ending.
+
+### Fixed
+- **A brand colour too dark to see is no longer used.** Two of the platforms are
+  black, which is fine on their own white pages and invisible on a dark overlay.
+  Anything below a luminance threshold falls back to the Look's ink.
+- **The display capture is hidden by the clean self-test**, alongside the camera.
+  It is every bit as private, and a published screenshot must not carry whatever
+  happens to be on the desktop.
+- **Two plates were sized against the wrong numbers.** 21:9 is 756 × 324 in the
+  frame's table and 1:1 is 480 × 480, not the round figures assumed, so the
+  plates behind them sat proud of the frame.
+
 ## [0.6.0] — 2026-09-25
 
 The show, rebuilt in the order you would run it, and the pieces a course needs.

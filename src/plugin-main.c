@@ -25,6 +25,9 @@ extern struct obs_source_info sbk_card_info;
 extern struct obs_source_info sbk_backdrop_info;
 extern struct obs_source_info sbk_plate_info;
 extern struct obs_source_info sbk_comments_info;
+extern struct obs_source_info sbk_social_info;
+extern struct obs_source_info sbk_prompt_info;
+extern struct obs_source_info sbk_logo_info;
 extern struct obs_source_info sbk_chip_info;
 extern struct obs_source_info sbk_progress_info;
 extern struct obs_source_info sbk_counter_info;
@@ -100,6 +103,9 @@ bool obs_module_load(void)
 	obs_register_source(&sbk_backdrop_info);
 	obs_register_source(&sbk_plate_info);
 	obs_register_source(&sbk_comments_info);
+	obs_register_source(&sbk_social_info);
+	obs_register_source(&sbk_prompt_info);
+	obs_register_source(&sbk_logo_info);
 	obs_register_source(&sbk_chip_info);
 	obs_register_source(&sbk_progress_info);
 	obs_register_source(&sbk_counter_info);
@@ -134,7 +140,7 @@ bool obs_module_load(void)
 	   so this proves the shaders build on this machine's renderer */
 	static const char *ids[] = {"sbk_onair", "sbk_lower_third", "sbk_ticker", "sbk_frame", "sbk_visualizer",
 				    "sbk_clock", "sbk_countdown", "sbk_card", "sbk_backdrop",
-				    "sbk_plate", "sbk_comments", "sbk_chip", "sbk_progress", "sbk_meter", "sbk_stats", "sbk_counter", "sbk_qr", "sbk_round", "sbk_scanlines", "sbk_colour", "sbk_punch", "sbk_voice", "sbk_radio", "sbk_wipe", "sbk_sting"};
+				    "sbk_plate", "sbk_comments", "sbk_social", "sbk_prompt", "sbk_logo", "sbk_chip", "sbk_progress", "sbk_meter", "sbk_stats", "sbk_counter", "sbk_qr", "sbk_round", "sbk_scanlines", "sbk_colour", "sbk_punch", "sbk_voice", "sbk_radio", "sbk_wipe", "sbk_sting"};
 	for (size_t i = 0; i < sizeof(ids) / sizeof(ids[0]); i++) {
 		obs_source_t *t = obs_source_create_private(ids[i], NULL, NULL);
 		if (t)

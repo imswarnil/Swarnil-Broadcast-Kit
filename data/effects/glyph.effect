@@ -1,0 +1,202 @@
+// A small set of marks, drawn as distance fields.
+//
+// These are GENERIC marks, not brand logos. A social lower third carries a
+// platform's colour and its name in type; the mark beside it is a play triangle
+// or a camera outline or an at-sign, never somebody's trademark. That keeps the
+// kit MIT and redistributable, and it survives a platform redrawing its logo.
+//
+// Everything is authored in a unit box: q runs -1..1 over the shorter side, so
+// one mark file works at any size and the stroke weight is the only thing that
+// has to come in as pixels.
+
+uniform float4x4 ViewProj;
+uniform float2 size;
+uniform float  mark;    // which one — see sbk-glyph.h
+uniform float4 color;
+uniform float  weight;  // stroke width in px, for the outline marks
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float sdCircle(float2 p, float r)
+{
+	return length(p) - r;
+}
+
+float sdBox(float2 p, float2 b, float r)
+{
+	float2 d = abs(p) - b + r;
+	return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
+}
+
+float sdSeg(float2 p, float2 a, float2 b, float r)
+{
+	float2 pa = p - a, ba = b - a;
+	float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+	return length(pa - ba * h) - r;
+}
+
+/* solid triangle, as the intersection of three half planes */
+float sdTri(float2 p, float2 a, float2 b, float2 c)
+{
+	float2 e0 = b - a, e1 = c - b, e2 = a - c;
+	float2 v0 = p - a, v1 = p - b, v2 = p - c;
+	float2 p0 = v0 - e0 * clamp(dot(v0, e0) / dot(e0, e0), 0.0, 1.0);
+	float2 p1 = v1 - e1 * clamp(dot(v1, e1) / dot(e1, e1), 0.0, 1.0);
+	float2 p2 = v2 - e2 * clamp(dot(v2, e2) / dot(e2, e2), 0.0, 1.0);
+	float s = sign(e0.x * e2.y - e0.y * e2.x);
+	float2 d = min(min(float2(dot(p0, p0), s * (v0.x * e0.y - v0.y * e0.x)),
+			   float2(dot(p1, p1), s * (v1.x * e1.y - v1.y * e1.x))),
+		       float2(dot(p2, p2), s * (v2.x * e2.y - v2.y * e2.x)));
+	return -sqrt(d.x) * sign(d.y);
+}
+
+/* five-pointed star */
+float sdStar(float2 p, float r, float n, float m)
+{
+	float an = 3.141593 / n, en = 3.141593 / m;
+	float2 acs = float2(cos(an), sin(an));
+	float2 ecs = float2(cos(en), sin(en));
+	float bn = fmod(atan2(p.x, p.y), 2.0 * an) - an;
+	p = length(p) * float2(cos(bn), abs(sin(bn)));
+	p -= r * acs;
+	p += ecs * clamp(-dot(p, ecs), 0.0, r * acs.y / ecs.y);
+	return length(p) * sign(p.x);
+}
+
+float glyph(float2 q, float w)
+{
+	float d = 1e6;
+
+	/* 1 — play: a filled tile with a triangle taken out of it */
+	if (abs(mark - 1.0) < 0.5) {
+		float tile = sdBox(q, float2(0.94, 0.68), 0.30);
+		float tri = sdTri(q, float2(-0.20, -0.32), float2(-0.20, 0.32), float2(0.30, 0.0));
+		d = max(tile, -tri);
+	}
+	/* 2 — camera: a rounded square, a lens, and the little lamp */
+	else if (abs(mark - 2.0) < 0.5) {
+		d = abs(sdBox(q, float2(0.88, 0.88), 0.32)) - w;
+		d = min(d, abs(sdCircle(q, 0.38)) - w);
+		d = min(d, sdCircle(q - float2(0.52, -0.52), 0.10));
+	}
+	/* 3 — at: the circle, its inner ring, and the open hook */
+	else if (abs(mark - 3.0) < 0.5) {
+		float ring = abs(sdCircle(q, 0.88)) - w;
+		/* open the ring at the lower right */
+		float gap = sdTri(q, float2(0.0, 0.0), float2(1.6, 0.35), float2(0.35, 1.6));
+		d = max(ring, -gap);
+		d = min(d, abs(sdCircle(q, 0.34)) - w);
+		d = min(d, sdSeg(q, float2(0.34, -0.25), float2(0.34, 0.30), w));
+		d = min(d, sdSeg(q, float2(0.34, 0.30), float2(0.86, 0.36), w));
+	}
+	/* 4 — chat: a bubble with a tail */
+	else if (abs(mark - 4.0) < 0.5) {
+		d = abs(sdBox(q - float2(0.0, -0.14), float2(0.90, 0.62), 0.28)) - w;
+		d = min(d, sdSeg(q, float2(-0.34, 0.46), float2(-0.52, 0.94), w));
+		d = min(d, sdSeg(q, float2(-0.52, 0.94), float2(-0.04, 0.46), w));
+	}
+	/* 5 — heart: two lobes and a point */
+	else if (abs(mark - 5.0) < 0.5) {
+		d = sdCircle(q - float2(-0.40, -0.30), 0.46);
+		d = min(d, sdCircle(q - float2(0.40, -0.30), 0.46));
+		d = min(d, sdTri(q, float2(-0.84, -0.22), float2(0.84, -0.22), float2(0.0, 0.90)));
+	}
+	/* 6 — bell */
+	else if (abs(mark - 6.0) < 0.5) {
+		float body = sdCircle(q - float2(0.0, -0.18), 0.58);
+		body = min(body, sdBox(q - float2(0.0, 0.16), float2(0.64, 0.42), 0.18));
+		body = max(body, -sdBox(q - float2(0.0, 1.30), float2(1.4, 0.72), 0.0));
+		d = body;
+		d = min(d, sdSeg(q, float2(-0.74, 0.58), float2(0.74, 0.58), w * 0.9));
+		d = min(d, sdCircle(q - float2(0.0, 0.84), 0.19));
+	}
+	/* 7 — star */
+	else if (abs(mark - 7.0) < 0.5) {
+		d = sdStar(float2(q.x, -q.y), 0.92, 5.0, 2.6);
+	}
+	/* 8 — share: out of the tray and away */
+	else if (abs(mark - 8.0) < 0.5) {
+		d = sdSeg(q, float2(0.0, -0.86), float2(0.0, 0.26), w);
+		d = min(d, sdSeg(q, float2(-0.42, -0.42), float2(0.0, -0.88), w));
+		d = min(d, sdSeg(q, float2(0.42, -0.42), float2(0.0, -0.88), w));
+		d = min(d, sdSeg(q, float2(-0.82, 0.10), float2(-0.82, 0.86), w));
+		d = min(d, sdSeg(q, float2(0.82, 0.10), float2(0.82, 0.86), w));
+		d = min(d, sdSeg(q, float2(-0.82, 0.86), float2(0.82, 0.86), w));
+	}
+	/* 9 — globe */
+	else if (abs(mark - 9.0) < 0.5) {
+		d = abs(sdCircle(q, 0.88)) - w;
+		float2 e = q / float2(0.44, 0.88);
+		d = min(d, abs((length(e) - 1.0) * 0.44) - w);
+		d = min(d, sdSeg(q, float2(-0.88, 0.0), float2(0.88, 0.0), w));
+	}
+	/* 10 — code: two chevrons */
+	else if (abs(mark - 10.0) < 0.5) {
+		d = sdSeg(q, float2(-0.26, -0.56), float2(-0.80, 0.0), w);
+		d = min(d, sdSeg(q, float2(-0.80, 0.0), float2(-0.26, 0.56), w));
+		d = min(d, sdSeg(q, float2(0.26, -0.56), float2(0.80, 0.0), w));
+		d = min(d, sdSeg(q, float2(0.80, 0.0), float2(0.26, 0.56), w));
+	}
+	/* 11 — person */
+	else if (abs(mark - 11.0) < 0.5) {
+		d = abs(sdCircle(q - float2(0.0, -0.44), 0.34)) - w;
+		float sh = abs(sdBox(q - float2(0.0, 0.86), float2(0.66, 0.42), 0.34)) - w;
+		sh = max(sh, -sdBox(q - float2(0.0, 1.10), float2(1.4, 0.44), 0.0));
+		d = min(d, sh);
+	}
+	/* 12 — bookmark */
+	else if (abs(mark - 12.0) < 0.5) {
+		float b = sdBox(q, float2(0.58, 0.88), 0.14);
+		d = max(b, -sdTri(q, float2(-0.58, 1.02), float2(0.58, 1.02), float2(0.0, 0.26)));
+	}
+	/* 13 — plus */
+	else if (abs(mark - 13.0) < 0.5) {
+		d = sdSeg(q, float2(-0.74, 0.0), float2(0.74, 0.0), w);
+		d = min(d, sdSeg(q, float2(0.0, -0.74), float2(0.0, 0.74), w));
+	}
+	/* 14 — the kit's own mark: the recording ring with its dot */
+	else if (abs(mark - 14.0) < 0.5) {
+		d = abs(sdCircle(q, 0.86)) - w;
+		d = min(d, sdCircle(q, 0.30));
+	}
+	/* 15 — arrow, up and to the right */
+	else if (abs(mark - 15.0) < 0.5) {
+		d = sdSeg(q, float2(-0.62, 0.62), float2(0.60, -0.60), w);
+		d = min(d, sdSeg(q, float2(0.60, -0.60), float2(-0.04, -0.60), w));
+		d = min(d, sdSeg(q, float2(0.60, -0.60), float2(0.60, 0.04), w));
+	}
+
+	return d;
+}
+
+float4 PSGlyph(VertInOut vert_in) : TARGET
+{
+	float r = min(size.x, size.y) * 0.5;
+	if (r <= 0.0 || mark < 0.5)
+		return float4(0.0, 0.0, 0.0, 0.0);
+
+	float2 q = (vert_in.uv - 0.5) * size / r;
+	float d = glyph(q, max(weight, 0.5) / r) * r;   /* back into pixels */
+	float a = 1.0 - smoothstep(-0.7, 0.7, d);
+	return float4(color.rgb * color.a * a, color.a * a);
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSGlyph(vert_in);
+	}
+}

@@ -11,9 +11,9 @@ Light source is named after.
 ## What it is, in one breath
 
 C built with CMake against `/Applications/OBS.app`, the same way every plugin in
-`~/OBS/` is built. Seventeen `sbk_*` sources in OBS's "+" menu, four video filters and two audio ones
+`~/OBS/` is built. Twenty `sbk_*` sources in OBS's "+" menu, four video filters and two audio ones
 under Filters, two transitions in the Scene Transitions panel, a Qt control dock,
-five Tools-menu actions that build a twenty-scene show, and a profile. Type is OBS's own `text_ft2_source` as a private child;
+five Tools-menu actions that build a twenty-two-scene show, and a profile. Type is OBS's own `text_ft2_source` as a private child;
 every box is `card.effect`; anything that animates draws into an `sbk_stage`
 (offscreen render target) and is presented with an alpha and an offset.
 
@@ -132,7 +132,7 @@ run with a person in it without asking first.
 touch ~/Library/Application\ Support/obs-studio/.sbk-selftest   # then start OBS
 ```
 
-It builds the collection, walks all twenty scenes and takes a program
+It builds the collection, walks all twenty-two scenes and takes a program
 screenshot of each into the profile's recording folder. Then read the newest log
 in `~/Library/Application Support/obs-studio/logs/`: `[sbk] v… loaded`, no
 `would not create` / `failed to compile`, `walked 18 scenes`.

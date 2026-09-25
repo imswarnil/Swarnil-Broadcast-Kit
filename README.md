@@ -1,12 +1,12 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/art/banner-dark.svg">
-  <img alt="SBK — Swarnil Broadcast Kit. Overlays OBS draws itself. A native plugin, not a browser source: seventeen sources, six filters, two transitions, a control dock and a show of twenty scenes." src="docs/art/banner-light.svg">
+  <img alt="SBK — Swarnil Broadcast Kit. Overlays OBS draws itself. A native plugin, not a browser source: twenty sources, six filters, two transitions, a control dock and a show of twenty-two scenes." src="docs/art/banner-light.svg">
 </picture>
 
 # Swarnil Broadcast Kit
 
-**Native OBS Studio overlays: seventeen sources, six filters, two transitions,
-a control dock and a show of twenty scenes — drawn by OBS itself.**
+**Native OBS Studio overlays: twenty sources, six filters, two transitions, a
+control dock and a show of twenty-two scenes — drawn by OBS itself.**
 
 No browser source, no web server, no URL to paste. Drop `sbk.plugin` into OBS
 and *Sources → +* fills up with **SBK …** sources drawn by libobs: type is OBS's
@@ -55,7 +55,10 @@ locked into.
 | **SBK Lower Third** | A name and a line under it. Card, pill, split, minimal or underline; replays its arrival on a hotkey. |
 | **SBK Ticker** | A tag and items sliding across the foot. On glass, bare, or one chip per item, fading at both ends. |
 | **SBK Cam Frame** | The treatment over your camera. 16:9, **9:16**, 1:1, 4:5, 4:3 or 21:9, and seven line treatments. |
+| **SBK Logo** | A channel bug that is alive. Your PNG or a drawn mark, looping — breathe, pulse, spin, orbit, draw on, bob. No video file, no browser. |
 | **SBK Plate** | The drop shadow OBS does not have. Put one behind a camera or a capture and it sits on the backdrop instead of floating on it. |
+| **SBK Social** | Where to find you: a bar of handles, a stack, or **one at a time on a timer** — the only one people read. |
+| **SBK Prompt** | The like-and-subscribe card, on a timer. Slides in, holds, slides out. Off screen in between, and quiet unless you are live if you want. |
 | **SBK Visualizer** | Bars, mirrored bars, waveform, dot matrix, ring, block ladder or filled line — from the **program mix** by default. |
 | **SBK Meter** | A real level meter in dB, with peak hold and the zones a broadcaster expects. |
 | **SBK Stats** | Uptime, bitrate, dropped frames, render rate, and a health lamp. |
@@ -87,7 +90,7 @@ band of accent that takes the cut with it. **SBK Logo Sting** — a colour field
 crosses, your logo lands on it, the field leaves on the next scene, and the cut
 happens underneath where nobody sees it. No video file to render.
 
-A **control dock** inside OBS. A **phone remote**. A **twenty-scene show** and a
+A **control dock** inside OBS. A **phone remote**. A **twenty-two-scene show** and a
 1080p60 profile.
 
 Every source shares a **Look** group — one accent colour, a scale slider that

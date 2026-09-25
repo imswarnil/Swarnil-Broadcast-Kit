@@ -2,7 +2,14 @@
 
 Every source shares two groups. **Look** is the accent colour, a scale slider
 that grows type, padding and radius together, a tone (glass, solid or light) and
-the font. **Motion** is how it arrives — fade, rise, drop, slide from either side, pop
+the font. The marks used by the Social, Prompt and Logo sources are **generic** — a play
+triangle, a camera, an at-sign, a chat bubble — and never a company's logo. A
+platform is told apart by its colour and its name in type. That is what keeps
+the kit MIT and free to give away, and it does not go stale the week somebody
+redraws their mark. A brand colour too dark to read on a dark overlay falls back
+to the ink rather than disappearing.
+
+**Motion** is how it arrives — fade, rise, drop, slide from either side, pop
 (overshoot and settle), grow (up from small) or settle (drop the last few pixels
 with a lift in scale) — and whether that replays each time the source is shown.
 
@@ -12,9 +19,12 @@ Sizes below are at scale 1 on a 1080p canvas.
 | --- | --- |
 | **SBK Light** | The tally light: LIVE, REC, LIVE · REC or OFF AIR, from OBS's own state. Shapes: pill, badge, bare dot, a bar across the frame, or the whole canvas edge lit. Can fill with the accent while lit, and hide entirely when off. |
 | **SBK Lower Third** | A name and a line under it. Card, pill, split (the title on an accent slab), minimal (shadowed type, no card) or underline. Hotkey: *play the lower third in again*. |
+| **SBK Social** | Where to find you. A bar of every handle, a stack of them, or one at a time on a timer, which is the one people actually read. Accounts typed one per line as `platform: handle`; a known platform brings its colour. |
+| **SBK Prompt** | The like-and-subscribe card, on a timer: slides in from an edge, holds, slides back out, working through your lines. Genuinely off screen in between, and it can stay quiet unless you are on air. Hotkey: *show the prompt now*. |
 | **SBK Ticker** | A tag and items separated with `\|`. On glass, bare, or one chip per item. Either direction, any speed, fading at both ends. |
 | **SBK Cam Frame** | The treatment over a camera. Shapes 16:9, **9:16**, 1:1, 4:5, 4:3, 21:9 or custom, scaled by one slider. Treatments: ring, inset, corner brackets, brackets stood off, head and foot rules, glow, double. A chip on any corner. |
 | **SBK Plate** | The drop shadow OBS does not have. A rounded rectangle with a soft offset shadow, in the same seven aspect ratios as the frame — put one behind a camera or a screen capture so it sits on the backdrop instead of floating on it. Optional fill, optional accent glow. |
+| **SBK Logo** | A channel bug that is alive: your PNG or one of fifteen drawn marks, looping. Breathe, pulse, spin, a dot going round it, a ring drawing itself on and off, or a bob. Driven by the clock, so it is moving before the scene goes out. |
 | **SBK Visualizer** | Bars, mirrored bars, waveform, dot matrix, ring, block ladder or filled line. Listens to the program mix by default. |
 | **SBK Meter** | A level meter in dB: solid or segments, horizontal or vertical, peak hold, and colour zones you set (calm below −18, hot by −6). |
 | **SBK Stats** | Uptime, bitrate, dropped frames, render rate, and a health lamp from congestion and drops. |
@@ -133,4 +143,4 @@ anything. The scenes are a starting point, not a template you are locked into.
 
 Under **Settings → Hotkeys**, per source: *play the lower third in again*,
 *restart the countdown*, *nudge the goal up*, *nudge the goal down*, *refresh the
-counter*.
+counter*, *show the prompt now*.

@@ -190,6 +190,7 @@ static obs_scene_t *fresh_scene(const char *name)
 
 #define CAM_NAME "Camera"
 #define MIC_NAME "Mic"
+#define SCREEN_NAME "Screen"
 
 /* The first real entry in a source type's device list. OBS only fills that list
    when the source exists, so one is made, asked, and thrown away. */
@@ -249,6 +250,32 @@ static obs_source_t *camera(void)
 		obs_source_release(f);
 	}
 	SBK_LOG(LOG_INFO, "camera added with rounded corners");
+	return hold(src);
+}
+
+/*  The display capture.
+
+    ScreenCaptureKit, the same source the Sources menu offers, created here so a
+    two-up or three-up layout arrives with something in the big hole rather than
+    a rectangle and an instruction. macOS asks for Screen Recording permission
+    the first time; until it is given the capture is black, which is the system
+    telling you, not a fault here.  */
+static obs_source_t *screen_capture(void)
+{
+	obs_source_t *existing = obs_get_source_by_name(SCREEN_NAME);
+	if (existing)
+		return hold(existing);
+
+	obs_data_t *st = obs_data_create();
+	obs_data_set_int(st, "type", 0);       /* 0 = a whole display */
+	obs_data_set_bool(st, "show_cursor", true);
+	obs_source_t *src = obs_source_create("screen_capture", SCREEN_NAME, st, NULL);
+	obs_data_release(st);
+	if (!src) {
+		SBK_LOG(LOG_INFO, "no display capture available — the big frames are left for you to fill");
+		return NULL;
+	}
+	SBK_LOG(LOG_INFO, "display capture added (grant Screen Recording if it is black)");
 	return hold(src);
 }
 
@@ -398,6 +425,9 @@ static void scene_starting(obs_scene_t *sc)
 			       "Grab a coffee. We begin at the top of the hour.",
 			       "@imswarnil | youtube.com/@imswarnil | imswarnil.com", "card", "left", 1100)),
 	    EDGE, 300, TL);
+	put(sc, comp("sbk_social", "SBK · Social stack",
+		     "{\"mode\":\"stack\",\"variant\":\"glass\",\"brand\":true}"),
+	    EDGE, 820, BL);
 	put(sc, comp("sbk_countdown", "SBK · Countdown",
 		     "{\"mode\":\"duration\",\"minutes\":15,\"style\":\"ring\",\"ring_size\":300,\"label\":\"We begin in\"}"),
 	    1920 - EDGE, 300, TR);
@@ -456,6 +486,9 @@ static void scene_screen_share(obs_scene_t *sc)
 		     "{\"source\":\"@mic\",\"label\":\"Mic\",\"width\":300,\"style\":\"segments\","
 		     "\"segment_count\":20,\"show_db\":false}"),
 	    EDGE, 1080 - EDGE - 130, BL);
+	put(sc, comp("sbk_prompt", "SBK · Prompt left",
+		     "{\"edge\":\"left\",\"every\":240.0,\"hold\":7.0,\"width\":460,\"variant\":\"glass\"}"),
+	    EDGE, 300, TL);
 	put(sc, light("badge"), 1920 - EDGE, EDGE, TR);
 }
 
@@ -492,6 +525,100 @@ static void scene_pair_share(obs_scene_t *sc)
 	put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
 }
 
+/*  Two up: the screen and you, in two different shapes.
+
+    The screen keeps a wide 21:9 crop of the canvas so code has room for long
+    lines, and the camera is a 9:16 column beside it — the shape a phone shoots
+    and the shape a face actually fills. Two aspect ratios in one frame is the
+    point: matching them wastes half the picture on a desk.  */
+static void scene_two_up(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop grid", "grid", "\"drift\":3.0,\"pitch\":72.0"), 0, 0, TL);
+
+	put_plate(sc, comp("sbk_plate", "SBK · Two up screen plate",
+			   "{\"aspect\":\"21x9\",\"size\":1.40,\"radius\":18.0,\"shadow_y\":18.0,"
+			   "\"shadow_blur\":56.0,\"fill_glass\":true}"),
+		  EDGE, 260, 1058, 454, TL);
+	put_box(sc, screen_capture(), EDGE, 260, 1058, 454, TL);
+	put(sc, comp("sbk_frame", "SBK · Two up screen frame",
+		     "{\"aspect\":\"21x9\",\"size\":1.40,\"style\":\"ring\",\"radius\":18.0,"
+		     "\"label\":\"Screen\",\"chip_at\":\"top-left\"}"),
+	    EDGE, 260, TL);
+
+	put_plate(sc, comp("sbk_plate", "SBK · Two up cam plate",
+			   "{\"aspect\":\"9x16\",\"size\":0.79,\"radius\":18.0,\"shadow_y\":18.0,"
+			   "\"shadow_blur\":56.0,\"fill_glass\":true}"),
+		  1920 - EDGE, 260, 284, 506, TR);
+	put_box(sc, camera(), 1920 - EDGE, 260, 284, 506, TR);
+	put(sc, comp("sbk_frame", "SBK · Two up cam frame",
+		     "{\"aspect\":\"9x16\",\"size\":0.79,\"style\":\"ring\",\"radius\":18.0,"
+		     "\"label\":\"@imswarnil\",\"chip_at\":\"bottom-left\"}"),
+	    1920 - EDGE, 260, TR);
+
+	put(sc, comp("sbk_logo", "SBK · Bug",
+		     "{\"mark\":\"ring\",\"loop\":\"orbit\",\"mark_size\":52,\"speed\":3.6,\"variant\":\"none\"}"),
+	    EDGE, EDGE - 20, TL);
+	put(sc, comp("sbk_chip", "SBK · Topic chip",
+		     "{\"label\":\"Chapter 1 — setting up\",\"variant\":\"card\",\"dot\":\"accent\"}"),
+	    EDGE + 130, EDGE, TL);
+	put(sc, comp("sbk_social", "SBK · Social bar",
+		     "{\"mode\":\"bar\",\"variant\":\"glass\",\"brand\":true}"),
+	    MIDX, 1080 - EDGE, OBS_ALIGN_BOTTOM | OBS_ALIGN_CENTER);
+	put(sc, light("badge"), 1920 - EDGE, EDGE, TR);
+}
+
+/*  Three up: the screen and two people.
+
+    A 16:9 screen across the top, and under it a 1:1 and a 4:5 — square for the
+    host because a square crops a talking head without cutting the shoulders,
+    and 4:5 for the guest because it is the shape every remote call hands you.
+    Each has a meter under it, so a silent guest is visible at a glance.  */
+static void scene_three_up(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop dots", "dots", "\"drift\":2.0,\"pitch\":48.0"), 0, 0, TL);
+
+	put_plate(sc, comp("sbk_plate", "SBK · Three up screen plate",
+			   "{\"aspect\":\"16x9\",\"size\":1.80,\"radius\":18.0,\"shadow_y\":18.0,"
+			   "\"shadow_blur\":56.0,\"fill_glass\":true}"),
+		  MIDX, 150, 1152, 648, TC);
+	put_box(sc, screen_capture(), MIDX, 150, 1152, 648, TC);
+	put(sc, comp("sbk_frame", "SBK · Three up screen frame",
+		     "{\"aspect\":\"16x9\",\"size\":1.80,\"style\":\"ring\",\"radius\":18.0,\"label\":\"\"}"),
+	    MIDX, 150, TC);
+
+	put_plate(sc, comp("sbk_plate", "SBK · Three up host plate",
+			   "{\"aspect\":\"1x1\",\"size\":0.42,\"radius\":16.0,\"shadow_y\":14.0,"
+			   "\"shadow_blur\":44.0,\"fill_glass\":true}"),
+		  EDGE, 280, 202, 202, TL);
+	put_box(sc, camera(), EDGE, 280, 202, 202, TL);
+	put(sc, comp("sbk_frame", "SBK · Three up host frame",
+		     "{\"aspect\":\"1x1\",\"size\":0.42,\"style\":\"ring\",\"radius\":16.0,\"label\":\"Host\"}"),
+	    EDGE, 280, TL);
+	put(sc, comp("sbk_meter", "SBK · Host meter",
+		     "{\"source\":\"@mic\",\"label\":\"Host\",\"width\":162,\"style\":\"segments\","
+		     "\"segment_count\":14,\"show_db\":false}"),
+	    EDGE, 512, TL);
+
+	put_plate(sc, comp("sbk_plate", "SBK · Three up guest plate",
+			   "{\"aspect\":\"4x5\",\"size\":0.44,\"radius\":16.0,\"shadow_y\":14.0,"
+			   "\"shadow_blur\":44.0,\"fill_glass\":true}"),
+		  1920 - EDGE, 280, 190, 238, TR);
+	put(sc, comp("sbk_frame", "SBK · Three up guest frame",
+		     "{\"aspect\":\"4x5\",\"size\":0.44,\"style\":\"ring\",\"radius\":16.0,"
+		     "\"label\":\"Guest\",\"line\":\"accent\"}"),
+	    1920 - EDGE, 280, TR);
+	put(sc, comp("sbk_meter", "SBK · Guest meter",
+		     "{\"source\":\"@mic2\",\"label\":\"Guest\",\"width\":150,\"style\":\"segments\","
+		     "\"segment_count\":14,\"show_db\":false}"),
+	    1920 - EDGE, 548, TR);
+
+	put(sc, comp("sbk_lower_third", "SBK · Three up title",
+		     "{\"variant\":\"minimal\",\"bar\":true,\"name\":\"Reviewing the build\","
+		     "\"title\":\"Live, with questions at the end\"}"),
+	    EDGE, 880, TL);
+	put(sc, light("dot"), 1920 - EDGE, EDGE, TR);
+}
+
 /* The screen keeps the left; the questions stack down the right. This is the
    one to cut to when the chat has got ahead of you. */
 static void scene_comments(obs_scene_t *sc)
@@ -520,6 +647,9 @@ static void scene_talking_head(obs_scene_t *sc)
 		     "{\"aspect\":\"16x9\",\"size\":2.6,\"style\":\"corner\",\"bracket\":96.0,\"label\":\"\","
 		     "\"line\":\"accent\",\"weight\":4.0}"),
 	    MIDX, EDGE, TC);
+	put(sc, comp("sbk_logo", "SBK · Bug",
+		     "{\"mark\":\"ring\",\"loop\":\"orbit\",\"mark_size\":52,\"speed\":3.6,\"variant\":\"none\"}"),
+	    EDGE, EDGE - 20, TL);
 	put(sc, comp("sbk_lower_third", "SBK · Lower third minimal",
 		     "{\"variant\":\"minimal\",\"bar\":true}"),
 	    EDGE + 40, 980, BL);
@@ -565,6 +695,9 @@ static void scene_live(obs_scene_t *sc)
 	    1920 - EDGE, 560, TR);
 	put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
 	put(sc, comp("sbk_lower_third", "SBK · Lower third", NULL), EDGE, 900, BL);
+	put(sc, comp("sbk_prompt", "SBK · Prompt",
+		     "{\"edge\":\"right\",\"every\":180.0,\"hold\":8.0,\"width\":520}"),
+	    1920 - EDGE, EDGE + 90, TR);
 	put(sc, light(""), 1920 - EDGE, EDGE, TR);
 }
 
@@ -713,6 +846,13 @@ static void scene_ending(obs_scene_t *sc)
 	put(sc, comp("sbk_chip", "SBK · Subscribe chip",
 		     "{\"label\":\"youtube.com/@imswarnil\",\"variant\":\"accent\",\"dot\":\"none\"}"),
 	    MIDX, 760, TC);
+	put(sc, comp("sbk_social", "SBK · Social bar",
+		     "{\"mode\":\"bar\",\"variant\":\"glass\",\"brand\":true}"),
+	    MIDX, 900, TC);
+	put(sc, comp("sbk_logo", "SBK · Sign off mark",
+		     "{\"mark\":\"ring\",\"loop\":\"draw\",\"mark_size\":120,\"speed\":4.0,"
+		     "\"variant\":\"none\",\"caption\":\"See you Thursday\"}"),
+	    EDGE, 1080 - EDGE, BL);
 	put(sc, comp("sbk_qr", "SBK · Channel QR",
 		     "{\"text\":\"https://youtube.com/@imswarnil\",\"caption\":\"Scan to subscribe\","
 		     "\"sub\":\"\",\"code_size\":240,\"variant\":\"none\",\"invert\":true}"),
@@ -766,6 +906,8 @@ static const struct scene_spec SHOW[] = {
 	{"SBK · Lesson", scene_lesson},
 	{"SBK · Screen share", scene_screen_share},
 	{"SBK · Screen share + two", scene_pair_share},
+	{"SBK · Two up", scene_two_up},
+	{"SBK · Three up", scene_three_up},
 	{"SBK · Comments", scene_comments},
 	{"SBK · Talking head", scene_talking_head},
 	{"SBK · Interview", scene_interview},
@@ -999,7 +1141,9 @@ static bool hide_camera_item(obs_scene_t *scene, obs_sceneitem_t *item, void *pa
 	UNUSED_PARAMETER(param);
 	obs_source_t *src = obs_sceneitem_get_source(item);
 	const char *name = src ? obs_source_get_name(src) : NULL;
-	if (!name || strcmp(name, CAM_NAME) != 0)
+	/* the display capture is every bit as private as the camera — a published
+	   screenshot must not carry whatever happens to be on the desktop */
+	if (!name || (strcmp(name, CAM_NAME) != 0 && strcmp(name, SCREEN_NAME) != 0))
 		return true;
 	if (!obs_sceneitem_visible(item) || g_n_hidden >= MAX_HIDDEN)
 		return true;
@@ -1020,7 +1164,7 @@ static void hide_cameras(void)
 	}
 	obs_frontend_source_list_free(&list);
 	if (g_n_hidden)
-		SBK_LOG(LOG_INFO, "self-test: %d camera item(s) hidden for the walk", g_n_hidden);
+		SBK_LOG(LOG_INFO, "self-test: %d camera and screen item(s) hidden for the walk", g_n_hidden);
 }
 
 static void restore_cameras(void)
@@ -1056,8 +1200,9 @@ static void *walk_thread(void *arg)
 	for (size_t i = 0; i < N_SHOW; i++) {
 		obs_queue_task(OBS_TASK_UI, step_switch, (void *)SHOW[i].name, true);
 		/* the cut is instant, but every source plays an arrival and the
-		   pollers want a frame or two — shoot once the scene has settled */
-		os_sleep_ms(2000);
+		   pollers want a frame or two, and a prompt comes in at two and a
+		   half — shoot once the scene has actually settled */
+		os_sleep_ms(3200);
 		obs_queue_task(OBS_TASK_UI, step_shoot, NULL, true);
 		os_sleep_ms(600);
 	}

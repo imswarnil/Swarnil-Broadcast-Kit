@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(sbk VERSION 0.6.0 LANGUAGES C CXX)
+project(sbk VERSION 0.7.0 LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -23,6 +23,9 @@ add_library(sbk MODULE
     src/source-backdrop.c
     src/source-plate.c
     src/source-comments.c
+    src/source-social.c
+    src/source-prompt.c
+    src/source-logo.c
     src/source-chip.c
     src/source-progress.c
     src/source-meter.c
