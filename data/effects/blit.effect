@@ -1,0 +1,50 @@
+// Puts a stage texture on the canvas at an opacity. The texture holds
+// premultiplied alpha, so the whole sample is scaled and the caller blends
+// ONE / INVSRCALPHA.
+//
+// fade_x softens the left and right edges over that many pixels, which is how
+// the ticker's text leaves the lane without a hard cut.
+
+uniform float4x4 ViewProj;
+uniform texture2d image;
+uniform float alpha;
+uniform float fade_x;
+uniform float2 size;
+
+sampler_state def_sampler {
+	Filter   = Linear;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float4 PSBlit(VertInOut vert_in) : TARGET
+{
+	float a = alpha;
+	if (fade_x > 0.5) {
+		float x = vert_in.uv.x * size.x;
+		a *= smoothstep(0.0, fade_x, x) * smoothstep(0.0, fade_x, size.x - x);
+	}
+	return image.Sample(def_sampler, vert_in.uv) * a;
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSBlit(vert_in);
+	}
+}

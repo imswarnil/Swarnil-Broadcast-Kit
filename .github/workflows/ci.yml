@@ -1,18 +1,83 @@
 name: CI
 
+# Two things are built here and they share nothing: the plugin, which is C
+# compiled against the OBS that Homebrew installs, and the documentation site,
+# which is plain Node with no dependencies at all.
+
 on:
-  pull_request:
   push:
-    branches-ignore: [main]
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: write
 
 jobs:
-  check:
+  plugin:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install --cask obs
+      - run: brew install simde jansson cmake
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - run: cmake --build build
+      - name: Check every source registered
+        run: |
+          # every obs_source_info in src/ must be registered in plugin-main.c,
+          # or it silently will not appear in OBS
+          missing=0
+          for id in $(grep -ho '\.id = "sbk_[a-z_]*"' src/*.c | sed 's/.*"\(.*\)"/\1/'); do
+            grep -q "\"$id\"" src/plugin-main.c || { echo "::error::$id is not in plugin-main.c's self-test list"; missing=1; }
+          done
+          for sym in $(grep -ho '^struct obs_source_info sbk_[a-z_]*' src/*.c | awk '{print $3}'); do
+            grep -q "obs_register_source(&$sym)" src/plugin-main.c || { echo "::error::$sym is never registered"; missing=1; }
+          done
+          exit $missing
+      - run: ditto -c -k --keepParent build/sbk.plugin sbk-${GITHUB_REF_NAME}.plugin.zip
+      - uses: actions/upload-artifact@v4
+        with: { name: sbk.plugin, path: '*.plugin.zip', retention-days: 14 }
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: '*.plugin.zip'
+          generate_release_notes: true
+
+  site:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
-      - run: npm run build
-      - run: npm run check
-      - run: npm run pack
+        with: { node-version: 22 }
+      - run: node site/build.mjs
+        env: { SITE_URL: 'https://obs.imswarnil.com/' }
+      - name: Check the built site's links resolve
+        run: node site/check.mjs
+      - uses: actions/upload-artifact@v4
+        with: { name: site, path: dist, retention-days: 7 }
+
+  deploy:
+    needs: [plugin, site]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://obs.imswarnil.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - id: gate
+        env: { T: '${{ secrets.CLOUDFLARE_API_TOKEN }}', A: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}' }
+        run: |
+          if [ -n "$T" ] && [ -n "$A" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else
+            echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set — site built, deploy skipped"
+            echo "ok=false" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.gate.outputs.ok == 'true'
+        uses: actions/download-artifact@v4
+        with: { name: site, path: dist }
+      - if: steps.gate.outputs.ok == 'true'
+        run: npx --yes wrangler@4 deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,0 +1,125 @@
+// The ground under an announcement scene. A solid, a scrim that fades so a
+// camera can sit behind the card, a vignette, a gradient, or one of three
+// patterns that drift slowly — which is what keeps a "starting soon" screen
+// from looking like a frozen stream.
+//
+// 0 solid · 1 scrim from the foot · 2 scrim from the head · 3 vignette
+// 4 gradient · 5 grid · 6 dot grid · 7 diagonal stripes
+// 8 waves · 9 concentric rings · 10 hex grid · 11 grain
+
+uniform float4x4 ViewProj;
+uniform float4 color;
+uniform float4 color2;
+uniform float  mode;
+uniform float  reach;    // how far a scrim reaches, or the vignette's softness
+uniform float  pitch;    // pattern spacing, px
+uniform float  weight;   // pattern line or dot size, px
+uniform float  angle;    // gradient direction: 0 vertical, 1 diagonal, 2 horizontal
+uniform float  time;
+uniform float  drift;    // px per second
+uniform float2 size;
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float4 PSGround(VertInOut vert_in) : TARGET
+{
+	float2 uv = vert_in.uv;
+	float2 px = uv * size;
+
+	if (mode == 4.0) {
+		float k = angle < 0.5 ? uv.y : (angle < 1.5 ? saturate((uv.x + uv.y) * 0.5) : uv.x);
+		return lerp(color, color2, k);
+	}
+
+	if (mode >= 5.0) {
+		float2 p = px + float2(drift, drift * 0.6) * time;
+		float a = 0.0;
+		float w = max(weight, 0.5);
+		if (mode == 5.0) {                    // grid
+			float2 g = abs(frac(p / pitch) - 0.5) * pitch;
+			float line = min(g.x, g.y);
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, line);
+		} else if (mode == 6.0) {             // dots
+			float2 g = (frac(p / pitch) - 0.5) * pitch;
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, length(g));
+		} else if (mode == 7.0) {             // diagonal stripes
+			float s = frac((p.x + p.y) / pitch);
+			float d = abs(s - 0.5) * pitch;
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, d);
+		} else if (mode == 8.0) {             // waves
+			// three sines at different rates, so the crests never line
+			// up into an obvious repeat
+			float y = p.y / pitch;
+			float wave = sin(p.x / pitch * 2.2 + time * 0.6) * 0.30
+				   + sin(p.x / pitch * 1.3 - time * 0.4) * 0.22
+				   + sin(p.x / pitch * 3.7 + time * 0.9) * 0.10;
+			float d = abs(frac(y - wave) - 0.5) * pitch;
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, d);
+		} else if (mode == 9.0) {             // concentric rings
+			float2 c = p - size * 0.5;
+			float r = length(c);
+			float d = abs(frac(r / pitch) - 0.5) * pitch;
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, d);
+			a *= 1.0 - smoothstep(0.0, max(size.x, size.y) * 0.75, r);
+		} else if (mode == 10.0) {            // hex grid
+			// a hex lattice is two offset rectangular lattices; the
+			// distance to the nearer centre gives both the cell and its
+			// outline for free
+			float2 q = p / pitch;
+			float2 r1 = float2(1.0, 1.7320508);
+			float2 h = r1 * 0.5;
+			float2 a1 = fmod(q, r1) - h;
+			float2 a2 = fmod(q - h, r1) - h;
+			float2 gv = dot(a1, a1) < dot(a2, a2) ? a1 : a2;
+			float2 ab = abs(gv);
+			float hexd = max(dot(ab, normalize(float2(1.0, 1.7320508))), ab.x);
+			float d = abs(0.5 - hexd) * pitch;
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, d);
+		} else {                              // grain
+			float2 g = floor(p / max(w, 1.0));
+			float n = frac(sin(dot(g, float2(12.9898, 78.233)) + floor(time * 12.0)) * 43758.5453);
+			a = smoothstep(0.55, 1.0, n);
+		}
+		// the pattern sits on the base colour, so one source is a whole backdrop
+		float4 base = color;
+		float4 ink = float4(color2.rgb, color2.a * a);
+		float outa = ink.a + base.a * (1.0 - ink.a);
+		if (outa <= 0.0001)
+			return float4(0.0, 0.0, 0.0, 0.0);
+		return float4((ink.rgb * ink.a + base.rgb * base.a * (1.0 - ink.a)) / outa, outa);
+	}
+
+	float a = 1.0;
+	if (mode == 1.0) {
+		float t = saturate((uv.y - (1.0 - reach)) / max(reach, 0.001));
+		a = t * t;
+	} else if (mode == 2.0) {
+		float t = saturate((reach - uv.y) / max(reach, 0.001));
+		a = t * t;
+	} else if (mode == 3.0) {
+		float2 c = uv - 0.5;
+		float r = length(c * float2(1.0, size.y / size.x)) * 2.0;
+		a = smoothstep(1.0 - reach, 1.25, r);
+	}
+	return float4(color.rgb, color.a * a);
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSGround(vert_in);
+	}
+}

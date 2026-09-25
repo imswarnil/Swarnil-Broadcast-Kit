@@ -1,0 +1,97 @@
+// A QR code, drawn from its module matrix as a one-channel texture.
+//
+// Point-sampling the matrix and rounding each module in the shader keeps the
+// code crisp at any size and costs one draw call, where a rectangle per module
+// would be several thousand.
+//
+// Rounding is neighbour-aware, and it has to be. Rounding every module the same
+// way turns the three finder squares into loose dots and the code stops being a
+// code — no decoder can lock onto it. A corner is cut only when both modules
+// beside it are light, so solid blocks stay solid and only free ends round off.
+//
+// `hole` clears a square in the middle for a logo. That is only safe at higher
+// error-correction levels, which is why the source pins the level up when it
+// is used.
+
+uniform float4x4 ViewProj;
+uniform texture2d modules;
+uniform float count;      // modules across
+uniform float quiet;      // quiet zone, in modules
+uniform float2 size;      // the drawn size, px
+uniform float4 dark;
+uniform float4 light;     // the code's own background
+uniform float radius;     // module corner rounding, 0..0.5 of a module
+uniform float hole;       // clear square in the middle, as a fraction of the code
+
+sampler_state point_sampler {
+	Filter   = Point;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float module_at(float2 cell, float count)
+{
+	if (cell.x < 0.0 || cell.y < 0.0 || cell.x >= count || cell.y >= count)
+		return 0.0;
+	return modules.Sample(point_sampler, (cell + 0.5) / count).r;
+}
+
+float4 PSQR(VertInOut vert_in) : TARGET
+{
+	float span = count + quiet * 2.0;
+	float2 m = vert_in.uv * span - quiet;          // position in module space
+	float4 col = light;
+
+	if (m.x < 0.0 || m.y < 0.0 || m.x >= count || m.y >= count)
+		return col;
+
+	// the logo cut-out, in module space around the middle
+	if (hole > 0.001) {
+		float h = count * hole * 0.5;
+		float2 c = abs(m - count * 0.5);
+		if (max(c.x, c.y) < h)
+			return col;
+	}
+
+	float2 cell = floor(m);
+	if (module_at(cell, count) < 0.5)
+		return col;
+
+	// how many screen pixels one module is, so the rounding antialiases
+	float px = size.x / span;
+	float2 f = m - cell - 0.5;                     // -0.5..0.5 within the module
+
+	// which corner this pixel belongs to, and whether that corner may be cut
+	float2 dir = float2(f.x < 0.0 ? -1.0 : 1.0, f.y < 0.0 ? -1.0 : 1.0);
+	float nx = module_at(cell + float2(dir.x, 0.0), count);
+	float ny = module_at(cell + float2(0.0, dir.y), count);
+	float r = (nx > 0.5 || ny > 0.5) ? 0.0 : clamp(radius, 0.0, 0.5);
+
+	float2 q = abs(f) - (0.5 - r);
+	float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+	float a = 1.0 - smoothstep(-0.7 / px, 0.7 / px, d);
+
+	return float4(lerp(col.rgb, dark.rgb, a * dark.a), max(col.a, a * dark.a));
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSQR(vert_in);
+	}
+}

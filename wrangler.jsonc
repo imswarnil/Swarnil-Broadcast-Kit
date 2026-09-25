@@ -1,8 +1,9 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "tally-obs",
-	// A static-assets Worker: no code, dist/ is served as-is. The
-	// compatibility date only has to exist; nothing here depends on it.
+	"name": "sbk-obs",
+	// A static-assets Worker: no code, dist/ is served as it is. This serves the
+	// DOCUMENTATION for the plugin — the plugin itself is a native bundle and
+	// nothing it draws is ever fetched from here.
 	"compatibility_date": "2026-09-01",
 	"assets": {
 		"directory": "./dist",
@@ -10,9 +11,9 @@
 		"html_handling": "auto-trailing-slash"
 	},
 	"observability": { "enabled": true },
-	// A Worker Route on the imswarnil.com zone, like the other sites here:
-	// it attaches to whatever proxied DNS record exists for `obs`, so the
-	// Worker never owns the DNS entry. Add an AAAA `obs` → `100::` (proxied)
+	// A Worker Route on the imswarnil.com zone, like the other sites in this
+	// workspace: it attaches to whatever proxied DNS record exists for `obs`, so
+	// the Worker never owns the DNS entry. Add an AAAA `obs` → `100::` (proxied)
 	// or a CNAME, and this route picks it up.
 	"routes": [
 		{ "pattern": "obs.imswarnil.com/*", "zone_name": "imswarnil.com" }

@@ -1,81 +1,129 @@
-# Tally — lives in `obs.imswarnil.com/`, deployed to https://obs.imswarnil.com
+# Swarnil Broadcast Kit — lives in `obs.imswarnil.com/`
 
-OBS Studio overlays as web pages. Repo `imswarnil/Tally` (public, MIT). Read `README.md` first.
+A **native OBS Studio plugin** (`sbk.plugin`), plus the documentation site served
+at **https://obs.imswarnil.com**. Repo `imswarnil/Swarnil-Broadcast-Kit`, public,
+MIT code. Read `README.md` first.
+
+Named **Tally** until 2026-09-25, when it was renamed. Nothing should say Tally
+any more except the phrase "tally light", which is the real broadcast lamp the
+Light source is named after.
 
 ## What it is, in one breath
 
-Every overlay is one HTML file under `overlays/<slug>/` that loads `assets/tally.css` and
-`assets/tally.js` and is configured by URL parameters. `overlays/registry.mjs` is the single
-list of overlays, their sizes and their params; the docs, the URL builder, the scene
-collection, the pack and `npm run check` are all derived from it. Nothing is listed twice.
+C built with CMake against `/Applications/OBS.app`, the same way every plugin in
+`~/OBS/` is built. Sixteen `sbk_*` sources in OBS's "+" menu, one transition in
+the Scene Transitions panel, four Tools-menu actions that build a thirteen-scene
+show, and a profile. Type is OBS's own `text_ft2_source` as a private child;
+every box is `card.effect`; anything that animates draws into an `sbk_stage`
+(offscreen render target) and is presented with an alpha and an offset.
 
 ## Rules
 
-- **Namespace is `tally-` / `--tally-`, nothing else.** `npm run check` fails on `im-`, `ck-`
-  or `kg-` in `src/`. Tally is *inspired by* the Im Design System (neutral ramp, Geist, one
-  accent, the recording-light dot, pills) but copies no code from it: the design system is
-  all-rights-reserved and sold; Tally is MIT. Keep the two apart in both directions.
-- **An overlay page must work without its own script.** The runtime mounts everything from
-  `data-tally-*` attributes. A page-specific `<script type="module">` is fine for URL → DOM
-  plumbing (chips, sizes) and must come BEFORE the runtime `<script>` so its changes land
-  before `Tally` mounts.
-- **The page is transparent and sized for a 1080p canvas.** Everything scales through
-  `--tally-scale`, so never hard-code a pixel size outside `tokens.css`; `?scale=2` must grow
-  it all.
-- **Never depend on a click.** OBS never clicks. The demo audio signal is pure maths, not an
-  AudioContext, because browsers suspend audio until a gesture. Anything that animates must
-  start on load.
-- **Never hand-edit `scenes/Tally.json`.** Edit `scenes/scenes.config.mjs`, run
-  `npm run scenes`; check fails if the JSON is stale.
-- **Params must be declared.** A page may only read `?keys` that are in its registry entry or
-  in the runtime's global set (check enforces this by grepping the HTML).
-- **CI builds on a clean machine.** Nothing in the build may read outside this folder.
+- **The overlays are native. Only the docs are a website.** No browser source,
+  no HTML overlay, no server in the render path. `site/` builds a documentation
+  site and nothing the plugin draws is ever fetched from it.
+- **Namespace `sbk_` / `SBK_` / `SBK.`** for source ids, hotkeys, locale keys.
+  The kit is *inspired by* the Im Design System (neutral ramp, Geist, one accent,
+  the recording-light dot, pills) but copies no code from it, and none from
+  `~/OBS/nsds-plugin` (which belongs to Namaste Salesforce). Kept apart in both
+  directions: that system is sold, this is MIT.
+- **Every length is `u × n`** where `u = sbk_u(&look)` = 4px × scale. No bare
+  pixel counts outside `sbk-common.h` tokens and property defaults; the scale
+  slider must grow a component uniformly.
+- **Never depend on a click.** Anything that moves starts in `create()`/`show()`.
+  The audio engine paints a demo signal when it hears nothing.
+- **The graphics thread never waits.** Network polling lives in `sbk-net.c` on a
+  worker; the source reads the last good value under a mutex. A failed poll keeps
+  the previous value on screen rather than showing a zero.
+- **Text children re-rasterise only on change** — `sbk_text_set*` compares first.
+- **Stage in premultiplied blending, present ONE/INVSRCALPHA.** Direct-draw
+  sources (visualizer, backdrop, QR) use plain SRCALPHA/INVSRCALPHA.
+- **Nothing in the build reads outside this folder.** libobs headers are in
+  `deps/include` (GPL-2.0, see `deps/README.md`); SIMDe and jansson come from
+  Homebrew, curl from macOS.
+- **Quit OBS before `./build.command`.** A loaded plugin cannot be replaced.
 
 ## Where things are
 
 ```
-src/tokens/tokens.css     every colour, size, font, ease
-src/base.css              transparent page, fonts, .tally-stage / .tally-pin / .tally-glass / .tally-dot
-src/components/*.css      lower-third, onair, chip, card, frame, ticker, clock (+ count)
-src/visualizers/          the <canvas> styling; painters are in src/js/viz.mjs
-src/layouts/layouts.css   .tally-layout-announce (starting soon / brb / ending), .tally-brand
-src/js/tally.js           entry; params.mjs, obs.mjs, audio.mjs, viz.mjs, widgets.mjs
-overlays/registry.mjs     THE list. slug, name, kind, size, params, example
-scenes/scenes.config.mjs  the collection; scenes/profile/Tally/basic.ini the profile
-site/build.mjs            template functions; site.css, site.js (previews, URL builder)
-scripts/                  build.mjs, dev.mjs (port 4800), check.mjs, scenes.mjs, pack.mjs
+src/sbk-common.h     tokens (ABGR), sbk_card/_fill/_dot, struct sbk_look, surfaces
+src/sbk-text.h       struct sbk_text: set / measure / draw / free / enum
+src/sbk-stage.h      struct sbk_stage: begin / end / present (+ edge fade)
+src/sbk-anim.h       the enter animation
+src/sbk-state.c      sbk_status + sbk_state_word() + sbk_state_uptime()
+src/sbk-audio.c      "@program" (raw mix), "@desktop", "@mic", a source, or demo
+src/sbk-net.c        polled GET on a worker + JSON dot-path walk
+src/sbk-qr.c         QR encoder, versions 1–16, all four ECC levels
+src/source-*.c       onair lower-third ticker frame visualizer meter stats counter
+                     qr card backdrop chip progress clock countdown
+src/transition-wipe.c
+src/scenes.c         the show, live pack, profile, self-test
+data/effects/        card frame viz backdrop qr wipe blit
+site/                content.mjs (the registry), build.mjs, check.mjs, site.css
+docs/screens/        real self-test frames; the site uses them
+profile/Swarnil Broadcast Kit/basic.ini + profile/install.command
 ```
 
 ## OBS facts the code relies on
 
-- Browser Source injects `window.obsstudio` and fires `obsStreamingStarted/Stopped`,
-  `obsRecordingStarted/Paused/Unpaused/Stopped`, `obsSceneChanged`, `obsSourceVisibleChanged`,
-  `obsSourceActiveChanged` on `window`; `obsstudio.getStatus(cb)` gives the initial state.
-  `src/js/obs.mjs` maps these to `data-tally-state` on `<html>` and the `tally:status` event.
-- `getUserMedia` inside a Browser Source hands over the system's default input device. Tally
-  asks with `echoCancellation/noiseSuppression/autoGainControl: false`; if refused it paints
-  the demo signal and logs one `console.info`.
-- obs-browser is Chromium 103+; esbuild targets `chrome103`.
-- A local-file Browser Source has no query string; the pack's README tells people to edit
-  `data-tally-default` attributes instead.
+- `obs_add_raw_audio_callback(0, &conv, cb, param)` is the **program mix**. A
+  named source uses `obs_source_add_audio_capture_callback`; channels 1–5 are
+  Desktop Audio 1–2 and Mic/Aux 1–3 via `obs_get_output_source`.
+- `text_ft2_source`: `font{face,style,size,flags}`, `text`, `color1/2` (ABGR),
+  `custom_width` + `word_wrap`, `drop_shadow`. **A wrapped source reports the
+  custom width, not the glyph width**, so `source-card.c` measures unwrapped
+  first and only wraps the line that overruns — otherwise centring is a no-op.
+- `gs_texture_create` with **GS_R8 and an odd width misaligns its rows**. The QR
+  matrix goes up as GS_RGBA for that reason; it looked like a QR code and could
+  not be scanned.
+- A **uniformly rounded QR module destroys the finder patterns.** `qr.effect`
+  rounds a corner only when both neighbours are light.
+- The frontend API can list and select transitions but **cannot add one** — only
+  the Scene Transitions panel's "+" can. `scenes.c` selects SBK Wipe if present
+  and logs how to add it if not.
+- Screenshots are taken on the UI thread, so **the self-test walk must not block
+  it**: `scenes.c` walks on a worker and hands each step back with
+  `obs_queue_task`. Sleeping on the UI thread collapsed thirteen shots into one.
+- `obs_get_lagged_frames()` is a total since OBS started; the stats panel reports
+  the recent change instead, or it reads as a fault on a healthy machine.
 
-## Gotchas already hit
+## Verifying a build
 
-- `[data-part] { display: inline-block }` beat the `hidden` attribute on the countdown's hours;
-  `base.css` now has `[hidden] { display: none !important }`.
-- `.site a { color }` (0,1,1) outranked `.btn--primary` (0,1,0) on the docs site, so the
-  primary button's text vanished. Site rules that fight `.site a` are written `.site .x`.
-- A preview iframe is laid out at the overlay's real size and CSS-transformed down; `site.js`
-  measures the box and sets `--scale`. CSS alone cannot divide two lengths.
+```bash
+touch ~/Library/Application\ Support/obs-studio/.sbk-selftest   # then start OBS
+```
+
+It builds the collection, walks all thirteen scenes and takes a program
+screenshot of each into the profile's recording folder. Then read the newest log
+in `~/Library/Application Support/obs-studio/logs/`: `[sbk] v… loaded`, no
+`would not create` / `failed to compile`, `walked 13 scenes`.
+
+The QR round-trips: crop a rendered frame and decode it with `CIDetector`
+(a small Swift tool does this; see the CHANGELOG entry for 0.3.0).
+
+## The site
+
+Live at **https://obs.imswarnil.com** — Cloudflare Worker `sbk-obs`, static
+assets, Worker route `obs.imswarnil.com/*` on the imswarnil.com zone. DNS is a
+**proxied AAAA `obs` → `100::`**: a placeholder with no origin, because the
+route answers everything. It replaced a leftover CNAME to `imswarnil.github.io`
+that served nothing and would have quietly 404'd from the links site if the
+route were ever removed.
+
+```bash
+node site/build.mjs && node site/check.mjs && npx wrangler@4 deploy
+```
+
+CI does the same on a push to `main`, but only once the repo has the secrets
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`; without them the site is
+built and checked and the deploy step is skipped.
 
 ## Dev
 
 ```bash
-nvm use && npm install
-npm run dev        # http://localhost:4800
-npm run build && npm run check
+./build.command             # quit OBS first
+node site/build.mjs && node site/check.mjs
 ```
 
-Deploy: push to `main` (Cloudflare Worker `tally-obs`, route `obs.imswarnil.com/*`). Secrets
-`CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` on the repo; a proxied DNS record for `obs`
-in the imswarnil.com zone. Release: `npm version minor && git push --follow-tags`.
+Release: `git tag vX.Y.Z && git push --follow-tags` → CI attaches the bundle.
+The version lives in `CMakeLists.txt` and `CHANGELOG.md`.

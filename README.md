@@ -1,84 +1,125 @@
-# Tally
+# Swarnil Broadcast Kit
 
-**Stream overlays, audio visualizers and scene layouts for OBS Studio.**
-Every overlay is a URL: add it as a Browser Source, tune it with a few parameters, done.
+**Native OBS Studio overlays: sixteen sources, a transition, and a show of
+thirteen scenes — drawn by OBS itself.**
 
-→ **https://obs.imswarnil.com**
+No browser source, no web server, no URL to paste. Drop `sbk.plugin` into OBS
+and *Sources → +* fills up with **SBK …** sources drawn by libobs: type is OBS's
+own FreeType text, every box is one small shader. The *Tools* menu builds a
+whole show out of them.
 
-Tally is named after the tally light, the small red lamp on a studio camera that says *this
-one is on air*. Its own on-air overlay reads OBS's real state, so the lamp turns red when
-you go live rather than when you remember to click something.
+→ **[obs.imswarnil.com](https://obs.imswarnil.com)** — the documentation, with a
+picture of every scene.
+
+## Why native
+
+These are not stylistic preferences. Each one is something a page inside a
+Browser Source has no way to do:
+
+| | |
+| --- | --- |
+| **Know you are live** | The light reads OBS's own streaming and recording state. |
+| **Hear the program mix** | The visualizer and meter listen to what OBS is actually outputting — every source, every filter. |
+| **See dropped frames** | Uptime, bitrate, dropped frames and congestion come from the running output. |
+| **Be a transition** | A transition is composited between two scene textures; nothing in a page sees both. |
+| **Cost almost nothing** | One or two draw calls per source instead of a Chromium process per overlay. |
+| **Work offline** | The QR code is generated in the plugin. No third party sees your link. |
 
 ## What ships
 
-| Overlay | Kind | Size | What it does |
-| --- | --- | --- | --- |
-| `lower-third` | Component | 1920×1080 | A name and a line under it, the accent as a bar. Slides in on load. |
-| `onair` | Component | 1920×1080 | The tally light. LIVE while streaming, REC while recording, OFF AIR otherwise. |
-| `frame` | Component | 640×400 | A rounded outline with a chip on its edge, to sit over the camera. |
-| `ticker` | Component | 1920×120 | A strip of text sliding across the foot of the screen. |
-| `visualizer` | Visualizer | 1920×240 | Bars, a waveform, a ring or a dot matrix, from the microphone. |
-| `starting-soon` | Scene | 1920×1080 | A card with a countdown, chips, a visualizer along the foot, a clock. |
-| `brb` | Scene | 1920×1080 | The break screen: the same card, worded for a pause, with the on-air light. |
+| Source | What it does |
+| --- | --- |
+| **SBK Light** | LIVE / REC / OFF AIR from OBS's own state. Five shapes: pill, badge, bare dot, a bar across the frame, or the whole canvas edge lit red. |
+| **SBK Lower Third** | A name and a line under it. Card, pill, split, minimal or underline; replays its arrival on a hotkey. |
+| **SBK Ticker** | A tag and items sliding across the foot. On glass, bare, or one chip per item, fading at both ends. |
+| **SBK Cam Frame** | The treatment over your camera. 16:9, **9:16**, 1:1, 4:5, 4:3 or 21:9, and seven line treatments. |
+| **SBK Visualizer** | Bars, mirrored bars, waveform, dot matrix, ring, block ladder or filled line — from the **program mix** by default. |
+| **SBK Meter** | A real level meter in dB, with peak hold and the zones a broadcaster expects. |
+| **SBK Stats** | Uptime, bitrate, dropped frames, render rate, and a health lamp. |
+| **SBK Counter** | A live number from **YouTube**, **Ghost members**, or any JSON endpoint, with an optional goal bar. |
+| **SBK QR** | A scannable code for a membership page, a donation link or your site. Generated in the plugin. |
+| **SBK Card** | The announcement: eyebrow, title, body, chips. Five variants. |
+| **SBK Backdrop** | Twelve grounds: solid, scrim, vignette, gradient, grid, dots, stripes, waves, rings, hex, grain — and they drift. |
+| **SBK Chip** | One badge: a handle, a count, a “Q&A”, with a dot that can light only when you are live. |
+| **SBK Progress** | A goal, nudged up and down on a hotkey. |
+| **SBK Clock** · **SBK Countdown** | The time, and a countdown to a duration or a time of day. |
+| **SBK Wipe** | A real transition: bar, dip, slide, iris or blinds, carrying the accent. |
 
-Plus a **scene collection** (`scenes/Tally.json`: Starting soon, Live, Be right back,
-Ending) and a **1080p60 profile** (`scenes/profile/Tally/basic.ini`), both importable
-from OBS's menus.
+Every source shares a **Look** group — one accent colour, a scale slider that
+grows type, padding and radius together, a tone (glass, solid or light) and a
+font. Give every source the same accent and the scene changes together.
 
-## Use it
+## Install
 
-1. Open an overlay on the site, tune it, press **Copy**.
-2. In OBS: **Sources → + → Browser**, paste the URL, set the width and height shown.
+1. Quit OBS. Put `sbk.plugin` from a [release](https://github.com/imswarnil/Swarnil-Broadcast-Kit/releases) into
+   `~/Library/Application Support/obs-studio/plugins/`.
+2. Copy the files in `fonts/` into `~/Library/Fonts` — or pick any installed
+   font in a source's *Look*.
+3. Open OBS. **Tools → Broadcast Kit: create the scene collection** builds the
+   show and switches to it.
+4. Put your own camera under the frames, and add **SBK Wipe** from the Scene
+   Transitions panel's **+**.
 
-Four parameters work on every overlay: `accent`, `scale`, `tone`, `font`. Give each
-source the same `?accent=00a3ff` and the scene changes colour together.
+From source, `./build.command` does all of it. See [docs/INSTALL.md](docs/INSTALL.md).
 
-Offline: every [release](https://github.com/imswarnil/Tally/releases) attaches a zip of
-the overlay pages, the runtime and the fonts, for a Browser Source set to *Local file*.
+## Live numbers
+
+`SBK Counter` polls on a worker thread — the picture never waits on the
+network, and a failed request keeps the last good number rather than blinking
+to zero.
+
+- **YouTube** — an API key and a channel id.
+- **Ghost** — your site and an Admin API key; the kit signs a fresh
+  five-minute token for every request.
+- **Any JSON endpoint** — a URL and a dot-path such as `data.total`.
+
+Keys typed into a source are saved in the scene collection as plain text.
+Begin the field with `@` and a path — `@/Users/you/.youtube-key` — and the kit
+reads the key from the file instead.
 
 ## Develop it
 
+```
+src/sbk-common.h      tokens, the card shader helper, the shared Look and surfaces
+src/sbk-text.h        a line of type as a child text_ft2 source
+src/sbk-stage.h       offscreen render target: fades, slides, clipping, edge fades
+src/sbk-anim.h        the arrival
+src/sbk-state.c       streaming / recording state and uptime, from the frontend
+src/sbk-audio.c       program mix, channels or any source → FFT → bands and levels
+src/sbk-net.c         the polled HTTPS GET, and the JSON dot-path walk
+src/sbk-qr.c          a QR encoder: byte mode, versions 1–16, all four ECC levels
+src/source-*.c        one file per source
+src/transition-wipe.c the transition
+src/scenes.c          the show, the live pack, the profile switch, the self-test
+data/effects/         card, frame, viz, backdrop, qr, wipe, blit
+site/                 the documentation site (plain Node, no dependencies)
+docs/screens/         real frames from the self-test, used by the site
+deps/include/         libobs headers for OBS 32.2.2 (GPL-2.0; see deps/README.md)
+```
+
 ```bash
-nvm use            # Node 22
-npm install
-npm run dev        # http://localhost:4800 — rebuilds on change
-npm run build      # dist/ — the whole site plus the overlays
-npm run check      # what CI runs: registry ↔ pages, params, scenes, namespace, links
-npm run scenes     # regenerate scenes/Tally.json from scenes/scenes.config.mjs
-npm run pack       # dist/pack/tally-<version>.zip, the release asset
+brew install cmake simde jansson
+./build.command          # build, install the plugin, fonts and profile (quit OBS first)
+node site/build.mjs      # the docs site → dist/
+node site/check.mjs      # what CI runs on it
 ```
 
-```
-src/          tokens → base → components → visualizers → layouts, all `tally-` / `--tally-`
-src/js/       the runtime: params, the OBS bridge, the audio engine, the painters, widgets
-overlays/     one folder per overlay, plus registry.mjs — the single list of what exists
-scenes/       the scene-collection config, its generated JSON, and the profile
-site/         the docs site: a builder, previews, install and scenes pages
-scripts/      build, dev, check, scenes, pack
-```
-
-**Add an overlay:** create `overlays/<slug>/index.html` (copy a neighbour), add an entry to
-`overlays/registry.mjs`, and if it belongs in the collection add it to
-`scenes/scenes.config.mjs` and run `npm run scenes`. The docs page, the URL builder, the
-catalogue card, the pack and the checks all follow from the registry.
-
-## Ship it
-
-- Push to `main` → GitHub Actions builds, checks and deploys `dist/` to a Cloudflare Worker
-  serving `obs.imswarnil.com` (`.github/workflows/deploy.yml`). Needs the repository
-  secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`; without them the build still
-  runs and the deploy step is skipped.
-- Pull requests run `ci.yml`: build, check, pack.
-- `npm version minor && git push --follow-tags` → `release.yml` attaches the pack to a
-  GitHub release.
+Nothing is downloaded at build time. CI builds the plugin on a clean Mac with
+OBS from Homebrew, checks that every source is registered, builds the site and
+deploys it; a `v*` tag attaches the bundle to a release. The site deploys by
+hand with `npx wrangler@4 deploy` — a Cloudflare Worker (`sbk-obs`) serving
+`dist/` on a route over the `obs` hostname.
 
 ## Design
 
-Tally speaks the visual language of the [Im Design System](https://design.imswarnil.com) —
-a neutral palette, Geist, one accent, a pill, a recording-light dot — but shares no code
-with it. It is its own small system with its own namespace, so it can be MIT while the
-design system is not.
+The kit speaks the visual language of the
+[Im Design System](https://design.imswarnil.com) — a neutral palette, Geist, one
+accent, pills, the recording-light dot — and **shares no code with it**. That
+system is all-rights-reserved and sold; this is MIT and public, so the two are
+kept independent in both directions.
 
 ## Licence
 
-MIT. Geist and Geist Mono are © Vercel under the SIL Open Font License 1.1.
+The kit's code is MIT. A compiled plugin links **libobs** (GPL-2.0), whose
+headers are vendored in `deps/`, so the binary is distributed under the GPL's
+terms. Geist and Geist Mono are © Vercel under the SIL Open Font License 1.1.

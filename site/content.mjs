@@ -1,0 +1,396 @@
+/*  Everything the site says about the kit, in one file.
+
+    The source list here is the same list `src/plugin-main.c` registers and
+    `data/locale/en-US.ini` names. It is written out rather than parsed: the
+    site describes what a source is FOR, which no header can tell it, and a
+    generator that scraped the C would still need this prose beside it.
+    `npm-less` on purpose — `node site/build.mjs` and nothing else.  */
+
+export const NAME = 'Swarnil Broadcast Kit';
+export const SHORT = 'SBK';
+export const REPO = 'https://github.com/imswarnil/Swarnil-Broadcast-Kit';
+export const OBS_MIN = '30';
+export const BUILT_FOR = 'OBS Studio 32.2.2';
+
+export const SOURCES = [
+	{
+		id: 'sbk_onair',
+		name: 'SBK Light',
+		tag: 'Indicator',
+		one: 'The tally light. LIVE while you stream, REC while you record, OFF AIR otherwise.',
+		body: `It reads OBS itself, so the lamp turns red the moment you go live rather than when
+		you remember to click something. Five shapes, because where the light sits decides what it
+		should look like: a pill or a squared badge in a corner, a bare dot when the corner is
+		crowded, a bar across the head of the frame, or the edge of the whole canvas lit up.`,
+		props: [
+			['Shape', 'Pill, badge, dot, bar, or the canvas edge'],
+			['Words', 'What it says in each state — they are yours to change'],
+			['Fill with the accent while lit', 'The pill floods red instead of just the dot'],
+			['Hide entirely when off air', 'Nothing on screen until you are live'],
+		],
+	},
+	{
+		id: 'sbk_lower_third',
+		name: 'SBK Lower Third',
+		tag: 'Titles',
+		one: 'A name and a line under it, with the accent as a bar.',
+		body: `Five variants that differ in where the weight sits: a card carries it on glass, a
+		split puts the title on the accent, an underline carries none at all and leans on the rule.
+		It rises into place when the source is shown, and a hotkey plays that arrival again
+		mid-stream when a guest joins.`,
+		props: [
+			['Variant', 'Card, pill, split, minimal, underline'],
+			['Accent bar', 'The red rule down the left'],
+			['Hotkey', '“Play the lower third in again”, under Settings → Hotkeys'],
+		],
+	},
+	{
+		id: 'sbk_ticker',
+		name: 'SBK Ticker',
+		tag: 'Titles',
+		one: 'A tag and a row of items sliding across the foot of the screen.',
+		body: `Items are separated with a pipe and kept apart rather than joined into one string, so
+		each can be drawn in its own chip and the separator between them is a drawn dot in the
+		accent rather than a character. The lane is a render target, which is what clips the text
+		and what lets both ends fade out instead of being cut off square.`,
+		props: [
+			['Variant', 'Strip on glass, bare over the video, or one chip per item'],
+			['Direction and speed', 'Either way, in pixels per second'],
+			['Fade at both ends', 'The text leaves softly rather than at a hard edge'],
+		],
+	},
+	{
+		id: 'sbk_frame',
+		name: 'SBK Cam Frame',
+		tag: 'Camera',
+		one: 'The treatment drawn over your camera, with a chip on one corner.',
+		body: `Pick a shape and the box is sized for you: 16:9, <strong>9:16 for Shorts and
+		Reels</strong>, 1:1, 4:5, 4:3 or 21:9, scaled by one slider. Seven treatments come out of a
+		single distance field, so the line keeps its weight around the corner radius instead of
+		thinning on the curve the way four stacked borders do. Put your camera under it in the
+		layer stack.`,
+		props: [
+			['Shape', '16:9, 9:16, 1:1, 4:5, 4:3, 21:9, or custom'],
+			['Treatment', 'Ring, inset, corner brackets, brackets stood off, head and foot rules, glow, double'],
+			['Chip', 'A handle in any corner, in the accent or on glass'],
+		],
+	},
+	{
+		id: 'sbk_visualizer',
+		name: 'SBK Visualizer',
+		tag: 'Audio',
+		one: 'Seven ways to draw what OBS is actually playing.',
+		body: `It listens to the <strong>program mix by default</strong> — literally what your
+		viewers hear, every source and every filter — because a visualizer that only watches the
+		microphone is a visualizer of the wrong stream. Desktop audio, any Mic/Aux channel and any
+		individual source are all in the same list. When there is nothing to hear it paints a
+		demo signal, so an overlay is never a dead rectangle.`,
+		props: [
+			['Listen to', 'Program, Desktop Audio, Mic/Aux, any source, or the demo signal'],
+			['Style', 'Bars, mirrored bars, waveform, dot matrix, ring, block ladder, filled line'],
+			['Audio', 'Gain, floor in dB, fall smoothing, peak hold'],
+		],
+	},
+	{
+		id: 'sbk_meter',
+		name: 'SBK Meter',
+		tag: 'Audio',
+		one: 'A real level meter, in dB, with the zones where a broadcaster expects them.',
+		body: `Not a bouncing decoration: the scale is in decibels, the peak sits where the loudest
+		recent moment reached rather than falling with the bar, and the colour changes at the
+		thresholds you set — comfortable below −18, loud by −6. You can see at a glance that you
+		are clipping, which is the one thing a pretty bar has never told anyone.`,
+		props: [
+			['Listen to', 'The same list as the visualizer, program mix included'],
+			['Style', 'Solid or segments, horizontal or vertical'],
+			['Zones', 'Where warning and hot begin, in dB'],
+		],
+	},
+	{
+		id: 'sbk_stats',
+		name: 'SBK Stats',
+		tag: 'Indicator',
+		one: 'How the broadcast is actually going: uptime, bitrate, dropped frames, render rate.',
+		body: `The source a web overlay could never be. Uptime, dropped frames and network
+		congestion live inside OBS and no page in a Browser Source can reach them. Lagged frames
+		are reported as a recent change rather than the total since OBS started, because a running
+		total says “something is wrong” on a machine that is perfectly fine. Put it in a scene of
+		its own and open that as a windowed projector on a second monitor.`,
+		props: [
+			['Rows', 'Uptime, bitrate, dropped frames, render rate — each optional'],
+			['Health lamp', 'Green, amber, red, from congestion and dropped frames'],
+		],
+	},
+	{
+		id: 'sbk_counter',
+		name: 'SBK Counter',
+		tag: 'Live data',
+		one: 'A live number from an API: subscribers, members, anything your own endpoint returns.',
+		body: `Three providers. <strong>YouTube</strong> wants an API key and a channel id and gives
+		you subscribers, views or videos. <strong>Ghost</strong> wants your site and an Admin API
+		key and gives you members, or paid members only — it signs a short-lived token for every
+		request the way Ghost's own docs describe. <strong>Any JSON endpoint</strong> wants a URL
+		and a dot-path into the response, which covers everything else: a Patreon proxy, a
+		Cloudflare Worker you write, a webhook's cached answer.
+		<br><br>
+		The number counts up to a new value rather than snapping, a small lamp says whether the
+		last poll worked, and a failed poll keeps the number that was there — a subscriber count
+		that blinks to zero mid-stream is worse than one that is thirty seconds old.`,
+		props: [
+			['Provider', 'YouTube, Ghost members, or any JSON endpoint'],
+			['Key', 'Typed in, or read from a file by beginning the field with @'],
+			['Goal bar', 'Optional, with the target you are counting toward'],
+			['Change since it started', 'The “+12 so far today” line'],
+			['Check every', 'Fifteen seconds at the fastest — an overlay must not eat someone’s API quota'],
+		],
+		note: 'Keys typed into a source are saved in the scene collection as plain text. Begin the field with @ and a file path to keep the secret out of a collection you might share.',
+	},
+	{
+		id: 'sbk_qr',
+		name: 'SBK QR',
+		tag: 'Live data',
+		one: 'A scannable code for the thing you are asking people to do.',
+		body: `Membership, a donation link, the channel, your site. The code is generated inside the
+		plugin, so it works with no connection, nothing is logged by a third party, and the link is
+		not silently rewritten by whoever owns some QR service. Rounded modules, a light-on-dark
+		option, the accent colour, and a cut-out in the middle for a logo — which forces the error
+		correction up to H, because punching a hole in a low-correction code destroys it.`,
+		props: [
+			['Link or text', 'Up to about a thousand characters; shorter scans from further away'],
+			['Caption and second line', 'What it says under the code'],
+			['Error correction', 'L, M, Q or H'],
+			['Quiet zone', 'Never dropped — a code butted against the picture does not scan'],
+			['Logo hole', 'Clears a square in the middle to drop an image on top'],
+		],
+	},
+	{
+		id: 'sbk_card',
+		name: 'SBK Card',
+		tag: 'Scenes',
+		one: 'The announcement: an eyebrow with the recording light, a title, a line, chips.',
+		body: `Starting soon, Be right back and Thanks for watching are all this card with
+		different words. The body wraps to the width you set, and five variants take it from a
+		glass panel to bare type straight on the video.`,
+		props: [
+			['Variant', 'Panel, split with an accent stripe, outline, the whole card in the accent, or plain'],
+			['Align', 'Left or centred'],
+			['Chips', 'A row, separated with a pipe, wrapping to the width'],
+		],
+	},
+	{
+		id: 'sbk_backdrop',
+		name: 'SBK Backdrop',
+		tag: 'Scenes',
+		one: 'The ground under it all — twelve of them, and the patterns drift.',
+		body: `A solid, a scrim that fades so a camera can sit behind the card, a vignette, a
+		two-colour gradient, or a pattern: grid, dot grid, diagonal stripes, waves, concentric
+		rings, a hex lattice, or grain. Anything with a pattern can drift slowly, which is what
+		keeps a waiting screen from looking like a frozen stream.`,
+		props: [
+			['Kind', 'Solid, scrim from the foot or head, vignette, gradient, grid, dots, stripes, waves, rings, hex, grain'],
+			['Drift', 'Pixels per second, either direction'],
+			['Spacing and weight', 'How big the pattern is and how heavy its line'],
+		],
+	},
+	{
+		id: 'sbk_chip',
+		name: 'SBK Chip',
+		tag: 'Indicator',
+		one: 'One small badge: a handle, a hashtag, “Q&A”, a follower count.',
+		body: `The piece every overlay set needs a dozen of and nobody wants to build a dozen times.
+		A label, optionally a second segment holding a value in the accent, and optionally a dot in
+		front that can be wired to the tally state so the chip itself says you are live.`,
+		props: [
+			['Label and value', 'The value rides in its own accent capsule'],
+			['Leading dot', 'None, accent, breathing, or lit only when on air'],
+			['Variant', 'Card, pill, outline, accent, or plain'],
+		],
+	},
+	{
+		id: 'sbk_progress',
+		name: 'SBK Progress',
+		tag: 'Indicator',
+		one: 'A goal: subscribers, a fundraiser, chapter 3 of 8.',
+		body: `The number is the point, so it is set in the mono face and the bar eases toward a new
+		value rather than jumping — a counter that snaps reads as a glitch. Two hotkeys nudge the
+		value up and down without opening the dialog, which is what you actually need while live.`,
+		props: [
+			['Value and target', 'Shown as value / target or as a percentage'],
+			['Bar', 'Solid, segments, or a thin line'],
+			['Hotkeys', '“Nudge the goal up / down”, under Settings → Hotkeys'],
+		],
+	},
+	{
+		id: 'sbk_clock',
+		name: 'SBK Clock',
+		tag: 'Scenes',
+		one: 'The time, set in the mono face, 12- or 24-hour.',
+		body: `Small, and the thing a waiting audience checks. Seconds optional.`,
+		props: [['Format', '12- or 24-hour, with or without seconds']],
+	},
+	{
+		id: 'sbk_countdown',
+		name: 'SBK Countdown',
+		tag: 'Scenes',
+		one: 'To a duration, or to a time of day.',
+		body: `“Fifteen minutes” or “21:30”, with a word of your choosing at zero. It restarts each
+		time the scene is shown, so the countdown on your starting-soon screen is right every time
+		you switch to it rather than only the first time. A hotkey restarts it on demand.`,
+		props: [
+			['Count down', 'For a duration, or to a time of day'],
+			['At zero', 'The word it shows when it arrives'],
+		],
+	},
+	{
+		id: 'sbk_wipe',
+		name: 'SBK Wipe',
+		tag: 'Transition',
+		one: 'A real transition, in the Scene Transitions panel beside Fade and Cut.',
+		body: `The other thing no browser source can be: a transition is composited by OBS between
+		two scene textures, and nothing running inside a page can see both. Five styles — a bar with
+		the accent riding its leading edge, a dip through the accent, a slide, an iris, and blinds —
+		so a cut carries the same red as the tally light.`,
+		props: [
+			['Style', 'Bar, dip, slide, iris, blinds'],
+			['Direction', 'Any of the four'],
+			['Bar width and softness', 'How much accent rides the edge, and how hard it is'],
+		],
+		note: 'Added from the Scene Transitions panel’s + button, not from Sources.',
+	},
+];
+
+export const SCENES = [
+	{ img: 'starting-soon', name: 'Starting soon', body: 'The countdown screen people sit on. A card, a countdown, a drifting grid, the clock, and a spectrum along the foot.' },
+	{ img: 'welcome', name: 'Welcome', body: 'The first seconds, with nothing to read. A gradient, a line of type, and a chip that lights up when you go live.' },
+	{ img: 'live', name: 'Live', body: 'The everyday scene: your camera under the frame, a lower third, the ticker, the light in the corner.' },
+	{ img: 'talking-head', name: 'Talking head', body: 'The camera is the whole picture, so the chrome shrinks to corner brackets, a minimal name and a bare dot.' },
+	{ img: 'screen-share', name: 'Screen share', body: 'The code has the frame. A small camera box, a chapter chip, a segment progress bar, and a mic meter so silence never goes unnoticed.' },
+	{ img: 'interview', name: 'Interview', body: 'Two cameras, two names on split lower thirds, and nothing else competing.' },
+	{ img: 'qa', name: 'Q&A', body: 'The question takes the left half on a split card; the camera takes the right behind a scrim.' },
+	{ img: 'support', name: 'Support', body: 'The ask, with something to scan: a membership QR, a live member count with a goal, and a live subscriber count beside it.' },
+	{ img: 'vertical', name: 'Vertical', body: 'A 9:16 box inside the landscape canvas. Frame yourself inside it and the same take cuts to a Short.' },
+	{ img: 'brb', name: 'Be right back', body: 'A drifting dot grid, a waveform, and a five-minute countdown that restarts every time you switch to it.' },
+	{ img: 'trouble', name: 'Technical difficulties', body: 'The one scene that should look wrong on purpose. A vignette, the card in full accent, and the canvas edge lit red.' },
+	{ img: 'ending', name: 'Ending', body: 'The ask, with the goal it is asking for: a subscriber bar, a subscribe chip, and drifting stripes.' },
+	{ img: 'desk', name: 'Desk (private)', body: 'Not for the stream. Open it as a windowed projector on a second monitor: stats, a program meter, a mic meter, a clock.' },
+];
+
+export const STEPS = [
+	{
+		n: 1,
+		title: 'Put the plugin in place',
+		body: `Quit OBS. Download the latest <code>sbk.plugin</code> from the releases page and drop
+		it into your user plugin folder, then start OBS again.`,
+		code: '~/Library/Application Support/obs-studio/plugins/sbk.plugin',
+	},
+	{
+		n: 2,
+		title: 'Let the fonts in',
+		body: `The kit sets type in Geist and Geist Mono. Copy the files from <code>fonts/</code>
+		into your Fonts folder, or pick any font you already have in a source’s
+		<em>Look → Font</em>. Building from source does this for you.`,
+		code: 'open ~/Library/Fonts',
+	},
+	{
+		n: 3,
+		title: 'Build the show',
+		body: `<strong>Tools → Broadcast Kit: create the scene collection</strong> writes twelve
+		complete scenes and switches to them. Every source in them is an ordinary source: select
+		it, open Properties, change anything. Nothing is locked.`,
+	},
+	{
+		n: 4,
+		title: 'Put your camera under the frames',
+		body: `The kit draws treatments, not captures — creating a camera on your behalf would
+		switch your webcam on just because you opened a menu. Add your own <em>Video Capture
+		Device</em> to a scene and drag it below the <em>SBK Cam Frame</em> in the Sources list, so
+		the frame draws over it.`,
+	},
+	{
+		n: 5,
+		title: 'Add the transition',
+		body: `In the <strong>Scene Transitions</strong> panel press <strong>+</strong> and choose
+		<strong>SBK Wipe</strong>. Set the duration beside it — 300–500 ms suits the bar. OBS only
+		lets the panel add transitions, which is why this one step is by hand.`,
+	},
+	{
+		n: 6,
+		title: 'Bind the hotkeys you will use live',
+		body: `Under <strong>Settings → Hotkeys</strong>: play the lower third in again, restart the
+		countdown, nudge the goal up and down. These are the four you reach for mid-stream.`,
+	},
+];
+
+export const APIS = [
+	{
+		name: 'YouTube — subscribers, views, videos',
+		steps: [
+			'Open <a href="https://console.cloud.google.com/">console.cloud.google.com</a> and make a project (any name).',
+			'APIs &amp; Services → Library → search <strong>YouTube Data API v3</strong> → Enable.',
+			'APIs &amp; Services → Credentials → Create credentials → <strong>API key</strong>. Restrict it to that one API.',
+			'Find your channel id: YouTube Studio → Settings → Channel → Advanced. It begins with <code>UC</code>.',
+			'In OBS: add <strong>SBK Counter</strong>, provider <em>YouTube</em>, paste both.',
+		],
+		note: 'YouTube rounds public subscriber counts, so 1,234 shows as 1,230. That is the API, not the kit.',
+	},
+	{
+		name: 'Ghost — members, or paid members',
+		steps: [
+			'Ghost Admin → Settings → <strong>Integrations</strong> → Add custom integration, call it “OBS”.',
+			'Copy the <strong>Admin API key</strong>. It looks like <code>640…:e3f…</code> — an id, a colon, a hex secret.',
+			'In OBS: add <strong>SBK Counter</strong>, provider <em>Ghost</em>, paste your site URL and the key.',
+		],
+		note: 'Member counts are admin-only in Ghost, so the Content API key will not work. The kit signs a fresh five-minute token for every request rather than storing one.',
+	},
+	{
+		name: 'Anything else — one JSON endpoint',
+		steps: [
+			'Point the provider at <em>Any JSON endpoint</em>.',
+			'Give it the URL and a dot-path to the number: <code>count</code>, <code>data.total</code>, <code>items.0.stats.followers</code>.',
+			'Add a bearer token if the endpoint needs one.',
+		],
+		note: 'This is how you reach a service with no direct support — put a tiny Cloudflare Worker in front of it that returns the one number, and point the counter at the Worker. Your key stays on the server.',
+	},
+];
+
+export const FAQ = [
+	{
+		q: 'Why a plugin and not a browser source?',
+		a: `Because the things worth having cannot be done in a page. A browser source cannot read
+		whether you are live, cannot see dropped frames or congestion, cannot hear the program mix,
+		and can never be a transition. It also costs a whole Chromium process per overlay. Every
+		source here is drawn by OBS itself.`,
+	},
+	{
+		q: 'Does it work on Windows or Linux?',
+		a: `The code is portable — text is OBS’s own FreeType source and the shaders are plain
+		HLSL-flavoured effects — and <code>CMakeLists.txt</code> has a branch that builds against an
+		installed OBS development package. Only macOS has been tested, and the release only ships a
+		macOS bundle. Reports welcome.`,
+	},
+	{
+		q: 'Will it slow my stream down?',
+		a: `Each source is one or two draw calls and a small amount of text that is re-rasterised
+		only when it changes. The audio analysis is a 2048-point transform once per frame, shared
+		between every visualizer listening to the same thing.`,
+	},
+	{
+		q: 'Can I change the colours?',
+		a: `Every source has the same <em>Look</em> group: one accent colour, a scale slider that
+		grows type, padding and radius together, a tone — glass, solid or light — and the font. Give
+		every source in a scene the same accent and the whole scene changes together.`,
+	},
+	{
+		q: 'Where do my API keys end up?',
+		a: `In the scene collection, as plain text, because that is where OBS saves every source
+		setting. If you are ever going to share a collection, begin the key field with <code>@</code>
+		and the path to a file — <code>@/Users/you/.youtube-key</code> — and the kit reads it from
+		there instead. Nothing is ever sent anywhere but the provider you chose.`,
+	},
+	{
+		q: 'What licence is it under?',
+		a: `The kit’s own code is MIT. A compiled plugin links libobs, which is GPL-2.0, so the
+		binary is distributed under the GPL’s terms. Geist and Geist Mono are © Vercel under the SIL
+		Open Font License 1.1.`,
+	},
+];

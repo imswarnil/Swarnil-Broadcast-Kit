@@ -1,0 +1,177 @@
+// The audio visualizer.
+//
+// The analysed bands (or the raw waveform) arrive as a one-row float texture,
+// so however many bars there are it is one draw call and the bar edges stay
+// crisp at any width.
+//
+// 0 bars · 1 bars mirrored · 2 waveform · 3 dot matrix · 4 ring
+// 5 blocks (a segment ladder) · 6 line, filled under the curve
+
+uniform float4x4 ViewProj;
+uniform texture2d bands;
+uniform float4 color_lo;   // at rest
+uniform float4 color_hi;   // at full scale
+uniform float2 size;
+uniform float  band_count;
+uniform float  mode;
+uniform float  gap;        // between bars, as a fraction of the slot
+uniform float  radius;     // bar cap rounding, px
+uniform float  line_width; // waveform / line stroke, px
+uniform float  floor_level;
+uniform float  cell;       // dot pitch and block height, px
+uniform float  inner;      // ring: inner radius as a fraction of the shorter half
+uniform float  fill_alpha; // line: opacity of the area under the curve
+
+sampler_state band_sampler {
+	Filter   = Point;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+sampler_state smooth_sampler {
+	Filter   = Linear;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float band_at(float i)
+{
+	return bands.Sample(band_sampler, float2((i + 0.5) / band_count, 0.5)).r;
+}
+
+float band_lerp(float t)
+{
+	return bands.Sample(smooth_sampler, float2(saturate(t), 0.5)).r;
+}
+
+float4 PSVis(VertInOut vert_in) : TARGET
+{
+	float2 px = vert_in.uv * size;
+	float4 col = float4(0.0, 0.0, 0.0, 0.0);
+
+	if (mode == 2.0) {                       // waveform
+		float t = px.x / size.x * band_count;
+		float i0 = floor(t);
+		float s = lerp(band_at(i0), band_at(min(i0 + 1.0, band_count - 1.0)), frac(t));
+		float y = (s - 0.5) * size.y * 0.9 + size.y * 0.5;
+		float d = abs(px.y - y);
+		float a = 1.0 - smoothstep(line_width * 0.5, line_width * 0.5 + 1.5, d);
+		col.rgb = lerp(color_lo.rgb, color_hi.rgb, saturate(abs(s - 0.5) * 2.0));
+		col.a = a * color_hi.a;
+		return col;
+	}
+
+	if (mode == 3.0) {                       // a grid of dots, lit from the foot
+		float2 cellpos = floor(px / cell);
+		float2 centre = (cellpos + 0.5) * cell;
+		float rows = floor(size.y / cell);
+		float cols = floor(size.x / cell);
+		float bi = floor(cellpos.x / cols * band_count);
+		float v = max(band_at(bi), floor_level);
+		float lit_rows = floor(v * rows + 0.5);
+		float row_from_foot = rows - 1.0 - cellpos.y;
+		float on = step(row_from_foot, lit_rows - 1.0);
+		float dist = length(px - centre);
+		float dot_a = 1.0 - smoothstep(cell * 0.3 - 0.75, cell * 0.3 + 0.75, dist);
+		float tone = row_from_foot / max(rows - 1.0, 1.0);
+		col.rgb = lerp(color_lo.rgb, color_hi.rgb, saturate(tone * on + 0.15));
+		col.a = dot_a * lerp(0.18, 1.0, on) * color_hi.a;
+		return col;
+	}
+
+	if (mode == 4.0) {                       // ring — the spectrum around a circle
+		float2 c = px - size * 0.5;
+		float half_min = min(size.x, size.y) * 0.5;
+		float r0 = half_min * inner;
+		float rmax = half_min - 1.0;
+		float ang = atan2(c.y, c.x) / 6.2831853 + 0.5;   // 0..1 clockwise from the left
+		float v = max(band_lerp(ang), floor_level);
+		float dist = length(c);
+		// a spoke per band, with the gap taken out
+		float slot = frac(ang * band_count);
+		float half_gap = gap * 0.5;
+		float in_spoke = step(half_gap, slot) * step(slot, 1.0 - half_gap);
+		float top = r0 + v * (rmax - r0);
+		float in_band = smoothstep(r0 - 1.0, r0 + 0.5, dist) * (1.0 - smoothstep(top - 0.5, top + 1.0, dist));
+		col.rgb = lerp(color_lo.rgb, color_hi.rgb, saturate(v));
+		col.a = in_spoke * in_band * lerp(color_lo.a, color_hi.a, saturate(v));
+		return col;
+	}
+
+	if (mode == 6.0) {                       // a filled area under a smooth curve
+		float v = max(band_lerp(px.x / size.x), floor_level);
+		float y = size.y * (1.0 - v);
+		float d = abs(px.y - y);
+		float stroke = 1.0 - smoothstep(line_width * 0.5, line_width * 0.5 + 1.5, d);
+		float under = 1.0 - smoothstep(y - 0.5, y + 1.0, px.y);
+		under = 1.0 - under;                  // 1 below the curve
+		float grad = saturate((px.y - y) / max(size.y - y, 1.0));
+		col.rgb = lerp(color_hi.rgb, color_lo.rgb, grad);
+		col.a = max(stroke * color_hi.a, under * fill_alpha * lerp(color_hi.a, color_lo.a, grad));
+		return col;
+	}
+
+	float slot = size.x / band_count;
+	float idx = floor(px.x / slot);
+	float within = frac(px.x / slot);
+	float v = max(band_at(idx), floor_level);
+
+	float half_gap = gap * 0.5;
+	float inside_x = step(half_gap, within) * step(within, 1.0 - half_gap);
+
+	float top, bottom;
+	if (mode == 1.0) {                       // mirrored about the middle
+		float h = v * size.y * 0.5;
+		top = size.y * 0.5 - h;
+		bottom = size.y * 0.5 + h;
+	} else {
+		top = size.y * (1.0 - v);
+		bottom = size.y;
+	}
+	float inside_y = step(top, px.y) * step(px.y, bottom);
+
+	if (mode == 5.0) {                       // a segment ladder
+		float seg = frac(px.y / cell);
+		inside_y *= step(seg, 0.72);
+	} else if (radius > 0.5) {               // round the bar caps
+		float bar_w = slot * (1.0 - gap);
+		float r = min(radius, bar_w * 0.5);
+		float cx = (idx + 0.5) * slot;
+		float dx = abs(px.x - cx) - (bar_w * 0.5 - r);
+		float dy_top = top + r - px.y;
+		if (dx > 0.0 && dy_top > 0.0)
+			inside_y *= 1.0 - smoothstep(r - 1.0, r, length(float2(dx, dy_top)));
+		if (mode == 1.0) {
+			float dy_bot = px.y - (bottom - r);
+			if (dx > 0.0 && dy_bot > 0.0)
+				inside_y *= 1.0 - smoothstep(r - 1.0, r, length(float2(dx, dy_bot)));
+		}
+	}
+
+	float a = inside_x * inside_y;
+	col.rgb = lerp(color_lo.rgb, color_hi.rgb, saturate(v));
+	col.a = a * lerp(color_lo.a, color_hi.a, saturate(v));
+	return col;
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSVis(vert_in);
+	}
+}

@@ -1,224 +1,415 @@
-/* The site — obs.imswarnil.com. A catalogue, a page per overlay with a
-   live preview and a URL builder, an install guide, a scenes page. Plain
-   template functions; the registry supplies every fact. */
+/*  The docs site at obs.imswarnil.com.
 
-import path from 'node:path';
+    Plain Node, no dependencies, no install step: `node site/build.mjs` writes
+    dist/ and that is the whole build. The content lives in site/content.mjs and
+    the screenshots in docs/screens/ are real frames off the self-test, so the
+    pictures on the site are the scenes the plugin actually builds.  */
+
 import fs from 'node:fs';
-import { OVERLAYS, GLOBAL_PARAMS, overlayUrl } from '../overlays/registry.mjs';
-import { collection } from '../scenes/scenes.config.mjs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { NAME, SHORT, REPO, BUILT_FOR, SOURCES, SCENES, STEPS, APIS, FAQ } from './content.mjs';
 
-const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const KINDS = { component: 'Component', visualizer: 'Visualizer', scene: 'Scene' };
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const DIST = path.join(ROOT, 'dist');
+const BASE = (process.env.SITE_URL || 'https://obs.imswarnil.com/').replace(/\/?$/, '/');
 
-export function buildSite({ dist, base, version }) {
-	const here = path.dirname(new URL(import.meta.url).pathname);
-	const out = (p, html) => { fs.mkdirSync(path.dirname(path.join(dist, p)), { recursive: true }); fs.writeFileSync(path.join(dist, p), html); };
-	fs.copyFileSync(path.join(here, 'site.css'), path.join(dist, 'site.css'));
-	fs.copyFileSync(path.join(here, 'site.js'), path.join(dist, 'site.js'));
-	fs.writeFileSync(path.join(dist, 'registry.json'), JSON.stringify({ base, version, globals: GLOBAL_PARAMS, overlays: OVERLAYS }, null, 2));
+const write = (p, s) => {
+	fs.mkdirSync(path.dirname(p), { recursive: true });
+	fs.writeFileSync(p, s);
+};
+const copy = (from, to) => {
+	fs.mkdirSync(path.dirname(to), { recursive: true });
+	fs.copyFileSync(from, to);
+};
+const esc = (s) => String(s).replace(/&(?![a-z#]+;)/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/* the content file writes prose with inline markup already in it */
+const prose = (s) => String(s).replace(/\s+/g, ' ').trim();
 
-	const ctx = { base, version };
-	const pages = [
-		['index.html', home(ctx)],
-		['install/index.html', install(ctx)],
-		['scenes/index.html', scenes(ctx)],
-		['404.html', notFound(ctx)],
-		...OVERLAYS.map((o) => [`docs/${o.slug}/index.html`, overlay(ctx, o)]),
-	];
-	for (const [p, html] of pages) out(p, html);
-	out('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.filter(([p]) => p !== '404.html').map(([p]) => `  <url><loc>${base}${p.replace(/index\.html$/, '')}</loc></url>`).join('\n')}\n</urlset>\n`);
-	return pages.length;
-}
+const NAV = [
+	['/', 'Overview'],
+	['/scenes/', 'Scenes'],
+	['/sources/', 'Sources'],
+	['/setup/', 'Setup'],
+];
 
-function shell({ base, version }, { title, description, body, current = '', head = '' }) {
-	const nav = [['Overlays', '/'], ['Install', '/install/'], ['Scenes', '/scenes/']];
+function page({ url, title, description, body }) {
+	const full = url === '/' ? `${NAME} — native overlays for OBS Studio` : `${title} · ${SHORT}`;
 	return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(title)} · Tally</title>
+<title>${esc(full)}</title>
 <meta name="description" content="${esc(description)}">
-<meta property="og:title" content="${esc(title)} · Tally">
+<meta name="color-scheme" content="dark light">
+<meta property="og:title" content="${esc(full)}">
 <meta property="og:description" content="${esc(description)}">
-<meta name="color-scheme" content="light dark">
-<link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/tally.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${BASE.replace(/\/$/, '')}${url}">
+<meta property="og:image" content="${BASE}screens/live.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="${BASE.replace(/\/$/, '')}${url}">
 <link rel="stylesheet" href="/site.css">
-<script type="module" src="/site.js"></script>
-${head}
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<script>
+/* Before the first paint, or the page flashes the other theme on every
+   navigation. No choice stored means follow the system, which the CSS does on
+   its own — so the attribute is only set when the reader has actually picked. */
+try { var t = localStorage.getItem("sbk-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 </head>
-<body class="site">
-<header class="site-bar">
-	<a class="site-brand" href="/"><span class="tally-brand"><b>Tally</b><i class="tally-dot" data-pulse></i></span><span class="site-brand__by">for OBS Studio</span></a>
-	<nav class="site-nav" aria-label="Site">
-		${nav.map(([l, h]) => `<a href="${h}"${current === h ? ' aria-current="page"' : ''}>${l}</a>`).join('')}
-		<a href="https://github.com/imswarnil/Tally" rel="noopener">GitHub</a>
-	</nav>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+	<div class="wrap wide bar__in">
+		<a class="bar__mark" href="/"><i class="dot" aria-hidden="true"></i><span>${esc(SHORT)}</span><span> Broadcast Kit</span></a>
+		<nav>${NAV.map(([u, l]) => `<a href="${u}"${u === url ? ' aria-current="page"' : ''}>${l}</a>`).join('')}</nav>
+		<button class="theme" type="button" data-theme-toggle aria-label="Switch between the light and dark theme">
+			<svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+			<svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+		</button>
+	</div>
 </header>
-<main class="site-main">
+<main id="main">
 ${body}
 </main>
-<footer class="site-foot">
-	<p>Tally ${esc(version)} · MIT · Built by <a href="https://imswarnil.com">Swarnil Singhai</a>, in the language of the <a href="https://design.imswarnil.com">Im Design System</a>.</p>
-	<p><a href="https://github.com/imswarnil/Tally/releases">Releases</a> · <a href="https://github.com/imswarnil/Tally/issues">Issues</a> · <a href="/registry.json">registry.json</a></p>
+<footer>
+	<div class="wrap wide">
+		<p><strong>${esc(NAME)}</strong> — native overlays for OBS Studio. Built for ${esc(BUILT_FOR)}.</p>
+		<p>Code is MIT. A compiled plugin links libobs, which is GPL-2.0, so the binary follows the
+		GPL’s terms. Geist and Geist Mono are © Vercel under the SIL Open Font License 1.1.</p>
+		<p><a href="${REPO}">Source and releases on GitHub</a> · <a href="https://imswarnil.com">imswarnil.com</a></p>
+	</div>
 </footer>
+<script src="/site.js" type="module"></script>
 </body>
 </html>
 `;
 }
 
-const preview = (o, values, extra = '') => `<div class="preview" style="--pw:${o.size.w};--ph:${o.size.h}" data-preview ${extra}><iframe src="${overlayUrl('/', o.slug, values)}" width="${o.size.w}" height="${o.size.h}" title="${esc(o.name)} preview" loading="lazy"></iframe></div>`;
+/* ---- the pages ------------------------------------------------------------ */
 
-function home(ctx) {
-	const groups = ['component', 'visualizer', 'scene'];
-	return shell(ctx, {
-		title: 'Overlays for OBS Studio',
-		description: 'Tally — stream overlays, audio visualizers and full scenes for OBS Studio. Add a URL as a Browser Source; nothing to install.',
-		current: '/',
-		body: `
+const sourcesByTag = () => {
+	const order = ['Indicator', 'Titles', 'Camera', 'Audio', 'Live data', 'Scenes', 'Transition'];
+	const seen = new Map();
+	for (const s of SOURCES) {
+		if (!seen.has(s.tag)) seen.set(s.tag, []);
+		seen.get(s.tag).push(s);
+	}
+	return order.filter((t) => seen.has(t)).map((t) => [t, seen.get(t)]);
+};
+
+function home() {
+	const body = `
 <section class="hero">
-	<p class="eyebrow"><i class="tally-dot"></i> Open source · MIT</p>
-	<h1>Overlays for OBS Studio that look like they belong together.</h1>
-	<p class="lede">Lower thirds, an on-air light that reads OBS's real state, audio visualizers, and full starting-soon and break scenes. Every one is a URL: add it as a Browser Source, tune it with a few parameters, done. One accent, one type, one gap, so a stream reads as one design.</p>
-	<p class="actions"><a class="btn btn--primary" href="/install/">Install in two minutes</a><a class="btn" href="/scenes/">Import the scene collection</a></p>
+	<div class="wrap wide">
+		<p class="eyebrow"><i class="dot" aria-hidden="true"></i> Native OBS plugin</p>
+		<h1>Overlays OBS draws itself.</h1>
+		<p class="lede">A tally light that knows when you are live, a level meter in real decibels,
+		live subscriber and member counts, a QR code people can scan, a camera frame in 9:16, and a
+		transition — ${SOURCES.length} sources and a full show of ${SCENES.length} scenes. No browser
+		source, no web server, no URL to paste.</p>
+		<p class="btns">
+			<a class="btn btn--primary" href="${REPO}/releases">Download the plugin</a>
+			<a class="btn" href="/setup/">How to set it up</a>
+			<a class="btn" href="${REPO}">Source on GitHub</a>
+		</p>
+	</div>
 </section>
-${groups.map((k) => `
-<section class="catalogue">
-	<h2>${KINDS[k]}s</h2>
-	<div class="cards">
-		${OVERLAYS.filter((o) => o.kind === k).map((o) => `
-		<a class="card" href="/docs/${o.slug}/">
-			${preview(o, { ...o.example, demo: 1 })}
-			<span class="card__body"><strong>${esc(o.name)}</strong><span>${esc(o.description)}</span><code>${o.size.w}×${o.size.h}</code></span>
-		</a>`).join('')}
-	</div>
-</section>`).join('')}
-<section class="strip">
-	<h2>How it holds together</h2>
-	<div class="three">
-		<div><h3>One runtime</h3><p>Every overlay loads the same 12 KB of CSS and JS. Change the accent once with <code>?accent=</code> and every overlay on the scene follows.</p></div>
-		<div><h3>OBS knows it is there</h3><p>Inside a Browser Source, Tally listens to OBS's own events. The tally light turns red when you go live, not when you remember to click something.</p></div>
-		<div><h3>Yours to change</h3><p>Plain HTML and CSS under MIT. Fork it, restyle it, or point the scene collection at your own copy.</p></div>
-	</div>
-</section>`,
-	});
-}
 
-function overlay(ctx, o) {
-	const all = [...o.params, ...GLOBAL_PARAMS];
-	const field = (p) => {
-		const id = `p-${p.key}`;
-		let input;
-		switch (p.type) {
-			case 'select': input = `<select id="${id}" name="${p.key}">${p.options.map((v) => `<option value="${esc(v)}"${String(v) === String(p.default) ? ' selected' : ''}>${v === '' ? 'default' : esc(v)}</option>`).join('')}</select>`; break;
-			case 'toggle': input = `<input type="checkbox" id="${id}" name="${p.key}" value="1"${p.default ? ' checked' : ''}>`; break;
-			case 'color': input = `<span class="color"><input type="color" id="${id}" name="${p.key}" value="${esc(p.default)}"><input type="text" name="${p.key}" value="${esc(p.default)}" data-mirror="${id}" aria-label="${esc(p.label)} as text"></span>`; break;
-			case 'number': input = `<input type="number" id="${id}" name="${p.key}" value="${esc(p.default)}" min="${p.min ?? ''}" max="${p.max ?? ''}" step="${p.step ?? 'any'}">`; break;
-			default: input = `<input type="text" id="${id}" name="${p.key}" value="${esc(p.default)}">`;
-		}
-		return `<div class="field${p.type === 'toggle' ? ' field--toggle' : ''}"><label for="${id}">${esc(p.label)}</label>${input}${p.hint ? `<small>${esc(p.hint)}</small>` : ''}</div>`;
-	};
-	return shell(ctx, {
-		title: o.name,
-		description: o.description,
-		body: `
-<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Overlays</a> / <span>${esc(o.name)}</span></nav>
-<section class="doc-head">
-	<p class="eyebrow">${KINDS[o.kind]} · ${o.size.w}×${o.size.h}</p>
-	<h1>${esc(o.name)}</h1>
-	<p class="lede">${esc(o.description)}</p>
+<section>
+	<div class="wrap wide">
+		<h2>The show it builds</h2>
+		<p class="sub">One menu item writes ${SCENES.length} complete scenes and switches to them.
+		These are real frames from that collection, not mock-ups — every picture on this site comes
+		out of the plugin’s own self-test.</p>
+		<div class="grid grid--2">
+			${SCENES.slice(0, 4)
+				.map(
+					(s) => `<article class="scene">
+				<a class="shot" href="/scenes/#${s.img}"><img src="/screens/${s.img}.jpg" alt="The ${esc(s.name)} scene" loading="lazy" width="1600" height="900"></a>
+				<h3>${esc(s.name)}</h3><p>${prose(s.body)}</p>
+			</article>`
+				)
+				.join('')}
+		</div>
+		<p class="btns"><a class="btn" href="/scenes/">See all ${SCENES.length} scenes</a></p>
+	</div>
 </section>
-<section class="builder" data-builder="${o.slug}" data-base="${esc(ctx.base)}" data-preview-demo="${esc(JSON.stringify({ ...o.example, demo: 1 }))}">
-	<div class="builder__stage">
-		${preview(o, { ...o.example, demo: 1 }, 'data-builder-preview')}
-		<div class="url">
-			<label for="url-out">Browser Source URL</label>
-			<div class="url__row"><input id="url-out" type="text" readonly value="${esc(overlayUrl(ctx.base, o.slug, {}))}"><button type="button" class="btn btn--primary" data-copy="#url-out">Copy</button></div>
-			<p class="url__hint">In OBS: Sources → + → Browser → paste this URL, set width <b>${o.size.w}</b> and height <b>${o.size.h}</b>. <a href="/install/">Full steps.</a></p>
+
+<section>
+	<div class="wrap wide">
+		<h2>What it can do that a web overlay cannot</h2>
+		<p class="sub">These are not stylistic preferences. They are things a page inside a Browser
+		Source has no way to reach.</p>
+		<div class="grid grid--3">
+			<div class="card"><h3>Know you are live</h3><p>The tally light reads OBS’s own streaming
+			and recording state, so it turns red when you go live rather than when you remember to
+			click something.</p></div>
+			<div class="card"><h3>Hear the program mix</h3><p>The visualizer and the meter listen to
+			what OBS is actually outputting — every source, every filter — not just a microphone the
+			browser was granted.</p></div>
+			<div class="card"><h3>See dropped frames</h3><p>Uptime, bitrate, dropped frames and
+			network congestion come from the running output. No page can ask for them.</p></div>
+			<div class="card"><h3>Be a transition</h3><p>A transition is composited between two scene
+			textures. Nothing running inside a page can see both.</p></div>
+			<div class="card"><h3>Cost almost nothing</h3><p>One or two draw calls per source instead
+			of a Chromium process per overlay.</p></div>
+			<div class="card"><h3>Work offline</h3><p>The QR code is generated inside the plugin. No
+			third-party service sees your link, and nothing breaks when the connection does.</p></div>
 		</div>
 	</div>
-	<form class="builder__form" data-builder-form>
-		<h2>Tune it</h2>
-		${o.params.map(field).join('')}
-		<h2>Every overlay</h2>
-		${GLOBAL_PARAMS.map(field).join('')}
-		<p class="hint">Only values that differ from the default go into the URL.</p>
-	</form>
 </section>
-<section class="doc-params">
-	<h2>Parameters</h2>
-	<table>
-		<thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead>
-		<tbody>${all.map((p) => `<tr><td><code>${p.key}</code></td><td><code>${esc(p.default === '' ? '—' : p.default)}</code></td><td>${esc(p.label)}${p.options ? ` — <code>${p.options.filter(Boolean).join('</code> · <code>')}</code>` : ''}${p.hint ? `. ${esc(p.hint)}` : ''}</td></tr>`).join('')}
-		<tr><td><code>hidden</code></td><td><code>—</code></td><td>Start hidden; <code>Tally.show()</code> from the page's console or a custom script reveals it.</td></tr>
-		</tbody>
-	</table>
+
+<section>
+	<div class="wrap wide">
+		<h2>${SOURCES.length} sources</h2>
+		<p class="sub">Every one shares a <em>Look</em> group — one accent colour, a scale slider, a
+		tone, a font — so a scene changes together rather than one piece at a time.</p>
+		${sourcesByTag()
+			.map(
+				([tag, list]) => `<h3 style="margin-top:1.6rem">${esc(tag)}</h3>
+		<div class="grid grid--3">${list
+			.map(
+				(s) => `<a class="card" href="/sources/#${s.id}" style="text-decoration:none">
+			<h3>${esc(s.name)}</h3><p>${prose(s.one)}</p></a>`
+			)
+			.join('')}</div>`
+			)
+			.join('')}
+	</div>
 </section>
-<section class="doc-source">
-	<h2>Source</h2>
-	<p>The page is <a href="https://github.com/imswarnil/Tally/blob/main/overlays/${o.slug}/index.html">overlays/${o.slug}/index.html</a>; its styles live in <code>src/</code>. Copy the file, keep the two <code>assets/</code> links, and you have your own.</p>
-</section>`,
+
+<section>
+	<div class="wrap wide">
+		<h2>Live numbers, from your own accounts</h2>
+		<p class="sub">Put in an API key and the counter fetches on a background thread — the
+		graphics thread never waits on the network, and a failed request keeps the last good number
+		on screen.</p>
+		<div class="grid grid--3">
+			${APIS.map(
+				(a) => `<div class="card"><h3>${esc(a.name.split('—')[0].trim())}</h3><p>${prose(a.name.split('—')[1] || '')}</p></div>`
+			).join('')}
+		</div>
+		<p class="btns"><a class="btn" href="/setup/#apis">How to get each key</a></p>
+	</div>
+</section>
+`;
+	return page({
+		url: '/',
+		title: 'Overview',
+		description: `${NAME} — a native OBS Studio plugin: ${SOURCES.length} overlay sources, live API counters, a QR code, a real level meter and a transition. No browser source.`,
+		body,
 	});
 }
 
-function install(ctx) {
-	return shell(ctx, {
-		title: 'Install',
-		description: 'How to add a Tally overlay to OBS Studio as a Browser Source, import the scene collection, and use the pack offline.',
-		current: '/install/',
-		body: `
-<section class="doc-head"><p class="eyebrow">Install</p><h1>Two minutes, no download.</h1><p class="lede">Tally overlays are web pages. OBS renders web pages natively through its Browser Source, so an overlay is a URL and nothing else.</p></section>
-<section class="prose">
-<h2>1. One overlay as a Browser Source</h2>
-<ol>
-	<li>Open any overlay on this site, tune it, and press <b>Copy</b> under the preview.</li>
-	<li>In OBS: <b>Sources → + → Browser</b>. Name it, press OK.</li>
-	<li>Paste the URL. Set <b>Width</b> and <b>Height</b> to the numbers the page shows (most are 1920 × 1080 — the overlay positions itself on the canvas).</li>
-	<li>Leave "Custom CSS" as it is. Tick <b>Shutdown source when not visible</b> if you like; Tally replays its entrance every time.</li>
-</ol>
-<p>Drag it into place if it is smaller than the canvas. That is the whole install.</p>
-
-<h2>2. The whole scene collection</h2>
-<p>Four scenes — Starting soon, Live, Be right back, Ending — already wired to hosted overlays. <b>Scene Collection → Import</b>, choose <a href="/scenes/Tally.json" download>Tally.json</a>, then switch to it. Edit any source's URL to put your own name in. <a href="/scenes/">Details.</a></p>
-
-<h2>3. The profile</h2>
-<p>A 1080p60 profile with sane simple-output settings. <b>Profile → Import</b>, pick the <code>Tally</code> folder from the <a href="https://github.com/imswarnil/Tally/releases">release zip</a>. A profile carries no stream key; add yours under Settings → Stream.</p>
-
-<h2>4. Offline</h2>
-<p>The <a href="https://github.com/imswarnil/Tally/releases">release zip</a> holds every overlay page, the runtime and the fonts. In a Browser Source tick <b>Local file</b> and pick a page. OBS offers no query string for a local file, so edit the <code>data-tally-default</code> attributes in the HTML instead, or keep using hosted URLs.</p>
-
-<h2>Audio for the visualizers</h2>
-<p>A Browser Source can hear the machine's <b>default input device</b> through <code>getUserMedia</code>. Set the device you want — the microphone, or a virtual cable carrying your desktop mix — as the system default, and the bars follow it. If OBS grants no device, Tally falls back to a generated demo signal so the scene never sits still; force that with <code>?source=demo</code>.</p>
-
-<h2>The on-air light</h2>
-<p>Inside OBS the light reads the program's real state: red for streaming, orange for recording, grey for neither. It needs the Browser Source's page permission at its default ("Read access to OBS status information") or higher. Outside OBS, <code>?demo=1</code> cycles the states so you can see it move.</p>
-
-<h2>Change everything at once</h2>
-<p>Four parameters work on every overlay: <code>accent</code>, <code>scale</code>, <code>tone</code> and <code>font</code>. Put the same <code>?accent=00a3ff</code> on each source and the scene changes colour together.</p>
-</section>`,
+function scenes() {
+	const body = `
+<section class="hero">
+	<div class="wrap wide">
+		<p class="eyebrow">Scenes</p>
+		<h1>A whole show, in one menu item.</h1>
+		<p class="lede"><strong>Tools → Broadcast Kit: create the scene collection</strong> writes
+		these ${SCENES.length} scenes and switches to them. Every source in them is an ordinary
+		source — select it, open Properties, change anything.</p>
+	</div>
+</section>
+<section>
+	<div class="wrap wide">
+		<div class="grid grid--2">
+			${SCENES.map(
+				(s) => `<article class="scene" id="${s.img}">
+			<span class="shot"><img src="/screens/${s.img}.jpg" alt="The ${esc(s.name)} scene" loading="lazy" width="1600" height="900"></span>
+			<h3>${esc(s.name)}</h3><p>${prose(s.body)}</p>
+		</article>`
+			).join('')}
+		</div>
+		<p class="note" style="margin-top:2rem">The frames are empty where your camera and screen
+		capture go. The kit draws treatments, not captures: creating a camera on your behalf would
+		switch your webcam on just because you opened a menu. Add your own capture and drag it below
+		the frame in the Sources list.</p>
+	</div>
+</section>
+`;
+	return page({
+		url: '/scenes/',
+		title: 'Scenes',
+		description: `The ${SCENES.length} scenes ${NAME} builds: starting soon, live, talking head, screen share, interview, Q&A, support, vertical, be right back, ending and a private monitoring desk.`,
+		body,
 	});
 }
 
-function scenes(ctx) {
-	return shell(ctx, {
-		title: 'Scene collection',
-		description: 'The Tally scene collection and profile for OBS Studio: four scenes wired to the hosted overlays.',
-		current: '/scenes/',
-		body: `
-<section class="doc-head"><p class="eyebrow">Scenes</p><h1>Four scenes, wired.</h1><p class="lede">Import once, then rename, re-word and reposition in OBS as you would any source. The collection references the hosted overlays, so it stays current as Tally improves.</p>
-<p class="actions"><a class="btn btn--primary" href="/scenes/Tally.json" download>Download Tally.json</a><a class="btn" href="/scenes/profile/Tally/basic.ini" download="basic.ini">Profile basic.ini</a></p></section>
-<section class="prose">
-${collection.scenes.map((s) => `<h2>${esc(s.name)}</h2><ul>${s.items.map((i) => { const o = OVERLAYS.find((x) => x.slug === i.overlay); return `<li><a href="/docs/${o.slug}/">${esc(i.name || `Tally · ${o.name}`)}</a> — ${i.size?.w ?? o.size.w}×${i.size?.h ?? o.size.h} at ${i.pos?.x ?? 0},${i.pos?.y ?? 0}${i.params && Object.keys(i.params).length ? ` <code>${esc(new URLSearchParams(i.params).toString())}</code>` : ''}</li>`; }).join('')}</ul>`).join('')}
-<h2>Importing</h2>
-<ol><li><b>Scene Collection → Import</b>, choose the JSON, press Import.</li><li><b>Scene Collection → Tally</b> to switch to it.</li><li>Double-click a source to change its URL — put your own name on the lower third, your own handle on the chips.</li></ol>
-<p>The profile is a folder named <code>Tally</code> holding <code>basic.ini</code>: 1920×1080 at 60 fps, simple output at 6000 kbps, MKV recording. <b>Profile → Import</b> and pick the folder.</p>
-<h2>Generated, not hand-made</h2>
-<p>The JSON is produced by <code>npm run scenes</code> from <a href="https://github.com/imswarnil/Tally/blob/main/scenes/scenes.config.mjs">scenes/scenes.config.mjs</a>. To ship a different arrangement, edit that list and regenerate.</p>
-</section>`,
+function sources() {
+	const body = `
+<section class="hero">
+	<div class="wrap wide">
+		<p class="eyebrow">Sources</p>
+		<h1>${SOURCES.length} sources in OBS’s own menu.</h1>
+		<p class="lede">Every one shares a <em>Look</em> group — one accent colour, a scale slider
+		that grows type, padding and radius together, a tone (glass, solid or light) and a font — and
+		a <em>Motion</em> group for how it arrives.</p>
+	</div>
+</section>
+${sourcesByTag()
+	.map(
+		([tag, list]) => `<section>
+	<div class="wrap wide">
+		<h2>${esc(tag)}</h2>
+		${list
+			.map(
+				(s) => `<article class="src" id="${s.id}">
+			<div class="src__head"><h3>${esc(s.name)}</h3><span class="tag">${esc(s.tag)}</span><code class="src__id">${esc(s.id)}</code></div>
+			<p class="src__one">${prose(s.one)}</p>
+			<p class="src__body">${prose(s.body)}</p>
+			<dl class="props">${s.props.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${prose(v)}</dd></div>`).join('')}</dl>
+			${s.note ? `<p class="note">${prose(s.note)}</p>` : ''}
+		</article>`
+			)
+			.join('')}
+	</div>
+</section>`
+	)
+	.join('')}
+`;
+	return page({
+		url: '/sources/',
+		title: 'Sources',
+		description: `Every source in ${NAME}, what it is for and what you can change about it.`,
+		body,
 	});
 }
 
-function notFound(ctx) {
-	return shell(ctx, { title: 'Not found', description: 'That page is not here.', body: `<section class="doc-head"><p class="eyebrow">404</p><h1>Off air.</h1><p class="lede">That page is not here. <a href="/">Back to the overlays.</a></p></section>` });
+function setup() {
+	const body = `
+<section class="hero">
+	<div class="wrap wide">
+		<p class="eyebrow">Setup</p>
+		<h1>Installed in a minute, set up in five.</h1>
+		<p class="lede">macOS, OBS Studio 30 or newer. Built and tested against ${esc(BUILT_FOR)}.</p>
+	</div>
+</section>
+
+<section>
+	<div class="wrap wide">
+		<h2>Getting it running</h2>
+		<div class="steps">
+			${STEPS.map(
+				(s) => `<div class="step">
+			<span class="step__n">${s.n}</span>
+			<div><h3>${esc(s.title)}</h3><p>${prose(s.body)}</p></div>
+			${s.code ? `<pre><code>${esc(s.code)}</code></pre>` : ''}
+		</div>`
+			).join('')}
+		</div>
+		<p class="note">macOS may refuse a plugin downloaded from the internet. If OBS starts but the
+		sources are missing, clear the quarantine flag and restart it.</p>
+		<pre><code>xattr -dr com.apple.quarantine ~/Library/Application\\ Support/obs-studio/plugins/sbk.plugin</code></pre>
+	</div>
+</section>
+
+<section id="apis">
+	<div class="wrap wide">
+		<h2>Live numbers</h2>
+		<p class="sub">The counter fetches on a background thread and never blocks the picture. It
+		checks every sixty seconds by default, and no faster than every fifteen — an overlay that
+		burns through someone’s API quota is a broken overlay.</p>
+		<div class="grid grid--2">
+			${APIS.map(
+				(a) => `<div class="card">
+			<h3>${esc(a.name)}</h3>
+			<ol style="margin:0.7rem 0 0;padding-left:1.1rem;color:var(--ink-dim);font-size:0.94rem">
+				${a.steps.map((st) => `<li style="margin:0.3rem 0">${prose(st)}</li>`).join('')}
+			</ol>
+			${a.note ? `<p class="note">${prose(a.note)}</p>` : ''}
+		</div>`
+			).join('')}
+		</div>
+		<p class="note">OBS saves every source setting into the scene collection as plain text, keys
+		included. Begin a key field with <code>@</code> and a file path —
+		<code>@/Users/you/.youtube-key</code> — and the kit reads it from there instead, so a
+		collection you share carries no secret.</p>
+	</div>
+</section>
+
+<section>
+	<div class="wrap wide">
+		<h2>Building it yourself</h2>
+		<p class="sub">Nothing is downloaded at build time. The libobs headers are vendored; the rest
+		is Homebrew and what macOS already has.</p>
+		<pre><code>brew install cmake simde jansson
+git clone ${REPO.replace('https://github.com/', 'https://github.com/')}.git
+cd Swarnil-Broadcast-Kit
+./build.command</code></pre>
+		<p class="sub" style="margin-top:1rem"><code>build.command</code> compiles, installs the
+		plugin, copies the fonts and installs the profile. Quit OBS first — a loaded plugin cannot be
+		replaced underneath a running OBS, and the script refuses to run while one is up.</p>
+	</div>
+</section>
+
+<section>
+	<div class="wrap wide">
+		<h2>Questions</h2>
+		${FAQ.map(
+			(f) => `<details><summary>${esc(f.q)}</summary><p>${prose(f.a)}</p></details>`
+		).join('')}
+	</div>
+</section>
+`;
+	return page({
+		url: '/setup/',
+		title: 'Setup',
+		description: `How to install ${NAME} in OBS Studio, put your camera under the frames, add the transition, and wire up live YouTube and Ghost counts with your own API keys.`,
+		body,
+	});
 }
+
+/* ---- build ---------------------------------------------------------------- */
+
+const t0 = performance.now();
+fs.rmSync(DIST, { recursive: true, force: true });
+fs.mkdirSync(DIST, { recursive: true });
+
+write(path.join(DIST, 'index.html'), home());
+write(path.join(DIST, 'scenes/index.html'), scenes());
+write(path.join(DIST, 'sources/index.html'), sources());
+write(path.join(DIST, 'setup/index.html'), setup());
+
+copy(path.join(ROOT, 'site/site.css'), path.join(DIST, 'site.css'));
+copy(path.join(ROOT, 'site/site.js'), path.join(DIST, 'site.js'));
+for (const f of fs.readdirSync(path.join(ROOT, 'docs/screens')))
+	copy(path.join(ROOT, 'docs/screens', f), path.join(DIST, 'screens', f));
+for (const f of ['Geist-Regular.ttf', 'Geist-Medium.ttf', 'Geist-SemiBold.ttf', 'GeistMono-Regular.ttf'])
+	copy(path.join(ROOT, 'fonts', f), path.join(DIST, 'fonts', f));
+
+/* the mark: the recording light, which is the whole idea in one shape */
+write(
+	path.join(DIST, 'icon.svg'),
+	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#0b0b0b"/><circle cx="16" cy="16" r="7" fill="#f5273f"/></svg>\n`
+);
+
+write(
+	path.join(DIST, '404.html'),
+	page({
+		url: '/404',
+		title: 'Not found',
+		description: 'That page does not exist.',
+		body: `<section class="hero"><div class="wrap wide"><p class="eyebrow">404</p><h1>Nothing here.</h1>
+		<p class="lede">That page does not exist.</p><p class="btns"><a class="btn btn--primary" href="/">Back to the overview</a></p></div></section>`,
+	})
+);
+
+const urls = ['', 'scenes/', 'sources/', 'setup/'];
+write(
+	path.join(DIST, 'sitemap.xml'),
+	`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+		urls.map((u) => `\t<url><loc>${BASE}${u}</loc></url>`).join('\n') +
+		`\n</urlset>\n`
+);
+write(path.join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${BASE}sitemap.xml\n`);
+write(
+	path.join(DIST, '_headers'),
+	['/fonts/*', '  Cache-Control: public, max-age=31536000, immutable', '/screens/*', '  Cache-Control: public, max-age=86400', ''].join('\n')
+);
+
+console.log(`${NAME} site → dist/ in ${Math.round(performance.now() - t0)}ms (base ${BASE})`);
