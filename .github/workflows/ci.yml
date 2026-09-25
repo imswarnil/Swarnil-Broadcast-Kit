@@ -34,9 +34,26 @@ jobs:
             grep -q "obs_register_source(&$sym)" src/plugin-main.c || { echo "::error::$sym is never registered"; missing=1; }
           done
           exit $missing
-      - run: ditto -c -k --keepParent build/sbk.plugin sbk-${GITHUB_REF_NAME}.plugin.zip
+      - name: Package the bundle
+        # GITHUB_REF_NAME is "1/merge" on a pull request. Using it raw put the
+        # zip in a subdirectory called sbk-1/, the glob below found nothing, and
+        # the upload passed with no artifact — so the name is built by hand and
+        # the upload is told to fail rather than shrug.
+        run: |
+          VERSION=$(sed -n 's/.*project(sbk VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            NAME="sbk-${GITHUB_REF_NAME}"
+          else
+            NAME="sbk-${VERSION}-$(git rev-parse --short HEAD)"
+          fi
+          ditto -c -k --keepParent build/sbk.plugin "${NAME}.plugin.zip"
+          ls -lh *.plugin.zip
       - uses: actions/upload-artifact@v4
-        with: { name: sbk.plugin, path: '*.plugin.zip', retention-days: 14 }
+        with:
+          name: sbk.plugin
+          path: '*.plugin.zip'
+          if-no-files-found: error
+          retention-days: 14
       - if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
@@ -54,7 +71,7 @@ jobs:
       - name: Check the built site's links resolve
         run: node site/check.mjs
       - uses: actions/upload-artifact@v4
-        with: { name: site, path: dist, retention-days: 7 }
+        with: { name: site, path: dist, if-no-files-found: error, retention-days: 7 }
 
   deploy:
     needs: [plugin, site]
