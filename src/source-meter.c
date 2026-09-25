@@ -224,8 +224,7 @@ static void meter_render(void *data, gs_effect_t *unused)
 	}
 
 	sbk_stage_end(&m->stage);
-	struct sbk_anim_out a = sbk_anim_eval(&m->anim);
-	sbk_stage_present(&m->stage, a.alpha, a.dx, a.dy);
+	sbk_stage_present_anim(&m->stage, sbk_anim_eval(&m->anim));
 }
 
 static void meter_show(void *d) { sbk_anim_on_show(&((struct meter *)d)->anim); }

@@ -175,8 +175,7 @@ static void frame_render(void *data, gs_effect_t *unused)
 	}
 
 	sbk_stage_end(&f->stage);
-	struct sbk_anim_out a = sbk_anim_eval(&f->anim);
-	sbk_stage_present(&f->stage, a.alpha, a.dx, a.dy);
+	sbk_stage_present_anim(&f->stage, sbk_anim_eval(&f->anim));
 }
 
 static void frame_show(void *d) { sbk_anim_on_show(&((struct frame *)d)->anim); }

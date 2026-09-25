@@ -187,8 +187,7 @@ static void lower_render(void *data, gs_effect_t *unused)
 	}
 
 	sbk_stage_end(&w->stage);
-	struct sbk_anim_out a = sbk_anim_eval(&w->anim);
-	sbk_stage_present(&w->stage, a.alpha, a.dx, a.dy);
+	sbk_stage_present_anim(&w->stage, sbk_anim_eval(&w->anim));
 }
 
 static void lower_show(void *d) { sbk_anim_on_show(&((struct lower *)d)->anim); }

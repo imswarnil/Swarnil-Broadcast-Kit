@@ -59,7 +59,7 @@ static void measure(void)
       · a scene that already exists is emptied and refilled rather than removed
         and remade, which also keeps the scene order the user arranged.  */
 
-#define MAX_HELD 128
+#define MAX_HELD 256
 static obs_source_t *g_held[MAX_HELD];
 static int g_n_held;
 
@@ -84,9 +84,21 @@ static void release_held(void)
 /* Settings as one JSON literal — thirty obs_data trees call-by-call would be
    three times this file. The returned source is BORROWED: release_held() owns
    it until the build finishes. */
+/*  A source and a scene share one namespace.
+
+    obs_get_source_by_name finds scenes too, so a source named after a scene
+    resolves to the scene, which is then quietly asked to contain itself. OBS
+    refuses and the item simply never appears — no warning anywhere. Naming a
+    source after its own scene is easy to do by accident, so it is caught here
+    rather than left to a screenshot to reveal.  */
 static obs_source_t *comp(const char *id, const char *name, const char *json)
 {
 	obs_source_t *existing = obs_get_source_by_name(name);
+	if (existing && obs_scene_from_source(existing)) {
+		SBK_LOG(LOG_WARNING, "'%s' is a scene — a source cannot share its name; skipped", name);
+		obs_source_release(existing);
+		return NULL;
+	}
 	if (existing) {
 		if (json) {
 			obs_data_t *st = obs_data_create_from_json(json);
@@ -315,6 +327,20 @@ static const char *fmt(const char *f, ...)
 	return out->array;
 }
 
+/*  A plate goes behind a box, so it has to line up with that box exactly.
+
+    The plate reports itself bigger than its shape — the shadow needs room to
+    fall outside it — so anchoring one by a corner puts the shape a shadow's
+    width away from whatever it is meant to sit under. The padding is symmetric,
+    so the shape's centre is the source's centre: place the plate centred on the
+    box's centre and the two register whatever the shadow is set to.  */
+static void put_plate(obs_scene_t *scene, obs_source_t *src, float x, float y, float w, float h, uint32_t align)
+{
+	float cx = (align & OBS_ALIGN_LEFT) ? x + w * 0.5f : (align & OBS_ALIGN_RIGHT) ? x - w * 0.5f : x;
+	float cy = (align & OBS_ALIGN_TOP) ? y + h * 0.5f : (align & OBS_ALIGN_BOTTOM) ? y - h * 0.5f : y;
+	put(scene, src, cx, cy, OBS_ALIGN_CENTER);
+}
+
 static const char *card_json(const char *eyebrow, const char *title, const char *body, const char *chips,
 			     const char *variant, const char *align, int width)
 {
@@ -332,6 +358,8 @@ static obs_source_t *light(const char *shape)
 
 static obs_source_t *backdrop(const char *name, const char *mode, const char *extra)
 {
+	if (!extra)
+		extra = "";
 	return comp("sbk_backdrop", name,
 		    fmt("{\"mode\":\"%s\",\"color\":%u,\"width\":%d,\"height\":%d%s%s}", mode, (unsigned)SBK_SOLID,
 			(int)W, (int)H, *extra ? "," : "", extra));
@@ -339,364 +367,475 @@ static obs_source_t *backdrop(const char *name, const char *mode, const char *ex
 
 /* ---- the show ------------------------------------------------------------ */
 
+/*  The show.
+
+    Ordered deliberately. OBS lists scenes with the most recently added at the
+    top, so these are built in reverse of how you would run them — the result is
+    a Scenes panel that reads from "Starting soon" at the top down to the private
+    desk at the bottom, in the order of an actual broadcast.
+
+    A scene that already exists is emptied and refilled rather than removed, so
+    anything you dragged somewhere else stays where you put it.
+
+    Grouped: the opening, the teaching scenes, the talking scenes, the breaks,
+    the closing, and one that is not for the stream at all.  */
+
+struct scene_spec {
+	const char *name;
+	void (*build)(obs_scene_t *sc);
+};
+
+/* ---- the opening ----------------------------------------------------------- */
+
+static void scene_starting(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop grid", "grid", "\"drift\":6.0,\"pitch\":72.0"), 0, 0, TL);
+	put(sc, comp("sbk_visualizer", "SBK · Viz bars", "{\"style\":\"bars\",\"height\":240}"), 0, 1080, BL);
+	put(sc, light(""), EDGE, EDGE, TL);
+	put(sc, comp("sbk_clock", "SBK · Clock", NULL), 1920 - EDGE, EDGE, TR);
+	put(sc, comp("sbk_card", "SBK · Starting soon card",
+		     card_json("Starting soon", "Building a Salesforce app live",
+			       "Grab a coffee. We begin at the top of the hour.",
+			       "@imswarnil | youtube.com/@imswarnil | imswarnil.com", "card", "left", 1100)),
+	    EDGE, 300, TL);
+	put(sc, comp("sbk_countdown", "SBK · Countdown",
+		     "{\"mode\":\"duration\",\"minutes\":15,\"style\":\"ring\",\"ring_size\":300,\"label\":\"We begin in\"}"),
+	    1920 - EDGE, 300, TR);
+}
+
+static void scene_welcome(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop aurora", "aurora", "\"color2\":4283584542,\"drift\":4.0,\"reach\":0.55"), 0, 0, TL);
+	put(sc, comp("sbk_visualizer", "SBK · Viz line",
+		     "{\"style\":\"line\",\"height\":300,\"bars\":72,\"fill_alpha\":0.22}"),
+	    0, 1080, BL);
+	put(sc, comp("sbk_card", "SBK · Welcome card",
+		     card_json("Live now", "Welcome in", "Say hello in the chat while everyone arrives.", "",
+			       "none", "centre", 1400)),
+	    MIDX, 360, TC);
+	put(sc, comp("sbk_chip", "SBK · Handle chip",
+		     "{\"label\":\"@imswarnil\",\"dot\":\"live\",\"variant\":\"pill\",\"enter\":\"pop\"}"),
+	    MIDX, 640, TC);
+	put(sc, light("bar"), 0, EDGE, TL);
+}
+
+static void scene_lesson(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop gradient", "gradient", "\"color2\":4281545523,\"angle\":\"diagonal\""), 0, 0, TL);
+	put(sc, comp("sbk_card", "SBK · Lesson card",
+		     card_json("Module 3", "Auth and sessions", "What a session really is, and the four ways to lose one.",
+			       "", "none", "centre", 1500)),
+	    MIDX, 340, TC);
+	put(sc, comp("sbk_progress", "SBK · Module progress",
+		     "{\"label\":\"Modules\",\"value\":3,\"target\":8,\"style\":\"segments\",\"segments\":8,"
+		     "\"width\":720,\"step\":1,\"variant\":\"none\"}"),
+	    MIDX, 700, TC);
+	put(sc, light("dot"), 1920 - EDGE, EDGE, TR);
+}
+
+/* ---- teaching -------------------------------------------------------------- */
+
+static void scene_screen_share(obs_scene_t *sc)
+{
+	put_plate(sc, comp("sbk_plate", "SBK · Cam plate small",
+		     "{\"aspect\":\"16x9\",\"size\":0.66,\"radius\":16.0,\"shadow_y\":18.0,\"shadow_blur\":48.0,\"fill_glass\":true}"),
+	    1920 - EDGE, 1080 - EDGE, 422, 238, BR);
+	put_box(sc, camera(), 1920 - EDGE, 1080 - EDGE, 420, 236, BR);
+	put(sc, comp("sbk_frame", "SBK · Cam frame small",
+		     "{\"aspect\":\"16x9\",\"size\":0.66,\"style\":\"ring\",\"radius\":16.0,"
+		     "\"label\":\"@imswarnil\",\"chip_at\":\"bottom-left\"}"),
+	    1920 - EDGE, 1080 - EDGE, BR);
+	put(sc, comp("sbk_chip", "SBK · Topic chip",
+		     "{\"label\":\"Chapter 1 — setting up\",\"variant\":\"card\",\"dot\":\"accent\"}"),
+	    EDGE, EDGE, TL);
+	put(sc, comp("sbk_progress", "SBK · Chapter progress",
+		     "{\"label\":\"Chapters\",\"value\":1,\"target\":8,\"style\":\"segments\",\"segments\":8,"
+		     "\"width\":420,\"step\":1}"),
+	    EDGE, 1080 - EDGE, BL);
+	put(sc, comp("sbk_meter", "SBK · Mic meter",
+		     "{\"source\":\"@mic\",\"label\":\"Mic\",\"width\":300,\"style\":\"segments\","
+		     "\"segment_count\":20,\"show_db\":false}"),
+	    EDGE, 1080 - EDGE - 130, BL);
+	put(sc, light("badge"), 1920 - EDGE, EDGE, TR);
+}
+
+/* Two people over a shared screen: the pair that a course review or a
+   walkthrough actually needs. Both cameras sit on the same edge so the screen
+   keeps the whole middle of the frame. */
+static void scene_pair_share(obs_scene_t *sc)
+{
+	put_plate(sc, comp("sbk_plate", "SBK · Pair plate host",
+		     "{\"aspect\":\"16x9\",\"size\":0.52,\"radius\":14.0,\"shadow_y\":14.0,\"shadow_blur\":40.0,\"fill_glass\":true}"),
+	    1920 - EDGE, EDGE, 333, 187, TR);
+	put_box(sc, camera(), 1920 - EDGE, EDGE, 333, 187, TR);
+	put(sc, comp("sbk_frame", "SBK · Pair frame host",
+		     "{\"aspect\":\"16x9\",\"size\":0.52,\"style\":\"ring\",\"radius\":14.0,\"label\":\"Host\"}"),
+	    1920 - EDGE, EDGE, TR);
+	put_plate(sc, comp("sbk_plate", "SBK · Pair plate guest",
+		     "{\"aspect\":\"16x9\",\"size\":0.52,\"radius\":14.0,\"shadow_y\":14.0,\"shadow_blur\":40.0,\"fill_glass\":true}"),
+	    1920 - EDGE, EDGE + 230, 333, 187, TR);
+	put(sc, comp("sbk_frame", "SBK · Pair frame guest",
+		     "{\"aspect\":\"16x9\",\"size\":0.52,\"style\":\"ring\",\"radius\":14.0,\"label\":\"Guest\","
+		     "\"line\":\"accent\"}"),
+	    1920 - EDGE, EDGE + 230, TR);
+	put(sc, comp("sbk_chip", "SBK · Topic chip",
+		     "{\"label\":\"Chapter 1 — setting up\",\"variant\":\"card\",\"dot\":\"accent\"}"),
+	    EDGE, EDGE, TL);
+	put(sc, comp("sbk_meter", "SBK · Host meter",
+		     "{\"source\":\"@mic\",\"label\":\"Host\",\"width\":333,\"style\":\"segments\","
+		     "\"segment_count\":18,\"show_db\":false}"),
+	    1920 - EDGE, EDGE + 460, TR);
+	put(sc, comp("sbk_meter", "SBK · Guest meter",
+		     "{\"source\":\"@mic2\",\"label\":\"Guest\",\"width\":333,\"style\":\"segments\","
+		     "\"segment_count\":18,\"show_db\":false}"),
+	    1920 - EDGE, EDGE + 570, TR);
+	put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
+}
+
+/* The screen keeps the left; the questions stack down the right. This is the
+   one to cut to when the chat has got ahead of you. */
+static void scene_comments(obs_scene_t *sc)
+{
+	put(sc, comp("sbk_comments", "SBK · Questions",
+		     "{\"width\":560,\"title\":\"Questions\",\"show_count\":3,\"rotate\":12.0,"
+		     "\"variant\":\"card\",\"enter\":\"left\"}"),
+	    1920 - EDGE, EDGE + 120, TR);
+	put(sc, comp("sbk_chip", "SBK · QA chip",
+		     "{\"label\":\"Questions\",\"variant\":\"accent\",\"dot\":\"none\"}"),
+	    1920 - EDGE, EDGE, TR);
+	put_plate(sc, comp("sbk_plate", "SBK · Cam plate corner",
+		     "{\"aspect\":\"16x9\",\"size\":0.52,\"radius\":14.0,\"shadow_y\":14.0,\"shadow_blur\":40.0,\"fill_glass\":true}"),
+	    EDGE, 1080 - EDGE, 333, 187, BL);
+	put_box(sc, camera(), EDGE, 1080 - EDGE, 333, 187, BL);
+	put(sc, comp("sbk_frame", "SBK · Cam frame corner",
+		     "{\"aspect\":\"16x9\",\"size\":0.52,\"style\":\"ring\",\"radius\":14.0,\"label\":\"\"}"),
+	    EDGE, 1080 - EDGE, BL);
+	put(sc, light("badge"), EDGE, EDGE, TL);
+}
+
+static void scene_talking_head(obs_scene_t *sc)
+{
+	put_box(sc, camera(), MIDX, EDGE, 1664, 936, TC);
+	put(sc, comp("sbk_frame", "SBK · Cam frame full",
+		     "{\"aspect\":\"16x9\",\"size\":2.6,\"style\":\"corner\",\"bracket\":96.0,\"label\":\"\","
+		     "\"line\":\"accent\",\"weight\":4.0}"),
+	    MIDX, EDGE, TC);
+	put(sc, comp("sbk_lower_third", "SBK · Lower third minimal",
+		     "{\"variant\":\"minimal\",\"bar\":true}"),
+	    EDGE + 40, 980, BL);
+	put(sc, comp("sbk_chip", "SBK · Topic chip",
+		     "{\"label\":\"Chapter 1 — setting up\",\"variant\":\"card\",\"dot\":\"accent\"}"),
+	    1920 - EDGE - 40, 980, BR);
+	put(sc, light("dot"), 1920 - EDGE, EDGE, TR);
+}
+
+static void scene_interview(obs_scene_t *sc)
+{
+	put_plate(sc, comp("sbk_plate", "SBK · Plate left",
+		     "{\"aspect\":\"16x9\",\"size\":1.31,\"radius\":18.0,\"shadow_y\":20.0,\"shadow_blur\":56.0,\"fill_glass\":true}"),
+	    EDGE, 300, 838, 472, TL);
+	put_box(sc, camera(), EDGE, 300, 838, 471, TL);
+	put(sc, comp("sbk_frame", "SBK · Cam frame left",
+		     "{\"aspect\":\"16x9\",\"size\":1.31,\"style\":\"ring\",\"label\":\"\"}"),
+	    EDGE, 300, TL);
+	put_plate(sc, comp("sbk_plate", "SBK · Plate right",
+		     "{\"aspect\":\"16x9\",\"size\":1.31,\"radius\":18.0,\"shadow_y\":20.0,\"shadow_blur\":56.0,\"fill_glass\":true}"),
+	    1920 - EDGE, 300, 838, 472, TR);
+	put(sc, comp("sbk_frame", "SBK · Cam frame right",
+		     "{\"aspect\":\"16x9\",\"size\":1.31,\"style\":\"ring\",\"label\":\"\"}"),
+	    1920 - EDGE, 300, TR);
+	put(sc, comp("sbk_lower_third", "SBK · Name left",
+		     "{\"variant\":\"split\",\"name\":\"Swarnil Singhai\",\"title\":\"Host\"}"),
+	    EDGE, 840, TL);
+	put(sc, comp("sbk_lower_third", "SBK · Name right",
+		     "{\"variant\":\"split\",\"name\":\"Your guest\",\"title\":\"Guest\"}"),
+	    1920 - EDGE - 840, 840, TL);
+	put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
+	put(sc, light(""), 1920 - EDGE, EDGE, TR);
+}
+
+static void scene_live(obs_scene_t *sc)
+{
+	put_plate(sc, comp("sbk_plate", "SBK · Cam plate",
+		     "{\"aspect\":\"16x9\",\"size\":1.0,\"radius\":20.0,\"shadow_y\":18.0,\"shadow_blur\":52.0,\"fill_glass\":true}"),
+	    1920 - EDGE, 560, 640, 360, TR);
+	put_box(sc, camera(), 1920 - EDGE, 560, 640, 360, TR);
+	put(sc, comp("sbk_frame", "SBK · Cam frame",
+		     "{\"aspect\":\"16x9\",\"size\":1.0,\"style\":\"ring\",\"label\":\"@imswarnil\"}"),
+	    1920 - EDGE, 560, TR);
+	put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
+	put(sc, comp("sbk_lower_third", "SBK · Lower third", NULL), EDGE, 900, BL);
+	put(sc, light(""), 1920 - EDGE, EDGE, TR);
+}
+
+static void scene_gameplay(obs_scene_t *sc)
+{
+	put_plate(sc, comp("sbk_plate", "SBK · Cam plate corner tiny",
+		     "{\"aspect\":\"16x9\",\"size\":0.56,\"radius\":12.0,\"shadow_y\":12.0,\"shadow_blur\":34.0,\"fill_glass\":true}"),
+	    1920 - EDGE, EDGE, 358, 202, TR);
+	put_box(sc, camera(), 1920 - EDGE, EDGE, 360, 203, TR);
+	put(sc, comp("sbk_frame", "SBK · Cam frame corner tiny",
+		     "{\"aspect\":\"16x9\",\"size\":0.56,\"style\":\"corner-out\",\"bracket\":40.0,"
+		     "\"line\":\"accent\",\"label\":\"\"}"),
+	    1920 - EDGE, EDGE, TR);
+	put(sc, comp("sbk_chip", "SBK · Now playing chip",
+		     "{\"label\":\"Now playing\",\"value\":\"Act 2\",\"variant\":\"card\",\"dot\":\"pulse\"}"),
+	    EDGE, EDGE, TL);
+	put(sc, comp("sbk_progress", "SBK · Run progress",
+		     "{\"label\":\"Run\",\"value\":3,\"target\":10,\"style\":\"segments\","
+		     "\"segments\":10,\"width\":420,\"step\":1}"),
+	    EDGE, 1080 - EDGE, BL);
+	put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
+}
+
+static void scene_music(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop checkers", "checkers", "\"color2\":4280229663,\"pitch\":160.0,\"drift\":5.0"), 0, 0, TL);
+	put(sc, comp("sbk_visualizer", "SBK · Viz ring",
+		     "{\"style\":\"ring\",\"width\":720,\"height\":720,\"bars\":72,\"inner\":0.52}"),
+	    MIDX, 120, TC);
+	put(sc, comp("sbk_chip", "SBK · Track chip",
+		     "{\"label\":\"Now playing\",\"value\":\"—\",\"variant\":\"pill\",\"dot\":\"pulse\"}"),
+	    MIDX, 880, TC);
+	put(sc, comp("sbk_clock", "SBK · Clock", NULL), 1920 - EDGE, EDGE, TR);
+	put(sc, light(""), EDGE, EDGE, TL);
+}
+
+static void scene_highlight(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop stars", "stars", "\"pitch\":90.0,\"weight\":2.5"), 0, 0, TL);
+	put(sc, comp("sbk_card", "SBK · Highlight card",
+		     card_json("", "The best overlay is the one nobody notices.", "", "", "none", "centre", 1500)),
+	    MIDX, 380, TC);
+	put(sc, comp("sbk_chip", "SBK · Highlight chip",
+		     "{\"label\":\"@imswarnil\",\"variant\":\"outline\",\"dot\":\"none\",\"enter\":\"pop\"}"),
+	    MIDX, 700, TC);
+	put(sc, light("dot"), 1920 - EDGE, EDGE, TR);
+}
+
+/* ---- breaks ---------------------------------------------------------------- */
+
+static void scene_intermission(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop aurora", "aurora", ""), 0, 0, TL);
+	put(sc, comp("sbk_countdown", "SBK · Intermission ring",
+		     "{\"mode\":\"duration\",\"minutes\":4,\"style\":\"ring\",\"ring_size\":420,"
+		     "\"label\":\"Back in\",\"draw_card\":false,\"enter\":\"grow\"}"),
+	    MIDX, 300, TC);
+	put(sc, comp("sbk_chip", "SBK · Intermission chip",
+		     "{\"label\":\"Stay there\",\"variant\":\"outline\",\"dot\":\"pulse\"}"),
+	    MIDX, 820, TC);
+	put(sc, light(""), 1920 - EDGE, EDGE, TR);
+}
+
+static void scene_brb(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop dots", "dots", "\"drift\":-4.0,\"pitch\":48.0"), 0, 0, TL);
+	put(sc, comp("sbk_visualizer", "SBK · Viz wave", "{\"style\":\"wave\",\"height\":240}"), 0, 1080, BL);
+	put(sc, light(""), EDGE, EDGE, TL);
+	put(sc, comp("sbk_clock", "SBK · Clock", NULL), 1920 - EDGE, EDGE, TR);
+	put(sc, comp("sbk_card", "SBK · Break card",
+		     card_json("Paused", "Be right back", "Two minutes. Stretch your legs.",
+			       "@imswarnil | imswarnil.com", "card", "left", 1000)),
+	    EDGE, 340, TL);
+	put(sc, comp("sbk_countdown", "SBK · Break countdown",
+		     "{\"mode\":\"duration\",\"minutes\":5,\"style\":\"bar\",\"draw_card\":true,\"label\":\"Back in\"}"),
+	    1920 - EDGE, 340, TR);
+}
+
+static void scene_podcast(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop plasma", "plasma", "\"color2\":4281545523,\"drift\":3.0,\"pitch\":140.0"), 0, 0, TL);
+	put(sc, comp("sbk_card", "SBK · Podcast card",
+		     card_json("Episode", "Building things in public", "", "", "none", "centre", 1300)),
+	    MIDX, 220, TC);
+	put(sc, comp("sbk_meter", "SBK · Host meter",
+		     "{\"source\":\"@mic\",\"label\":\"Host\",\"width\":700,\"style\":\"segments\","
+		     "\"segment_count\":28}"),
+	    EDGE, 560, TL);
+	put(sc, comp("sbk_meter", "SBK · Guest meter",
+		     "{\"source\":\"@mic2\",\"label\":\"Guest\",\"width\":700,\"style\":\"segments\","
+		     "\"segment_count\":28}"),
+	    1920 - EDGE, 560, TR);
+	put(sc, comp("sbk_countdown", "SBK · Episode clock",
+		     "{\"mode\":\"up\",\"minutes\":45,\"style\":\"bar\",\"label\":\"Running time\","
+		     "\"draw_card\":true}"),
+	    MIDX, 800, TC);
+	put(sc, light(""), 1920 - EDGE, EDGE, TR);
+}
+
+static void scene_trouble(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop vignette", "vignette", "\"reach\":0.75"), 0, 0, TL);
+	put(sc, comp("sbk_card", "SBK · Trouble card",
+		     card_json("Stand by", "Technical difficulties", "Back in a moment. Do not adjust your set.", "",
+			       "accent", "centre", 1200)),
+	    MIDX, 420, TC);
+	put(sc, light("edge"), 0, 0, TL);
+}
+
+/* ---- closing --------------------------------------------------------------- */
+
+static void scene_support(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop rings", "rings", "\"drift\":2.0,\"pitch\":120.0"), 0, 0, TL);
+	put(sc, comp("sbk_card", "SBK · Support card",
+		     card_json("Support the channel", "Become a member",
+			       "Members get the source for everything built on this stream.", "",
+			       "none", "left", 900)),
+	    EDGE, 240, TL);
+	put(sc, comp("sbk_qr", "SBK · Membership QR",
+		     "{\"text\":\"https://imswarnil.com/#/portal/signup\",\"caption\":\"Scan to join\","
+		     "\"sub\":\"imswarnil.com\",\"code_size\":300,\"variant\":\"card\",\"enter\":\"pop\"}"),
+	    1920 - EDGE, 240, TR);
+	put(sc, comp("sbk_counter", "SBK · Members",
+		     "{\"provider\":\"ghost\",\"label\":\"Members\",\"site\":\"https://imswarnil.com\","
+		     "\"show_goal\":true,\"goal\":500,\"width\":420}"),
+	    EDGE, 620, TL);
+	put(sc, comp("sbk_counter", "SBK · Subscribers",
+		     "{\"provider\":\"youtube\",\"label\":\"Subscribers\",\"width\":420}"),
+	    EDGE + 460, 620, TL);
+	put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
+	put(sc, light(""), 1920 - EDGE, EDGE, TR);
+}
+
+static void scene_ending(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop stripes", "stripes", "\"drift\":10.0,\"pitch\":96.0"), 0, 0, TL);
+	put(sc, comp("sbk_visualizer", "SBK · Viz dots", "{\"style\":\"dots\",\"height\":240}"), 0, 1080, BL);
+	put(sc, comp("sbk_card", "SBK · Ending card",
+		     card_json("That is a wrap", "Thanks for watching", "Subscribe for the next one.", "", "none",
+			       "centre", 1400)),
+	    MIDX, 320, TC);
+	put(sc, comp("sbk_progress", "SBK · Subscriber goal",
+		     "{\"label\":\"Subscriber goal\",\"value\":640,\"target\":1000,\"width\":720}"),
+	    MIDX, 620, TC);
+	put(sc, comp("sbk_chip", "SBK · Subscribe chip",
+		     "{\"label\":\"youtube.com/@imswarnil\",\"variant\":\"accent\",\"dot\":\"none\"}"),
+	    MIDX, 760, TC);
+	put(sc, comp("sbk_qr", "SBK · Channel QR",
+		     "{\"text\":\"https://youtube.com/@imswarnil\",\"caption\":\"Scan to subscribe\","
+		     "\"sub\":\"\",\"code_size\":240,\"variant\":\"none\",\"invert\":true}"),
+	    1920 - EDGE, 1080 - EDGE, BR);
+	put(sc, light(""), EDGE, EDGE, TL);
+}
+
+static void scene_vertical(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop hex", "hex", "\"drift\":3.0,\"pitch\":60.0"), 0, 0, TL);
+	put_plate(sc, comp("sbk_plate", "SBK · Cam plate vertical",
+		     "{\"aspect\":\"9x16\",\"size\":1.22,\"radius\":24.0,\"shadow_y\":20.0,\"shadow_blur\":60.0,\"fill_glass\":true}"),
+	    MIDX, 1080 - 30, 439, 781, OBS_ALIGN_BOTTOM | OBS_ALIGN_CENTER);
+	put_box(sc, camera(), MIDX, 1080 - 30, 439, 781, OBS_ALIGN_BOTTOM | OBS_ALIGN_CENTER);
+	put(sc, comp("sbk_frame", "SBK · Cam frame vertical",
+		     "{\"aspect\":\"9x16\",\"size\":1.22,\"style\":\"ring\",\"radius\":24.0,"
+		     "\"label\":\"@imswarnil\",\"chip_at\":\"bottom-left\"}"),
+	    MIDX, 1080 - 30, OBS_ALIGN_BOTTOM | OBS_ALIGN_CENTER);
+	put(sc, comp("sbk_card", "SBK · Vertical card",
+		     card_json("Short", "One idea, sixty seconds", "", "", "none", "centre", 760)),
+	    MIDX, 56, TC);
+	put(sc, light("dot"), 1920 - EDGE, EDGE, TR);
+}
+
+/* ---- not for the stream ----------------------------------------------------- */
+
+static void scene_desk(obs_scene_t *sc)
+{
+	put(sc, backdrop("SBK · Backdrop desk", "solid", ""), 0, 0, TL);
+	put(sc, comp("sbk_stats", "SBK · Stats", "{\"width\":760,\"show_fps\":true,\"variant\":\"card\"}"),
+	    EDGE, 200, TL);
+	put(sc, comp("sbk_meter", "SBK · Program meter",
+		     "{\"source\":\"@program\",\"label\":\"Program\",\"width\":760}"),
+	    EDGE, 460, TL);
+	put(sc, comp("sbk_meter", "SBK · Mic meter desk",
+		     "{\"source\":\"@mic\",\"label\":\"Mic\",\"width\":760}"),
+	    EDGE, 600, TL);
+	put(sc, comp("sbk_comments", "SBK · Desk comments",
+		     "{\"width\":700,\"title\":\"Questions\",\"show_count\":4,\"variant\":\"card\"}"),
+	    1920 - EDGE, 460, TR);
+	put(sc, comp("sbk_countdown", "SBK · Uptime",
+		     "{\"mode\":\"uptime\",\"style\":\"digits\",\"label\":\"On air\",\"draw_card\":true}"),
+	    1920 - EDGE, 200, TR);
+	put(sc, light(""), 1920 - EDGE, EDGE, TR);
+}
+
+/* The running order, top of the show to the bottom. */
+static const struct scene_spec SHOW[] = {
+	{"SBK · Starting soon", scene_starting},
+	{"SBK · Welcome", scene_welcome},
+	{"SBK · Lesson", scene_lesson},
+	{"SBK · Screen share", scene_screen_share},
+	{"SBK · Screen share + two", scene_pair_share},
+	{"SBK · Comments", scene_comments},
+	{"SBK · Talking head", scene_talking_head},
+	{"SBK · Interview", scene_interview},
+	{"SBK · Live", scene_live},
+	{"SBK · Gameplay", scene_gameplay},
+	{"SBK · Music", scene_music},
+	{"SBK · Highlight", scene_highlight},
+	{"SBK · Intermission", scene_intermission},
+	{"SBK · Be right back", scene_brb},
+	{"SBK · Podcast", scene_podcast},
+	{"SBK · Technical difficulties", scene_trouble},
+	{"SBK · Support", scene_support},
+	{"SBK · Ending", scene_ending},
+	{"SBK · Vertical", scene_vertical},
+	{"SBK · Desk (private)", scene_desk},
+};
+#define N_SHOW (sizeof(SHOW) / sizeof(SHOW[0]))
+
+/*  A scene the show no longer has.
+
+    Scenes are reused rather than recreated, which is what keeps anything you
+    dragged where you like it. The cost is that renaming or dropping a scene
+    would leave the old one behind, empty, for ever. This removes any SBK scene
+    that is not in the running order — and only those, so a scene you made
+    yourself is never touched.  */
+static void prune_retired_scenes(void)
+{
+	struct obs_frontend_source_list list = {0};
+	obs_frontend_get_scenes(&list);
+	for (size_t i = 0; i < list.sources.num; i++) {
+		obs_source_t *src = list.sources.array[i];
+		const char *name = obs_source_get_name(src);
+		if (!name || strncmp(name, "SBK · ", strlen("SBK · ")) != 0)
+			continue;
+		bool keep = false;
+		for (size_t j = 0; j < N_SHOW && !keep; j++)
+			keep = strcmp(name, SHOW[j].name) == 0;
+		if (keep)
+			continue;
+		SBK_LOG(LOG_INFO, "retired scene removed: %s", name);
+		obs_source_remove(src);
+	}
+	obs_frontend_source_list_free(&list);
+}
+
 int sbk_build_scenes(void)
 {
 	measure();
 	ensure_mic();
-	int n = 0;
 
-	/* 1. Starting soon — the countdown screen people sit on */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Starting soon");
-		put(sc, backdrop("SBK · Backdrop grid", "grid", "\"drift\":6.0,\"pitch\":72.0"), 0, 0, TL);
-		put(sc, comp("sbk_visualizer", "SBK · Viz bars", "{\"style\":\"bars\",\"height\":240}"), 0, 1080, BL);
-		put(sc, light(""), EDGE, EDGE, TL);
-		put(sc, comp("sbk_clock", "SBK · Clock", NULL), 1920 - EDGE, EDGE, TR);
-		put(sc, comp("sbk_card", "SBK · Starting soon card",
-			     card_json("Starting soon", "Building a Salesforce app live",
-				       "Grab a coffee. We begin at the top of the hour.",
-				       "@imswarnil | youtube.com/@imswarnil | imswarnil.com", "card", "left", 1100)),
-		    EDGE, 300, TL);
-		put(sc, comp("sbk_countdown", "SBK · Countdown",
-			     "{\"mode\":\"duration\",\"minutes\":15,\"draw_card\":true}"),
-		    1920 - EDGE, 300, TR);
+	/* built back to front: OBS puts the most recently added scene at the top
+	   of the Scenes panel, so this is what makes the panel read in show order */
+	for (size_t i = N_SHOW; i-- > 0;) {
+		obs_scene_t *sc = fresh_scene(SHOW[i].name);
+		if (!sc)
+			continue;
+		SHOW[i].build(sc);
 		obs_scene_release(sc);
-		n++;
-	}
-	/* 2. Welcome — the first seconds of the stream, nothing to read */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Welcome");
-		put(sc, backdrop("SBK · Backdrop gradient", "gradient", "\"color2\":4281545523,\"angle\":\"diagonal\""), 0, 0,
-		    TL);
-		put(sc, comp("sbk_visualizer", "SBK · Viz line",
-			     "{\"style\":\"line\",\"height\":300,\"bars\":72,\"fill_alpha\":0.22}"),
-		    0, 1080, BL);
-		put(sc, comp("sbk_card", "SBK · Welcome card",
-			     card_json("Live now", "Welcome in", "Say hello in the chat while everyone arrives.", "",
-				       "none", "centre", 1400)),
-		    MIDX, 360, TC);
-		put(sc, comp("sbk_chip", "SBK · Handle chip",
-			     "{\"label\":\"@imswarnil\",\"dot\":\"live\",\"variant\":\"pill\"}"),
-		    MIDX, 640, TC);
-		put(sc, light("bar"), 0, EDGE, TL);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 3. Live — the everyday scene: camera under the frame, lower third, ticker */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Live");
-		/* first added is furthest back, so the camera lands under its frame */
-		put_box(sc, camera(), 1920 - EDGE, 560, 640, 360, TR);
-		put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
-		put(sc, comp("sbk_lower_third", "SBK · Lower third", NULL), EDGE, 900, BL);
-		put(sc, comp("sbk_frame", "SBK · Cam frame",
-			     "{\"aspect\":\"16x9\",\"size\":1.0,\"style\":\"ring\",\"label\":\"@imswarnil\"}"),
-		    1920 - EDGE, 560, TR);
-		put(sc, light(""), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 4. Talking head — the camera is the whole picture, so the chrome shrinks */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Talking head");
-		put_box(sc, camera(), MIDX, EDGE, 1664, 936, TC);
-		put(sc, comp("sbk_frame", "SBK · Cam frame full",
-			     "{\"aspect\":\"16x9\",\"size\":2.6,\"style\":\"corner\",\"bracket\":96.0,\"label\":\"\","
-			     "\"line\":\"accent\",\"weight\":4.0}"),
-		    MIDX, EDGE, TC);
-		put(sc, comp("sbk_lower_third", "SBK · Lower third minimal",
-			     "{\"variant\":\"minimal\",\"bar\":true}"),
-		    EDGE + 40, 980, BL);
-		put(sc, comp("sbk_chip", "SBK · Topic chip",
-			     "{\"label\":\"Chapter 1 — setting up\",\"variant\":\"card\",\"dot\":\"accent\"}"),
-		    1920 - EDGE - 40, 980, BR);
-		put(sc, light("dot"), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 5. Screen share — the code has the frame, so everything hugs the edges */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Screen share");
-		put_box(sc, camera(), 1920 - EDGE, 1080 - EDGE, 420, 236, BR);
-		put(sc, comp("sbk_frame", "SBK · Cam frame small",
-			     "{\"aspect\":\"16x9\",\"size\":0.66,\"style\":\"ring\",\"radius\":16.0,\"label\":\"@imswarnil\","
-			     "\"chip_at\":\"bottom-left\"}"),
-		    1920 - EDGE, 1080 - EDGE, BR);
-		put(sc, comp("sbk_chip", "SBK · Topic chip",
-			     "{\"label\":\"Chapter 1 — setting up\",\"variant\":\"card\",\"dot\":\"accent\"}"),
-		    EDGE, EDGE, TL);
-		put(sc, comp("sbk_progress", "SBK · Chapter progress",
-			     "{\"label\":\"Chapters\",\"value\":1,\"target\":8,\"style\":\"segments\",\"segments\":8,"
-			     "\"as_percent\":false,\"width\":420,\"step\":1}"),
-		    EDGE, 1080 - EDGE, BL);
-		put(sc, comp("sbk_meter", "SBK · Mic meter",
-			     "{\"source\":\"@mic\",\"label\":\"Mic\",\"width\":300,\"style\":\"segments\","
-			     "\"segment_count\":20,\"show_db\":false}"),
-		    EDGE, 1080 - EDGE - 130, BL);
-		put(sc, light("badge"), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 6. Interview — two cameras, two names, nothing else competing */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Interview");
-		put(sc, comp("sbk_frame", "SBK · Cam frame left",
-			     "{\"aspect\":\"16x9\",\"size\":1.31,\"style\":\"ring\",\"label\":\"\"}"),
-		    EDGE, 300, TL);
-		put(sc, comp("sbk_frame", "SBK · Cam frame right",
-			     "{\"aspect\":\"16x9\",\"size\":1.31,\"style\":\"ring\",\"label\":\"\"}"),
-		    1920 - EDGE, 300, TR);
-		put(sc, comp("sbk_lower_third", "SBK · Name left",
-			     "{\"variant\":\"split\",\"name\":\"Swarnil Singhai\",\"title\":\"Host\"}"),
-		    EDGE, 840, TL);
-		put(sc, comp("sbk_lower_third", "SBK · Name right",
-			     "{\"variant\":\"split\",\"name\":\"Your guest\",\"title\":\"Guest\"}"),
-		    1920 - EDGE - 840, 840, TL);
-		put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
-		put(sc, light(""), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 7. Q&A — the question gets the left half and the camera the right */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Q&A");
-		put_box(sc, camera(), 1920 - EDGE, 360, 760, 428, TR);
-		put(sc, backdrop("SBK · Backdrop scrim", "scrim", "\"reach\":0.85"), 0, 0, TL);
-		put(sc, comp("sbk_chip", "SBK · QA chip",
-			     "{\"label\":\"Question\",\"variant\":\"accent\",\"dot\":\"none\"}"),
-		    EDGE, 260, TL);
-		put(sc, comp("sbk_card", "SBK · Question card",
-			     card_json("", "How do you structure a Salesforce org for scale?",
-				       "Asked by a viewer in the chat.", "", "split", "left", 860)),
-		    EDGE, 360, TL);
-		put(sc, comp("sbk_frame", "SBK · Cam frame qa",
-			     "{\"aspect\":\"16x9\",\"size\":1.19,\"style\":\"inset\",\"label\":\"@imswarnil\"}"),
-		    1920 - EDGE, 360, TR);
-		put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
-		put(sc, light(""), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 8. Be right back */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Be right back");
-		put(sc, backdrop("SBK · Backdrop dots", "dots", "\"drift\":-4.0,\"pitch\":48.0"), 0, 0, TL);
-		put(sc, comp("sbk_visualizer", "SBK · Viz wave", "{\"style\":\"wave\",\"height\":240}"), 0, 1080, BL);
-		put(sc, light(""), EDGE, EDGE, TL);
-		put(sc, comp("sbk_clock", "SBK · Clock", NULL), 1920 - EDGE, EDGE, TR);
-		put(sc, comp("sbk_card", "SBK · Break card",
-			     card_json("Paused", "Be right back", "Two minutes. Stretch your legs.",
-				       "@imswarnil | imswarnil.com", "card", "left", 1000)),
-		    EDGE, 340, TL);
-		put(sc, comp("sbk_countdown", "SBK · Break countdown",
-			     "{\"mode\":\"duration\",\"minutes\":5,\"draw_card\":true}"),
-		    1920 - EDGE, 340, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 9. Technical difficulties — the one scene that should look wrong on
-	   purpose, so nobody mistakes it for the show */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Technical difficulties");
-		put(sc, backdrop("SBK · Backdrop vignette", "vignette", "\"reach\":0.75"), 0, 0, TL);
-		put(sc, comp("sbk_card", "SBK · Trouble card",
-			     card_json("Stand by", "Technical difficulties", "Back in a moment. Do not adjust your set.", "",
-				       "accent", "centre", 1200)),
-		    MIDX, 420, TC);
-		put(sc, light("edge"), 0, 0, TL);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 10. Ending — the ask goes here, with the goal it is asking for */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Ending");
-		put(sc, backdrop("SBK · Backdrop stripes", "stripes", "\"drift\":10.0,\"pitch\":96.0"), 0, 0, TL);
-		put(sc, comp("sbk_visualizer", "SBK · Viz dots", "{\"style\":\"dots\",\"height\":240}"), 0, 1080, BL);
-		put(sc, comp("sbk_card", "SBK · Ending card",
-			     card_json("That is a wrap", "Thanks for watching", "Subscribe for the next one.", "", "none",
-				       "centre", 1400)),
-		    MIDX, 320, TC);
-		put(sc, comp("sbk_progress", "SBK · Subscriber goal",
-			     "{\"label\":\"Subscriber goal\",\"value\":640,\"target\":1000,\"width\":720}"),
-		    MIDX, 620, TC);
-		put(sc, comp("sbk_chip", "SBK · Subscribe chip",
-			     "{\"label\":\"youtube.com/@imswarnil\",\"variant\":\"accent\",\"dot\":\"none\"}"),
-		    MIDX, 760, TC);
-		put(sc, comp("sbk_qr", "SBK · Channel QR",
-			     "{\"text\":\"https://youtube.com/@imswarnil\",\"caption\":\"Scan to subscribe\","
-			     "\"sub\":\"\",\"code_size\":240,\"variant\":\"none\",\"invert\":true}"),
-		    1920 - EDGE, 1080 - EDGE, BR);
-		put(sc, light(""), EDGE, EDGE, TL);
-		obs_scene_release(sc);
-		n++;
 	}
 
-	/* 11. Intermission — the ring timer doing the work, and nothing to read.
-	   The one to cut to when you need four minutes and do not want to explain. */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Intermission");
-		put(sc, backdrop("SBK · Backdrop aurora", "aurora", "\"color2\":4283584542,\"drift\":4.0,\"reach\":0.55"), 0, 0, TL);
-		put(sc, comp("sbk_countdown", "SBK · Intermission ring",
-			     "{\"mode\":\"duration\",\"minutes\":4,\"style\":\"ring\",\"ring_size\":420,"
-			     "\"label\":\"Back in\",\"draw_card\":false}"),
-		    MIDX, 300, TC);
-		put(sc, comp("sbk_chip", "SBK · Intermission chip",
-			     "{\"label\":\"Stay there\",\"variant\":\"outline\",\"dot\":\"pulse\"}"),
-		    MIDX, 820, TC);
-		put(sc, light(""), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 12. Podcast — two people, no camera, the meters doing the showing. It
-	   should be obvious at a glance which microphone is live. */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Podcast");
-		put(sc, backdrop("SBK · Backdrop plasma", "plasma", "\"color2\":4281545523,\"drift\":3.0,\"pitch\":140.0"), 0, 0, TL);
-		put(sc, comp("sbk_card", "SBK · Podcast card",
-			     card_json("Episode", "Building things in public", "", "", "none", "centre", 1300)),
-		    MIDX, 220, TC);
-		put(sc, comp("sbk_meter", "SBK · Host meter",
-			     "{\"source\":\"@mic\",\"label\":\"Host\",\"width\":700,\"style\":\"segments\","
-			     "\"segment_count\":28}"),
-		    EDGE, 560, TL);
-		put(sc, comp("sbk_meter", "SBK · Guest meter",
-			     "{\"source\":\"@mic2\",\"label\":\"Guest\",\"width\":700,\"style\":\"segments\","
-			     "\"segment_count\":28}"),
-		    1920 - EDGE, 560, TR);
-		put(sc, comp("sbk_countdown", "SBK · Episode clock",
-			     "{\"mode\":\"up\",\"minutes\":45,\"style\":\"bar\",\"label\":\"Running time\","
-			     "\"draw_card\":true}"),
-		    MIDX, 800, TC);
-		put(sc, light(""), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 13. Gameplay — the capture has the frame, so the camera shrinks into a
-	   corner and everything else hugs the edges. */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Gameplay");
-		put_box(sc, camera(), 1920 - EDGE, EDGE, 360, 203, TR);
-		put(sc, comp("sbk_frame", "SBK · Cam frame corner",
-			     "{\"aspect\":\"16x9\",\"size\":0.56,\"style\":\"corner-out\",\"bracket\":40.0,"
-			     "\"line\":\"accent\",\"label\":\"\"}"),
-		    1920 - EDGE, EDGE, TR);
-		put(sc, comp("sbk_chip", "SBK · Now playing chip",
-			     "{\"label\":\"Now playing\",\"value\":\"Act 2\",\"variant\":\"card\",\"dot\":\"pulse\"}"),
-		    EDGE, EDGE, TL);
-		put(sc, comp("sbk_progress", "SBK · Run progress",
-			     "{\"label\":\"Run\",\"value\":3,\"target\":10,\"style\":\"segments\","
-			     "\"segments\":10,\"width\":420,\"step\":1}"),
-		    EDGE, 1080 - EDGE, BL);
-		put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 14. Highlight — one sentence, full bleed. For reading a question out, or
-	   landing a point you want people to screenshot. */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Highlight");
-		put(sc, backdrop("SBK · Backdrop stars", "stars", "\"pitch\":90.0,\"weight\":2.5"), 0, 0, TL);
-		put(sc, comp("sbk_card", "SBK · Highlight card",
-			     card_json("", "The best overlay is the one nobody notices.", "", "", "none", "centre", 1500)),
-		    MIDX, 380, TC);
-		put(sc, comp("sbk_chip", "SBK · Highlight chip",
-			     "{\"label\":\"@imswarnil\",\"variant\":\"outline\",\"dot\":\"none\"}"),
-		    MIDX, 700, TC);
-		put(sc, light("dot"), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 15. Music — the visualizer as the whole scene, on the program mix, so it
-	   moves to whatever is actually playing. */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Music");
-		put(sc, backdrop("SBK · Backdrop checkers", "checkers", "\"color2\":4280229663,\"pitch\":160.0,\"drift\":5.0"), 0, 0, TL);
-		put(sc, comp("sbk_visualizer", "SBK · Viz ring",
-			     "{\"style\":\"ring\",\"width\":720,\"height\":720,\"bars\":72,\"inner\":0.52}"),
-		    MIDX, 120, TC);
-		put(sc, comp("sbk_chip", "SBK · Track chip",
-			     "{\"label\":\"Now playing\",\"value\":\"—\",\"variant\":\"pill\",\"dot\":\"pulse\"}"),
-		    MIDX, 880, TC);
-		put(sc, comp("sbk_clock", "SBK · Clock", NULL), 1920 - EDGE, EDGE, TR);
-		put(sc, light(""), EDGE, EDGE, TL);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 16. Support — the ask, with something to scan. The counters are wired
-	   to nothing until you put your own key in: they show a dash and a grey
-	   lamp until then, which is the honest thing for them to do. */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Support");
-		put(sc, backdrop("SBK · Backdrop rings", "rings", "\"drift\":2.0,\"pitch\":120.0"), 0, 0, TL);
-		put(sc, comp("sbk_card", "SBK · Support card",
-			     card_json("Support the channel", "Become a member",
-				       "Members get the source for everything built on this stream.", "",
-				       "none", "left", 900)),
-		    EDGE, 240, TL);
-		put(sc, comp("sbk_qr", "SBK · Membership QR",
-			     "{\"text\":\"https://imswarnil.com/#/portal/signup\",\"caption\":\"Scan to join\","
-			     "\"sub\":\"imswarnil.com\",\"code_size\":300,\"variant\":\"card\"}"),
-		    1920 - EDGE, 240, TR);
-		put(sc, comp("sbk_counter", "SBK · Members",
-			     "{\"provider\":\"ghost\",\"label\":\"Members\",\"site\":\"https://imswarnil.com\","
-			     "\"show_goal\":true,\"goal\":500,\"width\":420}"),
-		    EDGE, 620, TL);
-		put(sc, comp("sbk_counter", "SBK · Subscribers",
-			     "{\"provider\":\"youtube\",\"label\":\"Subscribers\",\"width\":420}"),
-		    EDGE + 460, 620, TL);
-		put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
-		put(sc, light(""), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 17. Vertical — a 9:16 crop inside the landscape canvas, for the clip
-	   that becomes a Short. Frame yourself inside the box and the same take
-	   cuts both ways. */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Vertical");
-		put(sc, backdrop("SBK · Backdrop hex", "hex", "\"drift\":3.0,\"pitch\":60.0"), 0, 0, TL);
-		put_box(sc, camera(), MIDX, 1080 - 30, 439, 781, OBS_ALIGN_BOTTOM | OBS_ALIGN_CENTER);
-		put(sc, comp("sbk_frame", "SBK · Cam frame vertical",
-			     "{\"aspect\":\"9x16\",\"size\":1.22,\"style\":\"ring\",\"radius\":24.0,"
-			     "\"label\":\"@imswarnil\",\"chip_at\":\"bottom-left\"}"),
-		    MIDX, 1080 - 30, OBS_ALIGN_BOTTOM | OBS_ALIGN_CENTER);
-		put(sc, comp("sbk_card", "SBK · Vertical card",
-			     card_json("Short", "One idea, sixty seconds", "", "", "none", "centre", 760)),
-		    MIDX, 56, TC);
-		put(sc, light("dot"), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-	/* 18. Desk — not for the stream. Open it as a windowed projector on a
-	   second monitor and it is a read-out of how the broadcast is going. */
-	{
-		obs_scene_t *sc = fresh_scene("SBK · Desk (private)");
-		put(sc, backdrop("SBK · Backdrop desk", "solid", ""), 0, 0, TL);
-		put(sc, comp("sbk_stats", "SBK · Stats",
-			     "{\"width\":760,\"show_fps\":true,\"variant\":\"card\"}"),
-		    EDGE, 200, TL);
-		put(sc, comp("sbk_meter", "SBK · Program meter",
-			     "{\"source\":\"@program\",\"label\":\"Program\",\"width\":760}"),
-		    EDGE, 460, TL);
-		put(sc, comp("sbk_meter", "SBK · Mic meter desk",
-			     "{\"source\":\"@mic\",\"label\":\"Mic\",\"width\":760}"),
-		    EDGE, 600, TL);
-		put(sc, comp("sbk_clock", "SBK · Clock seconds", "{\"seconds\":true}"), 1920 - EDGE, 200, TR);
-		put(sc, light(""), 1920 - EDGE, EDGE, TR);
-		obs_scene_release(sc);
-		n++;
-	}
-
-	/* the show's own transition, if it has been created */
+	prune_retired_scenes();
 	obs_frontend_set_transition_duration(400);
-	obs_source_t *first = obs_get_source_by_name("SBK · Starting soon");
+	obs_source_t *first = obs_get_source_by_name(SHOW[0].name);
 	if (first) {
 		obs_frontend_set_current_scene(first);
 		obs_source_release(first);
 	}
 	release_held();
-	SBK_LOG(LOG_INFO, "%d scenes built", n);
-	return n;
+	SBK_LOG(LOG_INFO, "%zu scenes built", N_SHOW);
+	return (int)N_SHOW;
 }
 
 /* The frontend API can list transitions and choose one, but it has no call to
@@ -803,15 +942,6 @@ struct walk_step {
 	bool shoot;
 };
 
-static const char *const WALK[] = {
-	"SBK · Starting soon", "SBK · Welcome",      "SBK · Live",
-	"SBK · Talking head",  "SBK · Screen share", "SBK · Interview",
-	"SBK · Q&A",           "SBK · Intermission", "SBK · Podcast",
-	"SBK · Gameplay",      "SBK · Highlight",    "SBK · Music",
-	"SBK · Support",       "SBK · Vertical",     "SBK · Be right back",
-	"SBK · Technical difficulties", "SBK · Ending", "SBK · Desk (private)",
-};
-#define N_WALK (sizeof(WALK) / sizeof(WALK[0]))
 
 static void step_switch(void *param)
 {
@@ -822,12 +952,34 @@ static void step_switch(void *param)
 	}
 	obs_frontend_set_current_scene(s);
 	obs_source_release(s);
+	SBK_LOG(LOG_INFO, "self-test: on '%s'", (const char *)param);
 }
 
 static void step_shoot(void *param)
 {
 	UNUSED_PARAMETER(param);
 	obs_frontend_take_screenshot();
+}
+
+/*  The walk cuts rather than fades.
+
+    A 400 ms fade plus the sources' own arrivals meant a shot could still carry a
+    ghost of the scene before it, and a published picture of one scene with
+    another bleeding through is worse than no picture. Zero duration makes every
+    switch a cut, so the frame is only ever one scene.  */
+static int g_saved_duration;
+
+static void step_cut(void *param)
+{
+	UNUSED_PARAMETER(param);
+	g_saved_duration = obs_frontend_get_transition_duration();
+	obs_frontend_set_transition_duration(0);
+}
+
+static void step_uncut(void *param)
+{
+	UNUSED_PARAMETER(param);
+	obs_frontend_set_transition_duration(g_saved_duration > 0 ? g_saved_duration : 400);
 }
 
 /*  Hiding the camera for a screenshot run.
@@ -900,17 +1052,19 @@ static void *walk_thread(void *arg)
 	os_set_thread_name("sbk-selftest");
 	if (g_walk_clean)
 		obs_queue_task(OBS_TASK_UI, step_hide, NULL, true);
-	for (size_t i = 0; i < N_WALK; i++) {
-		obs_queue_task(OBS_TASK_UI, step_switch, (void *)WALK[i], true);
-		/* the transition has to land before the shot, or the frame is a
-		   blend of two scenes */
-		os_sleep_ms(1500);
+	obs_queue_task(OBS_TASK_UI, step_cut, NULL, true);
+	for (size_t i = 0; i < N_SHOW; i++) {
+		obs_queue_task(OBS_TASK_UI, step_switch, (void *)SHOW[i].name, true);
+		/* the cut is instant, but every source plays an arrival and the
+		   pollers want a frame or two — shoot once the scene has settled */
+		os_sleep_ms(2000);
 		obs_queue_task(OBS_TASK_UI, step_shoot, NULL, true);
 		os_sleep_ms(600);
 	}
+	obs_queue_task(OBS_TASK_UI, step_uncut, NULL, true);
 	if (g_walk_clean)
 		obs_queue_task(OBS_TASK_UI, step_restore, NULL, true);
-	SBK_LOG(LOG_INFO, "self-test: walked %zu scenes%s, screenshots are in the recording folder", N_WALK,
+	SBK_LOG(LOG_INFO, "self-test: walked %zu scenes%s, screenshots are in the recording folder", N_SHOW,
 		g_walk_clean ? " with the camera hidden" : "");
 	return NULL;
 }

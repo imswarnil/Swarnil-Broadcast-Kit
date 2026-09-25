@@ -222,8 +222,7 @@ static void onair_render(void *data, gs_effect_t *unused)
 
 done:
 	sbk_stage_end(&o->stage);
-	struct sbk_anim_out a = sbk_anim_eval(&o->anim);
-	sbk_stage_present(&o->stage, a.alpha, a.dx, a.dy);
+	sbk_stage_present_anim(&o->stage, sbk_anim_eval(&o->anim));
 }
 
 static void onair_show(void *d) { sbk_anim_on_show(&((struct onair *)d)->anim); }

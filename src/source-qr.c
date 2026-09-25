@@ -228,8 +228,7 @@ static void qr_render(void *data, gs_effect_t *unused)
 		sbk_text_draw(&q->sub, ((float)q->cx - (float)sbk_text_w(&q->sub)) * 0.5f, q->sub_y);
 
 	sbk_stage_end(&q->stage);
-	struct sbk_anim_out a = sbk_anim_eval(&q->anim);
-	sbk_stage_present(&q->stage, a.alpha, a.dx, a.dy);
+	sbk_stage_present_anim(&q->stage, sbk_anim_eval(&q->anim));
 }
 
 static void qr_show(void *d) { sbk_anim_on_show(&((struct qr_src *)d)->anim); }

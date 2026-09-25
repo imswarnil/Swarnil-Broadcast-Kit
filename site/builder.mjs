@@ -47,6 +47,30 @@ export const PALETTE = [
 		],
 	},
 	{
+		id: 'sbk_plate', name: 'Plate', group: 'Camera', size: [640, 360],
+		settings: { aspect: '16x9', size: 1.0, radius: 20.0, shadow_y: 18.0, shadow_blur: 52.0, fill: false },
+		fields: [
+			['aspect', 'Aspect', ['16x9', '9x16', '1x1', '4x5', '4x3', '21x9', 'custom']],
+			['size', 'Size', 'number'],
+			['radius', 'Corner radius', 'number'],
+			['shadow_y', 'Shadow drop', 'number'],
+			['shadow_blur', 'Shadow blur', 'number'],
+			['fill', 'Fill the shape', 'bool'],
+		],
+	},
+	{
+		id: 'sbk_comments', name: 'Comments', group: 'Chat', size: [560, 420],
+		settings: { width: 560, title: 'Questions', show_count: 3, rotate: 12.0, variant: 'card',
+			manual: 'Priya: does this work with a capture card?\nMarco: which OBS version is this?' },
+		fields: [
+			['title', 'Heading', 'text'],
+			['manual', 'Questions, one per line as Name: question', 'text'],
+			['show_count', 'Show at once', 'number'],
+			['rotate', 'Rotate every (seconds)', 'number'],
+			['variant', 'Variant', ['card', 'glass', 'none', 'accent', 'outline']],
+		],
+	},
+	{
 		id: 'sbk_frame', name: 'Cam frame', group: 'Camera', size: [640, 360],
 		settings: { aspect: '16x9', size: 1.0, style: 'ring', label: '@imswarnil' },
 		fields: [
@@ -181,6 +205,16 @@ export const START = [
 			{ id: 'sbk_qr', x: 1452, y: 240 },
 			{ id: 'sbk_counter', x: 120, y: 620 },
 			{ id: 'sbk_ticker', x: 0, y: 1024 },
+		],
+	},
+	{
+		id: 'teaching', name: 'Teaching',
+		items: [
+			{ id: 'sbk_plate', x: 1380, y: 724, settings: { aspect: '16x9', size: 0.66, radius: 16, shadow_y: 18, shadow_blur: 48 } },
+			{ id: 'sbk_frame', x: 1380, y: 724, settings: { aspect: '16x9', size: 0.66, style: 'ring', radius: 16, label: '@imswarnil' } },
+			{ id: 'sbk_comments', x: 120, y: 200, settings: { width: 560, title: 'Questions', show_count: 3 } },
+			{ id: 'sbk_chip', x: 120, y: 120, settings: { label: 'Chapter 1 — setting up', variant: 'card', dot: 'accent' } },
+			{ id: 'sbk_onair', x: 1632, y: 120, settings: { shape: 'badge' } },
 		],
 	},
 ];

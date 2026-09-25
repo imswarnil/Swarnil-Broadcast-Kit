@@ -1,12 +1,12 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/art/banner-dark.svg">
-  <img alt="SBK — Swarnil Broadcast Kit. Overlays OBS draws itself. A native plugin, not a browser source: fifteen sources, six filters, a transition, a control dock and a show of eighteen scenes." src="docs/art/banner-light.svg">
+  <img alt="SBK — Swarnil Broadcast Kit. Overlays OBS draws itself. A native plugin, not a browser source: seventeen sources, six filters, two transitions, a control dock and a show of twenty scenes." src="docs/art/banner-light.svg">
 </picture>
 
 # Swarnil Broadcast Kit
 
-**Native OBS Studio overlays: fifteen sources, six filters, a transition, a
-control dock and a show of eighteen scenes — drawn by OBS itself.**
+**Native OBS Studio overlays: seventeen sources, six filters, two transitions,
+a control dock and a show of twenty scenes — drawn by OBS itself.**
 
 No browser source, no web server, no URL to paste. Drop `sbk.plugin` into OBS
 and *Sources → +* fills up with **SBK …** sources drawn by libobs: type is OBS's
@@ -55,6 +55,7 @@ locked into.
 | **SBK Lower Third** | A name and a line under it. Card, pill, split, minimal or underline; replays its arrival on a hotkey. |
 | **SBK Ticker** | A tag and items sliding across the foot. On glass, bare, or one chip per item, fading at both ends. |
 | **SBK Cam Frame** | The treatment over your camera. 16:9, **9:16**, 1:1, 4:5, 4:3 or 21:9, and seven line treatments. |
+| **SBK Plate** | The drop shadow OBS does not have. Put one behind a camera or a capture and it sits on the backdrop instead of floating on it. |
 | **SBK Visualizer** | Bars, mirrored bars, waveform, dot matrix, ring, block ladder or filled line — from the **program mix** by default. |
 | **SBK Meter** | A real level meter in dB, with peak hold and the zones a broadcaster expects. |
 | **SBK Stats** | Uptime, bitrate, dropped frames, render rate, and a health lamp. |
@@ -62,6 +63,7 @@ locked into.
 | **SBK QR** | A scannable code for a membership page, a donation link or your site. Generated in the plugin. |
 | **SBK Card** | The announcement: eyebrow, title, body, chips. Five variants. |
 | **SBK Backdrop** | Sixteen grounds: solid, scrim, vignette, gradient, grid, dots, stripes, waves, rings, hex, grain, aurora, plasma, starfield, checkers — and they drift. |
+| **SBK Comments** | Questions on screen: typed by you, read from your **YouTube live chat**, or from any JSON. Pages through a queue on a timer. |
 | **SBK Chip** | One badge: a handle, a count, a “Q&A”, with a dot that can light only when you are live. |
 | **SBK Progress** | A goal, nudged up and down on a hotkey. |
 | **SBK Timer** | Down to a duration or a time of day, or up from zero or since the stream started — digits, a ring, or a bar. |
@@ -80,9 +82,13 @@ locked into.
 
 ### And
 
-**SBK Wipe**, a real transition — bar, dip, slide, push, iris, blinds, or a band
-of accent that takes the cut with it. A **control dock** inside OBS. A **phone
-remote**. An **eighteen-scene show** and a 1080p60 profile.
+Two real transitions. **SBK Wipe** — bar, dip, slide, push, iris, blinds, or a
+band of accent that takes the cut with it. **SBK Logo Sting** — a colour field
+crosses, your logo lands on it, the field leaves on the next scene, and the cut
+happens underneath where nobody sees it. No video file to render.
+
+A **control dock** inside OBS. A **phone remote**. A **twenty-scene show** and a
+1080p60 profile.
 
 Every source shares a **Look** group — one accent colour, a scale slider that
 grows type, padding and radius together, a tone (glass, solid or light) and the
@@ -99,7 +105,7 @@ font. Give every source the same accent and the scene changes together.
 3. Open OBS. **Tools → Broadcast Kit: create the scene collection** builds the
    show, switches to it, and puts your camera and microphone in — the camera
    with its corners genuinely rounded by a filter, not covered by one.
-4. Add **SBK Wipe** from the Scene Transitions panel's **+**.
+4. Add **SBK Wipe** or **SBK Logo Sting** from the Scene Transitions panel's **+**.
 
 From source, `./build.command` does all of it. See [docs/INSTALL.md](docs/INSTALL.md).
 

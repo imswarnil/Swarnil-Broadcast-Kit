@@ -110,8 +110,7 @@ static void clock_render(void *data, gs_effect_t *unused)
 		sbk_text_draw(&c->meridiem, pad_x + (float)sbk_text_w(&c->figures) + 1.5f * u, pad_y + fh - mh - 0.5f * u);
 	}
 	sbk_stage_end(&c->stage);
-	struct sbk_anim_out a = sbk_anim_eval(&c->anim);
-	sbk_stage_present(&c->stage, a.alpha, a.dx, a.dy);
+	sbk_stage_present_anim(&c->stage, sbk_anim_eval(&c->anim));
 }
 
 static void clock_show(void *d) { sbk_anim_on_show(&((struct clock_src *)d)->anim); }

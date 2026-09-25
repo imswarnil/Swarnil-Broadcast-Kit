@@ -142,7 +142,8 @@ function home() {
 		These are real frames from that collection, not mock-ups — every picture on this site comes
 		out of the plugin’s own self-test.</p>
 		<div class="grid grid--2">
-			${SCENES.slice(0, 4)
+			${SCENES.filter((s) => hasShot(s.img))
+				.slice(0, 4)
 				.map(
 					(s) => `<article class="scene">
 				<a class="shot" href="/scenes/#${s.img}"><img src="/screens/${s.img}.jpg" alt="The ${esc(s.name)} scene" loading="lazy" width="1600" height="900"></a>

@@ -3,6 +3,73 @@
 All notable changes to Swarnil Broadcast Kit (called Tally until 0.3.0). The format follows [Keep a Changelog](https://keepachangelog.com/);
 versions follow [SemVer](https://semver.org/).
 
+## [0.6.0] — 2026-09-25
+
+The show, rebuilt in the order you would run it, and the pieces a course needs.
+
+### Added
+- **`SBK Plate`**, the drop shadow OBS does not have. A source is composited
+  flat, so a camera box over a backdrop has nothing under it and reads as a
+  sticker. The plate is the missing layer: a rounded rectangle with a soft offset
+  shadow, the same seven aspect ratios as the frame, and the shadow drawn in
+  padding outside the shape so nothing is clipped. Optional fill for when the
+  feed drops, optional accent glow instead of a shadow.
+- **`SBK Comments`**, questions on screen. Typed one per line as
+  `Name: question`, pulled from a **YouTube live chat** by video id, or read from
+  any JSON endpoint. It holds forty and pages through them on a timer, so a queue
+  that has got ahead of you still gets its turn. YouTube mode resolves the chat
+  id from the video first, then polls at the interval the API asks for rather
+  than at one we picked.
+- **`SBK Logo Sting`**, a second transition. A colour field crosses as a band, an
+  iris or a curtain, your PNG lands on it, and the field leaves on the next
+  scene — the cut happens underneath where nobody sees it. No video file to
+  render. The audio ducks through the middle rather than crossfading, which is
+  the difference between a sting and a dissolve.
+- **Three arrivals**: *pop* overshoots and settles, *grow* comes up from small,
+  *settle* drops the last few pixels with a lift in scale. All three animate
+  scale, which the stage could not do before — it now presents with a scale about
+  the middle as well as an alpha and an offset.
+- **Two teaching scenes.** *Screen share + two* stacks two cameras on one edge
+  with a meter under each, so a shared screen keeps the middle of the frame and
+  it is obvious who is talking. *Comments* gives the questions the right-hand
+  column. A *Lesson* title card opens a module with a segment bar for how far
+  through the set you are.
+- **A Teaching preset** in the Broadcast Builder, and Plate and Comments in its
+  palette.
+
+### Changed
+- **The whole show is rebuilt in running order.** Twenty scenes, built back to
+  front so the Scenes panel reads from *Starting soon* at the top down to the
+  private desk at the bottom, grouped as the opening, the teaching scenes, the
+  talking scenes, the breaks, the closing, and one that is not for the stream at
+  all. A scene that already exists is emptied and refilled rather than removed,
+  so anything you dragged somewhere else stays where you put it.
+- **Cameras sit on plates now** in Live, Screen share, Interview, Gameplay and
+  Vertical, which is most of what makes the set look composited rather than
+  stacked.
+- The *Q&A* scene is gone; *Comments* does what it was for, with real questions
+  in it.
+- The self-test walks the running order itself rather than a hand-kept copy of
+  it, so a new scene cannot be left out of the sweep.
+
+### Fixed
+- **A source named after a scene never appeared.** Scenes and sources share one
+  namespace, so looking up "SBK · Comments" found the *scene* of that name, which
+  was then quietly asked to contain itself. OBS refuses and logs nothing. The
+  source is renamed, and building a scene now refuses a source named after one
+  and says so in the log.
+- **The self-test shot through the transition.** A 400 ms fade plus each source's
+  own arrival meant a published picture could carry a ghost of the scene before
+  it. The walk sets the duration to zero, cuts, waits for the scene to settle,
+  and puts the duration back afterwards.
+- **A null pattern argument crashed the build.** The Intermission scene asked for
+  a backdrop with no extra settings and the helper dereferenced the null.
+- **A plate sat a shadow's width off the box it was behind.** It reports itself
+  bigger than its shape so the shadow has room to fall; anchoring one by a corner
+  therefore misplaced the shape. Plates are now centred on the box's centre,
+  which registers whatever the shadow is set to.
+- **The comments panel repeated itself** when fewer questions existed than slots.
+
 ## [0.5.1] — 2026-09-25
 
 The site, mostly.

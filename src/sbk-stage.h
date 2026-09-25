@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sbk-common.h"
+#include "sbk-anim.h"
 
 /*  The stage: a component draws itself into an offscreen texture of its own
     size, then that texture is put on the canvas with an opacity and an offset.
@@ -67,7 +68,8 @@ static inline void sbk_stage_end(struct sbk_stage *st)
 /* Put the stage on the canvas at (dx, dy) with the given opacity. fade_x
    softens the left and right edges over that many pixels — the ticker's lane
    leaves without a hard cut. */
-static inline void sbk_stage_present_ex(struct sbk_stage *st, float alpha, float dx, float dy, float fade_x)
+static inline void sbk_stage_present_full(struct sbk_stage *st, float alpha, float dx, float dy, float fade_x,
+					  float scale)
 {
 	gs_texture_t *tex = st->tr ? gs_texrender_get_texture(st->tr) : NULL;
 	if (!tex || !st->blit || alpha <= 0.001f)
@@ -81,6 +83,12 @@ static inline void sbk_stage_present_ex(struct sbk_stage *st, float alpha, float
 
 	gs_matrix_push();
 	gs_matrix_translate3f(dx, dy, 0.0f);
+	if (scale != 1.0f) {
+		/* about its own middle, or a popping component slides as it grows */
+		gs_matrix_translate3f((float)st->cx * 0.5f, (float)st->cy * 0.5f, 0.0f);
+		gs_matrix_scale3f(scale, scale, 1.0f);
+		gs_matrix_translate3f(-(float)st->cx * 0.5f, -(float)st->cy * 0.5f, 0.0f);
+	}
 	gs_blend_state_push();
 	gs_blend_function(GS_BLEND_ONE, GS_BLEND_INVSRCALPHA);
 	while (gs_effect_loop(st->blit, "Draw"))
@@ -89,7 +97,18 @@ static inline void sbk_stage_present_ex(struct sbk_stage *st, float alpha, float
 	gs_matrix_pop();
 }
 
+static inline void sbk_stage_present_ex(struct sbk_stage *st, float alpha, float dx, float dy, float fade_x)
+{
+	sbk_stage_present_full(st, alpha, dx, dy, fade_x, 1.0f);
+}
+
 static inline void sbk_stage_present(struct sbk_stage *st, float alpha, float dx, float dy)
 {
 	sbk_stage_present_ex(st, alpha, dx, dy, 0.0f);
+}
+
+/* the whole arrival in one call, which is what every source actually wants */
+static inline void sbk_stage_present_anim(struct sbk_stage *st, struct sbk_anim_out a)
+{
+	sbk_stage_present_full(st, a.alpha, a.dx, a.dy, 0.0f, a.scale);
 }

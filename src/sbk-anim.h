@@ -9,7 +9,10 @@
     Fast-then-settling (ease-out) on entry, because that is how physical
     things arrive; a linear slide reads as mechanical.  */
 
-enum sbk_enter { SBK_ENTER_NONE = 0, SBK_ENTER_FADE, SBK_ENTER_UP, SBK_ENTER_DOWN, SBK_ENTER_LEFT, SBK_ENTER_RIGHT };
+enum sbk_enter {
+	SBK_ENTER_NONE = 0, SBK_ENTER_FADE, SBK_ENTER_UP, SBK_ENTER_DOWN,
+	SBK_ENTER_LEFT, SBK_ENTER_RIGHT, SBK_ENTER_POP, SBK_ENTER_GROW, SBK_ENTER_SETTLE,
+};
 
 struct sbk_anim {
 	enum sbk_enter kind;
@@ -20,7 +23,7 @@ struct sbk_anim {
 };
 
 struct sbk_anim_out {
-	float alpha, dx, dy;
+	float alpha, dx, dy, scale;
 };
 
 static inline enum sbk_enter sbk_enter_from(const char *id)
@@ -35,6 +38,12 @@ static inline enum sbk_enter sbk_enter_from(const char *id)
 		return SBK_ENTER_LEFT;
 	if (astrcmpi(id, "right") == 0)
 		return SBK_ENTER_RIGHT;
+	if (astrcmpi(id, "pop") == 0)
+		return SBK_ENTER_POP;
+	if (astrcmpi(id, "grow") == 0)
+		return SBK_ENTER_GROW;
+	if (astrcmpi(id, "settle") == 0)
+		return SBK_ENTER_SETTLE;
 	return SBK_ENTER_NONE;
 }
 
@@ -55,6 +64,9 @@ static inline void sbk_anim_props(obs_properties_t *props)
 	obs_property_list_add_string(l, "Dropping in", "down");
 	obs_property_list_add_string(l, "Sliding from the left", "left");
 	obs_property_list_add_string(l, "Sliding from the right", "right");
+	obs_property_list_add_string(l, "Popping — overshoots and settles", "pop");
+	obs_property_list_add_string(l, "Growing", "grow");
+	obs_property_list_add_string(l, "Settling — rises and eases in", "settle");
 	obs_properties_add_float_slider(g, "enter_secs", "Over (seconds)", 0.1, 2.0, 0.05);
 	obs_properties_add_bool(g, "enter_on_show", "Play again each time the source is shown");
 	obs_properties_add_group(props, "motion", "Motion", OBS_GROUP_NORMAL, g);
@@ -93,9 +105,20 @@ static inline void sbk_anim_tick(struct sbk_anim *a, float seconds)
 	}
 }
 
+/* Overshoot and come back. The constants are the usual back-ease ones; the
+   point of them is that a thing which stops dead at its final size reads as a
+   cut, and one that passes it and returns reads as an arrival. */
+static inline float sbk_ease_back(float t)
+{
+	t = sbk_clampf(t, 0.0f, 1.0f);
+	const float c1 = 1.70158f, c3 = c1 + 1.0f;
+	float u = t - 1.0f;
+	return 1.0f + c3 * u * u * u + c1 * u * u;
+}
+
 static inline struct sbk_anim_out sbk_anim_eval(const struct sbk_anim *a)
 {
-	struct sbk_anim_out o = {1.0f, 0.0f, 0.0f};
+	struct sbk_anim_out o = {1.0f, 0.0f, 0.0f, 1.0f};
 	if (!a->playing || a->kind == SBK_ENTER_NONE)
 		return o;
 	float p = sbk_ease_out(a->t);
@@ -106,6 +129,18 @@ static inline struct sbk_anim_out sbk_anim_eval(const struct sbk_anim *a)
 	case SBK_ENTER_DOWN: o.dy = -rest; break;
 	case SBK_ENTER_LEFT: o.dx = -rest; break;
 	case SBK_ENTER_RIGHT: o.dx = rest; break;
+	case SBK_ENTER_POP:
+		/* alpha lands early so the overshoot is seen rather than faded through */
+		o.alpha = sbk_clampf(a->t * 2.2f, 0.0f, 1.0f);
+		o.scale = 0.88f + 0.12f * sbk_ease_back(a->t);
+		break;
+	case SBK_ENTER_GROW:
+		o.scale = 0.72f + 0.28f * p;
+		break;
+	case SBK_ENTER_SETTLE:
+		o.dy = rest * 0.5f;
+		o.scale = 0.96f + 0.04f * p;
+		break;
 	default: break;
 	}
 	return o;

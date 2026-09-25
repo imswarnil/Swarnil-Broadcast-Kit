@@ -23,6 +23,8 @@ extern struct obs_source_info sbk_clock_info;
 extern struct obs_source_info sbk_countdown_info;
 extern struct obs_source_info sbk_card_info;
 extern struct obs_source_info sbk_backdrop_info;
+extern struct obs_source_info sbk_plate_info;
+extern struct obs_source_info sbk_comments_info;
 extern struct obs_source_info sbk_chip_info;
 extern struct obs_source_info sbk_progress_info;
 extern struct obs_source_info sbk_counter_info;
@@ -36,6 +38,7 @@ extern struct obs_source_info sbk_punch_info;
 extern struct obs_source_info sbk_voice_info;
 extern struct obs_source_info sbk_radio_info;
 extern struct obs_source_info sbk_wipe_info;
+extern struct obs_source_info sbk_sting_info;
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE("sbk", "en-US")
@@ -95,6 +98,8 @@ bool obs_module_load(void)
 	obs_register_source(&sbk_countdown_info);
 	obs_register_source(&sbk_card_info);
 	obs_register_source(&sbk_backdrop_info);
+	obs_register_source(&sbk_plate_info);
+	obs_register_source(&sbk_comments_info);
 	obs_register_source(&sbk_chip_info);
 	obs_register_source(&sbk_progress_info);
 	obs_register_source(&sbk_counter_info);
@@ -112,6 +117,7 @@ bool obs_module_load(void)
 
 	/* a real transition type — it appears under "+" in the Scene Transitions panel */
 	obs_register_source(&sbk_wipe_info);
+	obs_register_source(&sbk_sting_info);
 
 	sbk_state_init();
 
@@ -128,7 +134,7 @@ bool obs_module_load(void)
 	   so this proves the shaders build on this machine's renderer */
 	static const char *ids[] = {"sbk_onair", "sbk_lower_third", "sbk_ticker", "sbk_frame", "sbk_visualizer",
 				    "sbk_clock", "sbk_countdown", "sbk_card", "sbk_backdrop",
-				    "sbk_chip", "sbk_progress", "sbk_meter", "sbk_stats", "sbk_counter", "sbk_qr", "sbk_round", "sbk_scanlines", "sbk_colour", "sbk_punch", "sbk_voice", "sbk_radio", "sbk_wipe"};
+				    "sbk_plate", "sbk_comments", "sbk_chip", "sbk_progress", "sbk_meter", "sbk_stats", "sbk_counter", "sbk_qr", "sbk_round", "sbk_scanlines", "sbk_colour", "sbk_punch", "sbk_voice", "sbk_radio", "sbk_wipe", "sbk_sting"};
 	for (size_t i = 0; i < sizeof(ids) / sizeof(ids[0]); i++) {
 		obs_source_t *t = obs_source_create_private(ids[i], NULL, NULL);
 		if (t)

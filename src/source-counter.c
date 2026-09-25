@@ -471,8 +471,7 @@ static void counter_render(void *data, gs_effect_t *unused)
 	}
 
 	sbk_stage_end(&c->stage);
-	struct sbk_anim_out a = sbk_anim_eval(&c->anim);
-	sbk_stage_present(&c->stage, a.alpha, a.dx, a.dy);
+	sbk_stage_present_anim(&c->stage, sbk_anim_eval(&c->anim));
 }
 
 static void counter_show(void *d) { sbk_anim_on_show(&((struct counter *)d)->anim); }

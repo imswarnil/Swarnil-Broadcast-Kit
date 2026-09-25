@@ -2,8 +2,9 @@
 
 Every source shares two groups. **Look** is the accent colour, a scale slider
 that grows type, padding and radius together, a tone (glass, solid or light) and
-the font. **Motion** is how it arrives — fade, rise, drop, or slide from either
-side — and whether that replays each time the source is shown.
+the font. **Motion** is how it arrives — fade, rise, drop, slide from either side, pop
+(overshoot and settle), grow (up from small) or settle (drop the last few pixels
+with a lift in scale) — and whether that replays each time the source is shown.
 
 Sizes below are at scale 1 on a 1080p canvas.
 
@@ -13,6 +14,7 @@ Sizes below are at scale 1 on a 1080p canvas.
 | **SBK Lower Third** | A name and a line under it. Card, pill, split (the title on an accent slab), minimal (shadowed type, no card) or underline. Hotkey: *play the lower third in again*. |
 | **SBK Ticker** | A tag and items separated with `\|`. On glass, bare, or one chip per item. Either direction, any speed, fading at both ends. |
 | **SBK Cam Frame** | The treatment over a camera. Shapes 16:9, **9:16**, 1:1, 4:5, 4:3, 21:9 or custom, scaled by one slider. Treatments: ring, inset, corner brackets, brackets stood off, head and foot rules, glow, double. A chip on any corner. |
+| **SBK Plate** | The drop shadow OBS does not have. A rounded rectangle with a soft offset shadow, in the same seven aspect ratios as the frame — put one behind a camera or a screen capture so it sits on the backdrop instead of floating on it. Optional fill, optional accent glow. |
 | **SBK Visualizer** | Bars, mirrored bars, waveform, dot matrix, ring, block ladder or filled line. Listens to the program mix by default. |
 | **SBK Meter** | A level meter in dB: solid or segments, horizontal or vertical, peak hold, and colour zones you set (calm below −18, hot by −6). |
 | **SBK Stats** | Uptime, bitrate, dropped frames, render rate, and a health lamp from congestion and drops. |
@@ -20,11 +22,13 @@ Sizes below are at scale 1 on a 1080p canvas.
 | **SBK QR** | A scannable code, generated in the plugin. Rounded modules, light-on-dark, the accent, a logo hole (which forces error correction to H). |
 | **SBK Card** | Eyebrow with the recording light, title, body, chips. Panel, split, outline, accent or plain; left or centred. |
 | **SBK Backdrop** | Solid, scrim from the foot or head, vignette, gradient, grid, dot grid, diagonal stripes, waves, concentric rings, hex lattice, grain. Patterns drift. |
+| **SBK Comments** | Questions on screen. Typed here one per line as `Name: question`, pulled from a YouTube live chat by video id, or read from any JSON. Holds forty, shows a few at a time, pages on a timer. |
 | **SBK Chip** | A label, optionally a value in an accent capsule, optionally a dot that lights only when you are on air. |
 | **SBK Progress** | A goal: solid, segments or a thin line, as value / target or a percentage. Hotkeys: *nudge the goal up / down*. |
 | **SBK Clock** | The time in the mono face, 12- or 24-hour, seconds optional. |
 | **SBK Countdown** | To a duration or a time of day, with a word at zero. Restarts when shown. Hotkey: *restart the countdown*. |
 | **SBK Wipe** | A transition: bar, dip through the accent, slide, push, iris, blinds, or a band of accent that crosses the frame and takes the cut with it — a stinger with no video file. Any of four directions. Added from the Scene Transitions panel's **+**. |
+| **SBK Logo Sting** | A transition that hides the cut behind your logo: a colour field crosses as a band, an iris or a curtain, your PNG lands on it, the field leaves on the next scene. No video file to render. Audio ducks through the middle. Added from the Scene Transitions panel's **+**. |
 
 ## Filters
 

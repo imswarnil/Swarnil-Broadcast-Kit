@@ -1,0 +1,110 @@
+// The logo sting: a colour field crosses the frame, the mark lands, the field
+// leaves and the other scene is behind it.
+//
+// The cut happens while the frame is covered, which is the whole trick and the
+// reason a sting reads as deliberate where a crossfade reads as a transition.
+//
+// The mark is drawn rather than loaded: a ring and a dot, which is the kit's own
+// shape and needs no file. An image can be laid over the top of it by the C.
+
+uniform float4x4 ViewProj;
+uniform texture2d tex_a;
+uniform texture2d tex_b;
+uniform float2 size;
+
+uniform float  t;         // 0..1 through the whole sting
+uniform float  cover;     // 0..1 how much of the frame the field has
+uniform float  style;     // 0 band, 1 iris, 2 curtain from both edges
+uniform float  dir;       // 0 left→right, 1 right→left, 2 top→bottom, 3 bottom→top
+uniform float4 field;     // the colour the frame is covered in
+uniform float4 mark;      // the ring and dot
+uniform float  mark_in;   // 0..1 how present the mark is
+uniform float  mark_size; // px, the ring's outer radius
+uniform float  softness;
+
+sampler_state def_sampler {
+	Filter   = Linear;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float4 over(float4 dst, float4 src)
+{
+	float a = src.a + dst.a * (1.0 - src.a);
+	if (a <= 0.0001)
+		return float4(0.0, 0.0, 0.0, 0.0);
+	return float4((src.rgb * src.a + dst.rgb * dst.a * (1.0 - src.a)) / a, a);
+}
+
+float axis(float2 uv)
+{
+	if (dir < 0.5) return uv.x;
+	if (dir < 1.5) return 1.0 - uv.x;
+	if (dir < 2.5) return uv.y;
+	return 1.0 - uv.y;
+}
+
+float4 PSSting(VertInOut vert_in) : TARGET
+{
+	float2 uv = vert_in.uv;
+	/* the cut is hidden under the field: before the midpoint the frame still
+	   holds the old scene, after it the new one */
+	float4 col = t < 0.5 ? tex_a.Sample(def_sampler, uv) : tex_b.Sample(def_sampler, uv);
+
+	float soft = max(softness, 0.001);
+	float amount = 0.0;
+
+	if (style < 0.5) {
+		/* a band whose leading edge runs ahead of its trailing edge */
+		float x = axis(uv);
+		amount = smoothstep(1.0 - cover - soft, 1.0 - cover, 1.0 - x);
+	} else if (style < 1.5) {
+		float2 c = (uv - 0.5) * float2(1.0, size.y / max(size.x, 1.0));
+		float r = length(c) / 0.5;
+		amount = 1.0 - smoothstep(cover * 1.5 - soft, cover * 1.5, r);
+	} else {
+		/* two curtains meeting in the middle */
+		float x = abs(axis(uv) - 0.5) * 2.0;
+		amount = smoothstep(1.0 - cover - soft, 1.0 - cover, 1.0 - x);
+	}
+
+	col = over(col, float4(field.rgb, field.a * saturate(amount)));
+
+	if (mark_in > 0.001 && mark_size > 1.0) {
+		float2 p = (uv - 0.5) * size;
+		float r = length(p);
+		/* the ring draws itself on as the mark arrives, the dot swells */
+		float ring_r = mark_size;
+		float ring_w = mark_size * 0.09;
+		float band = abs(r - ring_r) - ring_w * 0.5;
+		float ring = (1.0 - smoothstep(-1.0, 1.0, band)) * smoothstep(0.0, 0.55, mark_in);
+		float dot_r = mark_size * 0.42 * smoothstep(0.25, 1.0, mark_in);
+		float dot = 1.0 - smoothstep(dot_r - 1.0, dot_r + 1.0, r);
+		float a = max(ring, dot) * saturate(amount) * mark.a;
+		col = over(col, float4(mark.rgb, a));
+	}
+
+	return col;
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSSting(vert_in);
+	}
+}

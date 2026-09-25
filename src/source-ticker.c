@@ -217,8 +217,7 @@ static void ticker_render(void *data, gs_effect_t *unused)
 	}
 
 	sbk_stage_end(&t->stage);
-	struct sbk_anim_out a = sbk_anim_eval(&t->anim);
-	sbk_stage_present(&t->stage, a.alpha, a.dx, a.dy);
+	sbk_stage_present_anim(&t->stage, sbk_anim_eval(&t->anim));
 }
 
 static void ticker_show(void *d) { sbk_anim_on_show(&((struct ticker *)d)->anim); }

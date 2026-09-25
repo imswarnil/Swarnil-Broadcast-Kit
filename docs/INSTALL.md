@@ -8,7 +8,7 @@ Quit OBS, copy the bundle into your user plugin folder, start OBS again:
 ~/Library/Application Support/obs-studio/plugins/sbk.plugin
 ```
 
-**Sources → +** then lists fifteen *SBK …* sources, **Filters** on any source
+**Sources → +** then lists seventeen *SBK …* sources, **Filters** on any source
 gains four video filters and two audio ones, **Docks → Broadcast Kit** is the
 control panel, and the **Tools** menu has five *Broadcast Kit:* items.
 
@@ -130,7 +130,7 @@ touch ~/Library/Application\ Support/obs-studio/.sbk-selftest-clean   # camera h
 ```
 
 Start OBS. Once it has loaded, the kit creates the scene collection, walks all
-eighteen scenes and takes a program screenshot of each into the profile's
+twenty scenes and takes a program screenshot of each into the profile's
 recording folder. The trigger file is deleted, so it fires once.
 
 The **clean** variant hides every camera item for the walk and puts them back

@@ -220,8 +220,7 @@ static void prog_render(void *data, gs_effect_t *unused)
 	}
 
 	sbk_stage_end(&g->stage);
-	struct sbk_anim_out a = sbk_anim_eval(&g->anim);
-	sbk_stage_present(&g->stage, a.alpha, a.dx, a.dy);
+	sbk_stage_present_anim(&g->stage, sbk_anim_eval(&g->anim));
 }
 
 static void prog_show(void *d) { sbk_anim_on_show(&((struct progress *)d)->anim); }

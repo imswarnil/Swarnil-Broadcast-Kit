@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(sbk VERSION 0.5.0 LANGUAGES C CXX)
+project(sbk VERSION 0.6.0 LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -21,6 +21,8 @@ add_library(sbk MODULE
     src/source-countdown.c
     src/source-card.c
     src/source-backdrop.c
+    src/source-plate.c
+    src/source-comments.c
     src/source-chip.c
     src/source-progress.c
     src/source-meter.c
@@ -34,6 +36,7 @@ add_library(sbk MODULE
     src/filter-radio.c
     src/filter-scanlines.c
     src/transition-wipe.c
+    src/transition-sting.c
     src/scenes.c
     src/dock.cpp)
 

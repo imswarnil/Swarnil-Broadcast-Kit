@@ -30,6 +30,25 @@ export const SOURCES = [
 		],
 	},
 	{
+		id: 'sbk_plate',
+		name: 'SBK Plate',
+		tag: 'Backdrop',
+		one: 'A drop shadow for a camera or a screen capture. Put it behind, size it to the same aspect.',
+		body: `OBS has no shadow. A source is composited flat, so a camera box floating over a
+		backdrop has nothing under it and reads as a sticker. The plate is the missing layer: a
+		rounded rectangle with a soft offset shadow, the same seven aspect ratios as the frame, and
+		the shadow drawn in padding outside the shape so nothing is clipped. Behind a camera it is a
+		shadow; with the fill turned on it is the card the camera sits on when the feed drops.`,
+		props: [
+			['Aspect', '16:9, 9:16, 1:1, 4:5, 4:3, 21:9, or a size you type'],
+			['Corner radius', 'Match it to the frame in front'],
+			['Offset and blur', 'How far the shadow falls and how soft it lands'],
+			['Spread', 'Grow the shadow past the shape before it blurs'],
+			['Fill', 'Off for a pure shadow, or the Look\u2019s glass so the source sits on a card'],
+			['Glow', 'The accent bleeding out instead of a shadow falling in'],
+		],
+	},
+	{
 		id: 'sbk_lower_third',
 		name: 'SBK Lower Third',
 		tag: 'Titles',
@@ -350,6 +369,26 @@ export const SOURCES = [
 		],
 	},
 	{
+		id: 'sbk_comments',
+		name: 'SBK Comments',
+		tag: 'Chat',
+		one: 'Questions on screen — typed by you, pulled from a YouTube live chat, or read from any JSON.',
+		body: `Built for teaching, where the chat gets ahead of you and you want the question up
+		while you answer it. It holds forty and shows a few at a time, rotating pages on a timer so a
+		long queue still gets its turn. Manual mode takes one line per question as “Name: the
+		question”, which is all a rehearsal needs. YouTube mode finds the live chat from the video id
+		and then polls it, honouring the interval the API asks for rather than hammering it. JSON mode
+		points at anything you already run and tells it where the name and the text live.`,
+		props: [
+			['From', 'Typed here, a YouTube live chat, or any JSON endpoint'],
+			['Show at once', 'How many fit before it pages'],
+			['Rotate every', 'Seconds a page stays up'],
+			['Newest first', 'Or keep the order they arrived in'],
+			['Initials', 'A lettered dot beside each name'],
+		],
+		note: 'A YouTube key typed here is saved in the scene collection in plain text. Type @/path/to/a/file to keep it out.',
+	},
+	{
 		id: 'sbk_wipe',
 		name: 'SBK Wipe',
 		tag: 'Transition',
@@ -365,27 +404,48 @@ export const SOURCES = [
 		],
 		note: 'Added from the Scene Transitions panel’s + button, not from Sources.',
 	},
+	{
+		id: 'sbk_sting',
+		name: 'SBK Logo Sting',
+		tag: 'Transition',
+		one: 'A cut hidden behind your logo. The field crosses, the mark lands, the field leaves.',
+		body: `The stinger every channel has, without a video file to render. A colour field sweeps
+		in as a band, an iris or a curtain, holds long enough for a logo to land on it, and sweeps
+		out on the next scene. The cut happens under the field where nobody sees it. Point it at a
+		PNG and that is the mark; leave it empty and it draws the tally ring instead. The audio ducks
+		through the middle rather than crossfading, which is what makes it feel like a sting and not
+		a dissolve.`,
+		props: [
+			['Style', 'Band, iris, or curtain'],
+			['Hold', 'How much of the transition the field stays up for'],
+			['Logo', 'A PNG with transparency, or nothing for the drawn mark'],
+			['Field colour', 'The accent by default'],
+		],
+		note: 'Added from the Scene Transitions panel’s + button, not from Sources.',
+	},
 ];
 
 export const SCENES = [
-	{ img: 'starting-soon', name: 'Starting soon', body: 'The countdown screen people sit on. A card, a countdown, a drifting grid, the clock, and a spectrum along the foot.' , uses: ['Backdrop (drifting grid)', 'Visualizer (bars)', 'Light', 'Clock', 'Card', 'Countdown'] },
-	{ img: 'welcome', name: 'Welcome', body: 'The first seconds, with nothing to read. A gradient, a line of type, and a chip that lights up when you go live.' , uses: ['Backdrop (gradient)', 'Visualizer (line)', 'Card', 'Chip', 'Light (bar)'] },
-	{ img: 'live', name: 'Live', body: 'The everyday scene: your camera under the frame, a lower third, the ticker, the light in the corner.' , uses: ['Camera', 'Ticker', 'Lower Third', 'Cam Frame', 'Light'] },
-	{ img: 'talking-head', name: 'Talking head', body: 'The camera is the whole picture, so the chrome shrinks to corner brackets, a minimal name and a bare dot.' , uses: ['Camera', 'Cam Frame (brackets)', 'Lower Third (minimal)', 'Chip', 'Light (dot)'] },
-	{ img: 'screen-share', name: 'Screen share', body: 'The code has the frame. A small camera box, a chapter chip, a segment progress bar, and a mic meter so silence never goes unnoticed.' , uses: ['Camera', 'Cam Frame', 'Chip', 'Progress (segments)', 'Meter', 'Light (badge)'] },
-	{ img: 'interview', name: 'Interview', body: 'Two cameras, two names on split lower thirds, and nothing else competing.' , uses: ['Cam Frame ×2', 'Lower Third (split) ×2', 'Ticker', 'Light'] },
-	{ img: 'qa', name: 'Q&A', body: 'The question takes the left half on a split card; the camera takes the right behind a scrim.' , uses: ['Camera', 'Backdrop (scrim)', 'Chip', 'Card (split)', 'Cam Frame (inset)', 'Ticker', 'Light'] },
-	{ img: 'intermission', name: 'Intermission', body: 'A four-minute ring on drifting aurora, and nothing to read. The one to cut to when you need a moment and would rather not explain.', uses: ['Backdrop (aurora)','Timer (ring)','Chip','Light'] },
-	{ img: 'podcast', name: 'Podcast', body: 'Two people, no camera, the meters doing the showing — it should be obvious at a glance which microphone is live. A running-time bar underneath.', uses: ['Backdrop (plasma)','Card','Meter ×2','Timer (bar)','Light'] },
-	{ img: 'gameplay', name: 'Gameplay', body: 'The capture has the frame, so the camera shrinks into a corner behind stood-off brackets and everything else hugs the edges.', uses: ['Camera','Cam Frame (brackets)','Chip','Progress','Ticker'] },
-	{ img: 'highlight', name: 'Highlight', body: 'One sentence, full bleed, over a drifting starfield. For reading a question out, or landing a point you want people to screenshot.', uses: ['Backdrop (starfield)','Card','Chip','Light (dot)'] },
-	{ img: 'music', name: 'Music', body: 'The visualizer as the whole scene, on the program mix, so it moves to whatever is actually playing.', uses: ['Backdrop (checkers)','Visualizer (ring)','Chip','Clock','Light'] },
-	{ img: 'support', name: 'Support', body: 'The ask, with something to scan: a membership QR, a live member count with a goal, and a live subscriber count beside it.' , uses: ['Backdrop (rings)', 'Card', 'QR', 'Counter (Ghost)', 'Counter (YouTube)', 'Ticker', 'Light'] },
-	{ img: 'vertical', name: 'Vertical', body: 'A 9:16 box inside the landscape canvas. Frame yourself inside it and the same take cuts to a Short.' , uses: ['Backdrop (hex)', 'Camera', 'Cam Frame (9:16)', 'Card', 'Light (dot)'] },
-	{ img: 'brb', name: 'Be right back', body: 'A drifting dot grid, a waveform, and a five-minute countdown that restarts every time you switch to it.' , uses: ['Backdrop (dots)', 'Visualizer (wave)', 'Light', 'Clock', 'Card', 'Countdown'] },
-	{ img: 'trouble', name: 'Technical difficulties', body: 'The one scene that should look wrong on purpose. A vignette, the card in full accent, and the canvas edge lit red.' , uses: ['Backdrop (vignette)', 'Card (accent)', 'Light (canvas edge)'] },
-	{ img: 'ending', name: 'Ending', body: 'The ask, with the goal it is asking for: a subscriber bar, a subscribe chip, and drifting stripes.' , uses: ['Backdrop (stripes)', 'Visualizer (dots)', 'Card', 'Progress', 'Chip', 'QR', 'Light'] },
-	{ img: 'desk', name: 'Desk (private)', body: 'Not for the stream. Open it as a windowed projector on a second monitor: stats, a program meter, a mic meter, a clock.' , uses: ['Backdrop', 'Stats', 'Meter (program)', 'Meter (mic)', 'Clock', 'Light'] },
+	{ img: 'starting-soon', name: 'Starting soon', body: 'The countdown screen people sit on. A card, a countdown, a drifting grid, the clock, and a spectrum along the foot.', uses: ['Backdrop (drifting grid)', 'Visualizer (bars)', 'Light', 'Clock', 'Card', 'Countdown'] },
+	{ img: 'welcome', name: 'Welcome', body: 'The first seconds, with nothing to read. A gradient, a line of type, and a chip that pops in when you go live.', uses: ['Backdrop (gradient)', 'Visualizer (line)', 'Card', 'Chip', 'Light (bar)'] },
+	{ img: 'lesson', name: 'Lesson', body: 'The title card a course module opens on: which module, what it covers, and how far through the set you are.', uses: ['Backdrop (gradient)', 'Card', 'Progress (segments)', 'Light (dot)'] },
+	{ img: 'screen-share', name: 'Screen share', body: 'The code has the frame. A small camera box on a plate, a chapter chip, a segment progress bar, and a mic meter so silence never goes unnoticed.', uses: ['Camera', 'Plate', 'Cam Frame', 'Chip', 'Progress (segments)', 'Meter', 'Light (badge)'] },
+	{ img: 'pair-share', name: 'Screen share + two', body: 'Two people over one shared screen. Both cameras stack on the same edge so the screen keeps the middle, and a meter under each says who is talking.', uses: ['Camera', 'Plate ×2', 'Cam Frame ×2', 'Chip', 'Meter ×2', 'Ticker'] },
+	{ img: 'comments', name: 'Comments', body: 'Questions stacked down the right while the screen keeps the left. Type them, or let it read your YouTube live chat. The one to cut to when the chat has got ahead of you.', uses: ['Comments', 'Chip', 'Plate', 'Camera', 'Cam Frame', 'Light (badge)'] },
+	{ img: 'talking-head', name: 'Talking head', body: 'The camera is the whole picture, so the chrome shrinks to corner brackets, a minimal name and a bare dot.', uses: ['Camera', 'Cam Frame (brackets)', 'Lower Third (minimal)', 'Chip', 'Light (dot)'] },
+	{ img: 'interview', name: 'Interview', body: 'Two cameras on plates, two names on split lower thirds, and nothing else competing.', uses: ['Camera', 'Plate ×2', 'Cam Frame ×2', 'Lower Third (split) ×2', 'Ticker', 'Light'] },
+	{ img: 'live', name: 'Live', body: 'The everyday scene: your camera on a plate under the frame, a lower third, the ticker, the light in the corner.', uses: ['Camera', 'Plate', 'Cam Frame', 'Ticker', 'Lower Third', 'Light'] },
+	{ img: 'gameplay', name: 'Gameplay', body: 'The capture has the frame, so the camera shrinks into a corner behind stood-off brackets and everything else hugs the edges.', uses: ['Camera', 'Plate', 'Cam Frame (brackets)', 'Chip', 'Progress', 'Ticker'] },
+	{ img: 'music', name: 'Music', body: 'The visualizer as the whole scene, on the program mix, so it moves to whatever is actually playing.', uses: ['Backdrop (checkers)', 'Visualizer (ring)', 'Chip', 'Clock', 'Light'] },
+	{ img: 'highlight', name: 'Highlight', body: 'One sentence, full bleed, over a drifting starfield. For reading a question out, or landing a point you want people to screenshot.', uses: ['Backdrop (starfield)', 'Card', 'Chip', 'Light (dot)'] },
+	{ img: 'intermission', name: 'Intermission', body: 'A four-minute ring growing into place on drifting aurora, and nothing to read. The one to cut to when you need a moment and would rather not explain.', uses: ['Backdrop (aurora)', 'Timer (ring)', 'Chip', 'Light'] },
+	{ img: 'brb', name: 'Be right back', body: 'A drifting dot grid, a waveform, and a five-minute countdown that restarts every time you switch to it.', uses: ['Backdrop (dots)', 'Visualizer (wave)', 'Light', 'Clock', 'Card', 'Countdown'] },
+	{ img: 'podcast', name: 'Podcast', body: 'Two people, no camera, the meters doing the showing — it should be obvious at a glance which microphone is live. A running-time bar underneath.', uses: ['Backdrop (plasma)', 'Card', 'Meter ×2', 'Timer (bar)', 'Light'] },
+	{ img: 'trouble', name: 'Technical difficulties', body: 'The one scene that should look wrong on purpose. A vignette, the card in full accent, and the canvas edge lit red.', uses: ['Backdrop (vignette)', 'Card (accent)', 'Light (canvas edge)'] },
+	{ img: 'support', name: 'Support', body: 'The ask, with something to scan: a membership QR, a live member count with a goal, and a live subscriber count beside it.', uses: ['Backdrop (rings)', 'Card', 'QR', 'Counter (Ghost)', 'Counter (YouTube)', 'Ticker', 'Light'] },
+	{ img: 'ending', name: 'Ending', body: 'The ask, with the goal it is asking for: a subscriber bar, a subscribe chip, a channel QR, and drifting stripes.', uses: ['Backdrop (stripes)', 'Visualizer (dots)', 'Card', 'Progress', 'Chip', 'QR', 'Light'] },
+	{ img: 'vertical', name: 'Vertical', body: 'A 9:16 box inside the landscape canvas, on its own plate. Frame yourself inside it and the same take cuts to a Short.', uses: ['Backdrop (hex)', 'Plate', 'Camera', 'Cam Frame (9:16)', 'Card', 'Light (dot)'] },
+	{ img: 'desk', name: 'Desk (private)', body: 'Not for the stream. Open it as a windowed projector on a second monitor: stats, both meters, the questions queue, and time on air.', uses: ['Stats', 'Meter (program)', 'Meter (mic)', 'Comments', 'Timer (uptime)', 'Light'] },
 ];
 
 export const STEPS = [
