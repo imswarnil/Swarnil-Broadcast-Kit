@@ -23,6 +23,7 @@ const copy = (from, to) => {
 	fs.mkdirSync(path.dirname(to), { recursive: true });
 	fs.copyFileSync(from, to);
 };
+const isFilter = (s) => /filter/i.test(s.tag);
 const hasShot = (img) => fs.existsSync(path.join(ROOT, 'docs/screens', `${img}.jpg`));
 const esc = (s) => String(s).replace(/&(?![a-z#]+;)/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 /* the content file writes prose with inline markup already in it */
@@ -121,8 +122,8 @@ function home() {
 				<a class="btn" href="/docs/">Set it up</a>
 			</p>
 			<dl class="facts">
-				<div><dt>${SOURCES.filter((s) => !s.tag.includes('Filter') && s.tag !== 'Transition').length}</dt><dd>sources</dd></div>
-				<div><dt>${SOURCES.filter((s) => s.tag.includes('Filter')).length}</dt><dd>filters</dd></div>
+				<div><dt>${SOURCES.filter((s) => !isFilter(s) && s.tag !== 'Transition').length}</dt><dd>sources</dd></div>
+				<div><dt>${SOURCES.filter(isFilter).length}</dt><dd>filters</dd></div>
 				<div><dt>${SCENES.length}</dt><dd>scenes</dd></div>
 				<div><dt>0</dt><dd>browser sources</dd></div>
 			</dl>
