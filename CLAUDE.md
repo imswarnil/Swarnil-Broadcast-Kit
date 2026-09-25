@@ -115,10 +115,16 @@ profile/Swarnil Broadcast Kit/basic.ini + profile/install.command
 
 ## Screenshots are published
 
-`docs/screens/*.jpg` go straight onto obs.imswarnil.com. Since the collection now
-adds a real camera, a self-test run contains **whatever the webcam is pointed at**.
-Remove or hide the `Camera` source before taking shots meant for the site, and
-never commit a run that has a person in it without asking first.
+`docs/screens/*.jpg` go straight onto obs.imswarnil.com, and the collection puts a
+real camera in six scene items — so an ordinary self-test run contains **whatever
+the webcam is pointed at**. Use the clean trigger for anything published:
+
+```bash
+touch ~/Library/Application\ Support/obs-studio/.sbk-selftest-clean
+```
+
+It hides every camera item for the walk and restores them after. Never commit a
+run with a person in it without asking first.
 
 ## Verifying a build
 
@@ -126,10 +132,10 @@ never commit a run that has a person in it without asking first.
 touch ~/Library/Application\ Support/obs-studio/.sbk-selftest   # then start OBS
 ```
 
-It builds the collection, walks all thirteen scenes and takes a program
+It builds the collection, walks all eighteen scenes and takes a program
 screenshot of each into the profile's recording folder. Then read the newest log
 in `~/Library/Application Support/obs-studio/logs/`: `[sbk] v… loaded`, no
-`would not create` / `failed to compile`, `walked 13 scenes`.
+`would not create` / `failed to compile`, `walked 18 scenes`.
 
 The QR round-trips: crop a rendered frame and decode it with `CIDetector`
 (a small Swift tool does this; see the CHANGELOG entry for 0.3.0).

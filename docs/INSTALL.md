@@ -125,12 +125,18 @@ says `[sbk] effects/….effect failed to compile`.
 ## The self-test
 
 ```bash
-touch ~/Library/Application\ Support/obs-studio/.sbk-selftest
+touch ~/Library/Application\ Support/obs-studio/.sbk-selftest         # as it really looks
+touch ~/Library/Application\ Support/obs-studio/.sbk-selftest-clean   # camera hidden
 ```
 
 Start OBS. Once it has loaded, the kit creates the scene collection, walks all
-thirteen scenes and takes a program screenshot of each into the profile's
+eighteen scenes and takes a program screenshot of each into the profile's
 recording folder. The trigger file is deleted, so it fires once.
+
+The **clean** variant hides every camera item for the walk and puts them back
+afterwards. That is the one to use for anything going on the web: an ordinary run
+captures whatever the webcam is pointed at, and those images are what the
+documentation site publishes.
 
 The walk runs on a worker thread and hands each step back to the UI thread with
 `obs_queue_task`. That matters: OBS writes a queued screenshot on the UI thread,

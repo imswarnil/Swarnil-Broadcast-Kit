@@ -39,8 +39,10 @@ panel inside OBS.
 - The build now wants `brew install qt` for the dock's headers. The frameworks
   come from OBS.app at the same version; linking Homebrew's would load a second
   Qt into the process and crash on the first widget.
-- The five new scenes have no screenshot on the site yet. The page says so rather
-  than showing a broken image.
+- The self-test gained a clean variant (`.sbk-selftest-clean`) that hides every
+  camera item for the walk and restores it after. An ordinary run captures
+  whatever the webcam is pointed at, and those images are what the site
+  publishes, so anything going on the web is taken this way.
 
 ## [0.4.0] — 2026-09-25
 

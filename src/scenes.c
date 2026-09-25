@@ -830,10 +830,76 @@ static void step_shoot(void *param)
 	obs_frontend_take_screenshot();
 }
 
+/*  Hiding the camera for a screenshot run.
+
+    The shots that end up on the website are taken by this walk, and the
+    collection now puts a real camera in five of the scenes — so a run captures
+    whatever the webcam is pointed at, and those images get published. The clean
+    run hides every item whose source is the camera, walks, and puts them back.  */
+
+#define MAX_HIDDEN 64
+static obs_sceneitem_t *g_hidden[MAX_HIDDEN];
+static int g_n_hidden;
+
+static bool hide_camera_item(obs_scene_t *scene, obs_sceneitem_t *item, void *param)
+{
+	UNUSED_PARAMETER(scene);
+	UNUSED_PARAMETER(param);
+	obs_source_t *src = obs_sceneitem_get_source(item);
+	const char *name = src ? obs_source_get_name(src) : NULL;
+	if (!name || strcmp(name, CAM_NAME) != 0)
+		return true;
+	if (!obs_sceneitem_visible(item) || g_n_hidden >= MAX_HIDDEN)
+		return true;
+	obs_sceneitem_addref(item);
+	g_hidden[g_n_hidden++] = item;
+	obs_sceneitem_set_visible(item, false);
+	return true;
+}
+
+static void hide_cameras(void)
+{
+	struct obs_frontend_source_list list = {0};
+	obs_frontend_get_scenes(&list);
+	for (size_t i = 0; i < list.sources.num; i++) {
+		obs_scene_t *sc = obs_scene_from_source(list.sources.array[i]);
+		if (sc)
+			obs_scene_enum_items(sc, hide_camera_item, NULL);
+	}
+	obs_frontend_source_list_free(&list);
+	if (g_n_hidden)
+		SBK_LOG(LOG_INFO, "self-test: %d camera item(s) hidden for the walk", g_n_hidden);
+}
+
+static void restore_cameras(void)
+{
+	for (int i = 0; i < g_n_hidden; i++) {
+		obs_sceneitem_set_visible(g_hidden[i], true);
+		obs_sceneitem_release(g_hidden[i]);
+		g_hidden[i] = NULL;
+	}
+	g_n_hidden = 0;
+}
+
+static void step_hide(void *param)
+{
+	UNUSED_PARAMETER(param);
+	hide_cameras();
+}
+static void step_restore(void *param)
+{
+	UNUSED_PARAMETER(param);
+	restore_cameras();
+}
+
+static bool g_walk_clean;
+
 static void *walk_thread(void *arg)
 {
 	UNUSED_PARAMETER(arg);
 	os_set_thread_name("sbk-selftest");
+	if (g_walk_clean)
+		obs_queue_task(OBS_TASK_UI, step_hide, NULL, true);
 	for (size_t i = 0; i < N_WALK; i++) {
 		obs_queue_task(OBS_TASK_UI, step_switch, (void *)WALK[i], true);
 		/* the transition has to land before the shot, or the frame is a
@@ -842,12 +908,16 @@ static void *walk_thread(void *arg)
 		obs_queue_task(OBS_TASK_UI, step_shoot, NULL, true);
 		os_sleep_ms(600);
 	}
-	SBK_LOG(LOG_INFO, "self-test: walked %zu scenes, screenshots are in the recording folder", N_WALK);
+	if (g_walk_clean)
+		obs_queue_task(OBS_TASK_UI, step_restore, NULL, true);
+	SBK_LOG(LOG_INFO, "self-test: walked %zu scenes%s, screenshots are in the recording folder", N_WALK,
+		g_walk_clean ? " with the camera hidden" : "");
 	return NULL;
 }
 
-void sbk_selftest(void)
+void sbk_selftest(bool clean)
 {
+	g_walk_clean = clean;
 	sbk_create_collection();
 	pthread_t th;
 	if (pthread_create(&th, NULL, walk_thread, NULL) == 0)

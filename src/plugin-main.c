@@ -63,13 +63,21 @@ static void on_event(enum obs_frontend_event e, void *d)
 	UNUSED_PARAMETER(d);
 	if (e != OBS_FRONTEND_EVENT_FINISHED_LOADING)
 		return;
-	char *trigger = os_get_config_path_ptr("obs-studio/.sbk-selftest");
-	if (trigger && os_file_exists(trigger)) {
-		os_unlink(trigger);
+	/* two triggers: the plain one shows the kit as it really is, and the clean
+	   one hides the camera so the shots can go on the website */
+	char *clean = os_get_config_path_ptr("obs-studio/.sbk-selftest-clean");
+	char *plain = os_get_config_path_ptr("obs-studio/.sbk-selftest");
+	if (clean && os_file_exists(clean)) {
+		os_unlink(clean);
+		SBK_LOG(LOG_INFO, ".sbk-selftest-clean found — building the collection, camera hidden");
+		sbk_selftest(true);
+	} else if (plain && os_file_exists(plain)) {
+		os_unlink(plain);
 		SBK_LOG(LOG_INFO, ".sbk-selftest found — building the collection");
-		sbk_selftest();
+		sbk_selftest(false);
 	}
-	bfree(trigger);
+	bfree(clean);
+	bfree(plain);
 }
 
 bool obs_module_load(void)

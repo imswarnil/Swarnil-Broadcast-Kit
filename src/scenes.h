@@ -6,6 +6,6 @@ int sbk_build_scenes(void);          /* the ten scenes, into the current collect
 void sbk_create_collection(void);    /* a collection called "Swarnil Broadcast Kit", then the scenes */
 void sbk_add_live_pack(void);        /* light + lower third + ticker + frame into the current scene */
 bool sbk_use_profile(void);          /* switch to the profile called "Swarnil Broadcast Kit", if installed */
-void sbk_selftest(void);             /* create the collection and screenshot every scene */
+void sbk_selftest(bool clean);         /* clean = hide the camera, for publishable shots */             /* create the collection and screenshot every scene */
 void sbk_add_devices(void);            /* camera + mic into the current scene */
 void sbk_scenes_free(void);            /* at module unload */
