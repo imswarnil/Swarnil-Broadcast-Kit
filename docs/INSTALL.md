@@ -9,7 +9,8 @@ Quit OBS, copy the bundle into your user plugin folder, start OBS again:
 ```
 
 **Sources → +** then lists fifteen *SBK …* sources, **Filters** on any source
-gains two more, and the **Tools** menu has five *Broadcast Kit:* items.
+gains four video filters and two audio ones, **Docks → Broadcast Kit** is the
+control panel, and the **Tools** menu has five *Broadcast Kit:* items.
 
 The kit sets type in **Geist** and **Geist Mono**. Copy the files in `fonts/`
 into `~/Library/Fonts`, or pick any installed font in a source's *Look → Font*.
@@ -60,7 +61,7 @@ Broadcast Kit profile** switches to it.
 | --- | --- |
 | OBS Studio | 30 or newer, installed in `/Applications` |
 | Xcode Command Line Tools | `xcode-select --install` |
-| CMake, SIMDe, jansson | `brew install cmake simde jansson` |
+| CMake, SIMDe, jansson, Qt | `brew install cmake simde jansson qt` |
 
 ```bash
 ./build.command
@@ -78,8 +79,10 @@ cp -R build/sbk.plugin ~/Library/Application\ Support/obs-studio/plugins/
 ```
 
 SIMDe is needed because libobs's headers use it for SSE intrinsics on Apple
-silicon. jansson parses what the live-data sources fetch. curl is already on
-every Mac. Nothing is downloaded at build time: `deps/include` holds the libobs
+silicon. jansson parses what the live-data sources fetch. Qt supplies the
+*headers* for the control dock — the frameworks come from OBS.app itself, at the
+same version, because loading a second Qt into the process crashes on the first
+widget. curl is already on every Mac. Nothing is downloaded at build time: `deps/include` holds the libobs
 headers for OBS 32.2.2 (see `deps/README.md`).
 
 ## Building the documentation site

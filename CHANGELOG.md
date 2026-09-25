@@ -3,6 +3,45 @@
 All notable changes to Swarnil Broadcast Kit (called Tally until 0.3.0). The format follows [Keep a Changelog](https://keepachangelog.com/);
 versions follow [SemVer](https://semver.org/).
 
+## [0.5.0] — 2026-09-25
+
+Effects, a timer that does more than count down, five more scenes, and a control
+panel inside OBS.
+
+### Added
+- **Audio filters**, which the kit had none of. **`SBK Voice`** is the chain a
+  spoken voice wants — high-pass, gate, compressor, presence, saturation,
+  limiter — in the right order, with presets that move all of it at once. OBS
+  ships every one of these separately and most people never chain them, because
+  doing so means understanding six dialogs first. **`SBK Radio`** is the
+  character set: telephone, AM radio, megaphone, tannoy, walkie-talkie.
+- **Two more video filters.** **`SBK Colour`** grades a source — exposure, white
+  balance, contrast, vibrance, lift/gamma/gain — with presets that are
+  corrections rather than looks. **`SBK Punch`** zooms into the picture on a
+  hotkey and eases back out, which is the thing you want constantly in a tutorial
+  and cannot do by hand mid-sentence.
+- **`SBK Timer`** replaces the countdown and does four things: down to a
+  duration, down to a time of day, up from zero, or up since the stream started.
+  Four styles, including a progress ring that empties as the time runs out and
+  turns red for the last ten seconds. Pause and restart hotkeys. The id is
+  unchanged, so existing scenes keep working.
+- **Four more backgrounds** — a drifting aurora, plasma, a twinkling starfield
+  and checkers — bringing the backdrop to sixteen.
+- **A control dock** (Docks → Broadcast Kit): uptime and bitrate, stream, record
+  and mic, a button per scene, a button for every hotkey the kit registers, and
+  the build actions. Stock Qt with no `Q_OBJECT`, so the build gains no code
+  generation step.
+- **Two more transitions** and **five more scenes** — Intermission, Podcast,
+  Gameplay, Highlight and Music — which between them use every new background and
+  timer style.
+
+### Notes
+- The build now wants `brew install qt` for the dock's headers. The frameworks
+  come from OBS.app at the same version; linking Homebrew's would load a second
+  Qt into the process and crash on the first widget.
+- The five new scenes have no screenshot on the site yet. The page says so rather
+  than showing a broken image.
+
 ## [0.4.0] — 2026-09-25
 
 Filters, real devices, and a remote.

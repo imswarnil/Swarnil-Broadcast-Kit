@@ -293,6 +293,10 @@ pre code { background: none; border: 0; padding: 0; font-size: inherit; }
 	transition: border-color 0.18s ease;
 }
 button.shot:hover { border-color: var(--line-strong); }
+.shot--none {
+	display: grid; place-items: center; aspect-ratio: 16 / 9; cursor: default;
+	color: var(--ink-faint); font-size: 0.85rem; border-style: dashed;
+}
 .shot img { display: block; width: 100%; height: auto; }
 .scene h3 { margin-top: 0.85rem; }
 .scene p { color: var(--ink-dim); font-size: 0.94rem; margin: 0.25rem 0 0; }

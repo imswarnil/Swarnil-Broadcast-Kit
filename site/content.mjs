@@ -164,6 +164,74 @@ export const SOURCES = [
 		],
 	},
 	{
+		id: 'sbk_colour',
+		name: 'SBK Colour',
+		tag: 'Filter',
+		one: 'A grade for any source: exposure, white balance, contrast, vibrance.',
+		body: `A dark, orange webcam is the most common and most fixable problem on a stream, and
+		fixing it means exposure and white balance before anything else. The order the filter applies
+		things in is the order a colourist would use, and it matters: exposure before contrast
+		(contrast pivots on middle grey, so exposing afterwards throws the pivot off), white balance
+		before saturation (or saturation exaggerates a cast you are about to correct). Seven presets,
+		and they are corrections rather than looks — “warm room” takes the orange <em>out</em>.`,
+		props: [
+			['Exposure and contrast', 'In stops, pivoting on middle grey'],
+			['Temperature and tint', 'Blue to amber, green to magenta'],
+			['Saturation and vibrance', 'Vibrance spares what is already vivid, so a red shirt does not shout'],
+			['Lift, gamma and gain', 'Per channel, for when a preset is nearly right'],
+		],
+	},
+	{
+		id: 'sbk_punch',
+		name: 'SBK Punch',
+		tag: 'Filter',
+		one: 'A zoom into the picture, on a hotkey.',
+		body: `In a tutorial you constantly want to push in on the thing you are pointing at and come
+		back out, and doing that by hand means grabbing a scene item mid-sentence. One key instead: it
+		eases in, holds, and eases back. The visible window is kept inside the frame, so a punch near
+		an edge slides along rather than smearing the edge pixel across a third of the picture, and
+		pressing again mid-move carries the current zoom across instead of snapping.`,
+		props: [
+			['Zoom and focus', 'How far in, and which point of the picture stays still'],
+			['In and out', 'Seconds each way, eased'],
+			['Come back out on its own', 'After a hold you set'],
+			['Hotkeys', 'Punch in, punch out, or one key that does both'],
+		],
+	},
+	{
+		id: 'sbk_voice',
+		name: 'SBK Voice',
+		tag: 'Audio filter',
+		one: 'The chain a spoken voice wants, in one filter with one set of presets.',
+		body: `High-pass, gate, compressor, presence lift, saturation and limiter, in that order.
+		Nothing here is exotic — OBS ships every one of these separately. The value is that the order
+		is right, the defaults are sane, and a preset moves all of it at once, because most people
+		never chain six filters and so never sound better. Stream, Podcast, Noisy room and Quiet mic
+		cover almost everyone.`,
+		props: [
+			['High-pass', 'Desk thumps and air conditioning live under 80 Hz and a voice has nothing to lose down there'],
+			['Gate', 'Opens and closes at levels you set, with a hold so it does not chatter'],
+			['Compressor', 'Threshold, ratio, soft knee, attack, release, make-up'],
+			['Presence, saturation, limiter', 'The lift that cuts through, a little warmth, and a ceiling'],
+		],
+		note: 'Everything is per channel. A compressor whose detector is the sum of two channels pumps audibly on anything panned.',
+	},
+	{
+		id: 'sbk_radio',
+		name: 'SBK Radio',
+		tag: 'Audio filter',
+		one: 'Telephone, AM radio, megaphone, tannoy, walkie-talkie.',
+		body: `Band-limit the voice, squash it, and add the distortion the medium would have added.
+		It exists because the alternative is stacking three of OBS's filters and guessing at the
+		frequencies. The <em>Amount</em> control blends against the untouched voice, which is usually
+		more convincing than all of it.`,
+		props: [
+			['Band', 'What it cuts below and above'],
+			['Squash and distortion', 'One slider each, mapped onto a threshold and ratio behind the scenes'],
+			['Hiss', 'Because a clean radio does not sound like a radio'],
+		],
+	},
+	{
 		id: 'sbk_round',
 		name: 'SBK Round Corners',
 		tag: 'Filter',
@@ -265,15 +333,20 @@ export const SOURCES = [
 	},
 	{
 		id: 'sbk_countdown',
-		name: 'SBK Countdown',
+		name: 'SBK Timer',
 		tag: 'Scenes',
-		one: 'To a duration, or to a time of day.',
-		body: `“Fifteen minutes” or “21:30”, with a word of your choosing at zero. It restarts each
-		time the scene is shown, so the countdown on your starting-soon screen is right every time
-		you switch to it rather than only the first time. A hotkey restarts it on demand.`,
+		one: 'Counts down or up, in four styles, including a progress ring.',
+		body: `Down to a duration, down to a time of day, up from zero for a segment, or up since the
+		broadcast actually started — the same digits with a different source of truth. Counting to a
+		time of day rolls over to tomorrow if it has already passed, so “21:30” keeps working after
+		21:30. A countdown restarts each time its scene is shown, so the starting-soon screen is right
+		every time you switch to it rather than only the first. The last ten seconds turn red, which
+		is the only warning a waiting screen gets to give.`,
 		props: [
-			['Count down', 'For a duration, or to a time of day'],
+			['Counts', 'Down for a duration, down to a time of day, up from zero, or up since the stream started'],
+			['Style', 'Digits, digits in a ring, ring only, or digits over a bar'],
 			['At zero', 'The word it shows when it arrives'],
+			['Hotkeys', 'Restart, and pause or resume'],
 		],
 	},
 	{
@@ -302,6 +375,11 @@ export const SCENES = [
 	{ img: 'screen-share', name: 'Screen share', body: 'The code has the frame. A small camera box, a chapter chip, a segment progress bar, and a mic meter so silence never goes unnoticed.' , uses: ['Camera', 'Cam Frame', 'Chip', 'Progress (segments)', 'Meter', 'Light (badge)'] },
 	{ img: 'interview', name: 'Interview', body: 'Two cameras, two names on split lower thirds, and nothing else competing.' , uses: ['Cam Frame ×2', 'Lower Third (split) ×2', 'Ticker', 'Light'] },
 	{ img: 'qa', name: 'Q&A', body: 'The question takes the left half on a split card; the camera takes the right behind a scrim.' , uses: ['Camera', 'Backdrop (scrim)', 'Chip', 'Card (split)', 'Cam Frame (inset)', 'Ticker', 'Light'] },
+	{ img: 'intermission', name: 'Intermission', body: 'A four-minute ring on drifting aurora, and nothing to read. The one to cut to when you need a moment and would rather not explain.', uses: ['Backdrop (aurora)','Timer (ring)','Chip','Light'] },
+	{ img: 'podcast', name: 'Podcast', body: 'Two people, no camera, the meters doing the showing — it should be obvious at a glance which microphone is live. A running-time bar underneath.', uses: ['Backdrop (plasma)','Card','Meter ×2','Timer (bar)','Light'] },
+	{ img: 'gameplay', name: 'Gameplay', body: 'The capture has the frame, so the camera shrinks into a corner behind stood-off brackets and everything else hugs the edges.', uses: ['Camera','Cam Frame (brackets)','Chip','Progress','Ticker'] },
+	{ img: 'highlight', name: 'Highlight', body: 'One sentence, full bleed, over a drifting starfield. For reading a question out, or landing a point you want people to screenshot.', uses: ['Backdrop (starfield)','Card','Chip','Light (dot)'] },
+	{ img: 'music', name: 'Music', body: 'The visualizer as the whole scene, on the program mix, so it moves to whatever is actually playing.', uses: ['Backdrop (checkers)','Visualizer (ring)','Chip','Clock','Light'] },
 	{ img: 'support', name: 'Support', body: 'The ask, with something to scan: a membership QR, a live member count with a goal, and a live subscriber count beside it.' , uses: ['Backdrop (rings)', 'Card', 'QR', 'Counter (Ghost)', 'Counter (YouTube)', 'Ticker', 'Light'] },
 	{ img: 'vertical', name: 'Vertical', body: 'A 9:16 box inside the landscape canvas. Frame yourself inside it and the same take cuts to a Short.' , uses: ['Backdrop (hex)', 'Camera', 'Cam Frame (9:16)', 'Card', 'Light (dot)'] },
 	{ img: 'brb', name: 'Be right back', body: 'A drifting dot grid, a waveform, and a five-minute countdown that restarts every time you switch to it.' , uses: ['Backdrop (dots)', 'Visualizer (wave)', 'Light', 'Clock', 'Card', 'Countdown'] },

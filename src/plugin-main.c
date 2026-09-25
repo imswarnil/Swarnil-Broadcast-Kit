@@ -11,6 +11,9 @@
 #include "sbk-state.h"
 #include "scenes.h"
 
+void sbk_dock_register(void);
+void sbk_dock_unregister(void);
+
 extern struct obs_source_info sbk_onair_info;
 extern struct obs_source_info sbk_lower_third_info;
 extern struct obs_source_info sbk_ticker_info;
@@ -28,6 +31,10 @@ extern struct obs_source_info sbk_meter_info;
 extern struct obs_source_info sbk_stats_info;
 extern struct obs_source_info sbk_round_info;
 extern struct obs_source_info sbk_scanlines_info;
+extern struct obs_source_info sbk_colour_info;
+extern struct obs_source_info sbk_punch_info;
+extern struct obs_source_info sbk_voice_info;
+extern struct obs_source_info sbk_radio_info;
 extern struct obs_source_info sbk_wipe_info;
 
 OBS_DECLARE_MODULE()
@@ -90,11 +97,18 @@ bool obs_module_load(void)
 	/* filters, which appear under Filters on any source or scene */
 	obs_register_source(&sbk_round_info);
 	obs_register_source(&sbk_scanlines_info);
+	obs_register_source(&sbk_colour_info);
+	obs_register_source(&sbk_punch_info);
+	obs_register_source(&sbk_voice_info);
+	obs_register_source(&sbk_radio_info);
 
 	/* a real transition type — it appears under "+" in the Scene Transitions panel */
 	obs_register_source(&sbk_wipe_info);
 
 	sbk_state_init();
+
+	/* the control panel, which is Qt, so it goes up once the frontend exists */
+	sbk_dock_register();
 	obs_frontend_add_tools_menu_item("Broadcast Kit: build the show here", on_build, NULL);
 	obs_frontend_add_tools_menu_item("Broadcast Kit: create the scene collection", on_collection, NULL);
 	obs_frontend_add_tools_menu_item("Broadcast Kit: add the live pack to this scene", on_pack, NULL);
@@ -106,7 +120,7 @@ bool obs_module_load(void)
 	   so this proves the shaders build on this machine's renderer */
 	static const char *ids[] = {"sbk_onair", "sbk_lower_third", "sbk_ticker", "sbk_frame", "sbk_visualizer",
 				    "sbk_clock", "sbk_countdown", "sbk_card", "sbk_backdrop",
-				    "sbk_chip", "sbk_progress", "sbk_meter", "sbk_stats", "sbk_counter", "sbk_qr", "sbk_round", "sbk_scanlines", "sbk_wipe"};
+				    "sbk_chip", "sbk_progress", "sbk_meter", "sbk_stats", "sbk_counter", "sbk_qr", "sbk_round", "sbk_scanlines", "sbk_colour", "sbk_punch", "sbk_voice", "sbk_radio", "sbk_wipe"};
 	for (size_t i = 0; i < sizeof(ids) / sizeof(ids[0]); i++) {
 		obs_source_t *t = obs_source_create_private(ids[i], NULL, NULL);
 		if (t)
@@ -119,6 +133,7 @@ bool obs_module_load(void)
 
 void obs_module_unload(void)
 {
+	sbk_dock_unregister();
 	sbk_scenes_free();
 	SBK_LOG(LOG_INFO, "unloaded");
 }

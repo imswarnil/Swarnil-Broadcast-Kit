@@ -1,7 +1,7 @@
 # Swarnil Broadcast Kit
 
-**Native OBS Studio overlays: fifteen sources, two filters, a transition and a
-show of thirteen scenes — drawn by OBS itself.**
+**Native OBS Studio overlays: fifteen sources, six filters, a transition, a
+control dock and a show of eighteen scenes — drawn by OBS itself.**
 
 No browser source, no web server, no URL to paste. Drop `sbk.plugin` into OBS
 and *Sources → +* fills up with **SBK …** sources drawn by libobs: type is OBS's
@@ -42,9 +42,13 @@ Browser Source has no way to do:
 | **SBK Backdrop** | Twelve grounds: solid, scrim, vignette, gradient, grid, dots, stripes, waves, rings, hex, grain — and they drift. |
 | **SBK Chip** | One badge: a handle, a count, a “Q&A”, with a dot that can light only when you are live. |
 | **SBK Progress** | A goal, nudged up and down on a hotkey. |
-| **SBK Clock** · **SBK Countdown** | The time, and a countdown to a duration or a time of day. |
-| **SBK Round Corners** | *A filter.* Rounds your camera's corners — the picture itself, not a frame over it. |
-| **SBK Scanlines** | *A filter.* A CRT treatment for any source: scanlines, aperture mask, fringing, curvature, grain. Four presets. |
+| **SBK Clock** · **SBK Timer** | The time; and a timer that counts down to a duration or a time of day, or up from zero or since the stream started — as digits, a ring, or a bar. |
+| **SBK Round Corners** | *Filter.* Rounds your camera's corners — the picture itself, not a frame over it. |
+| **SBK Scanlines** | *Filter.* A CRT treatment: scanlines, aperture mask, fringing, curvature, grain. Four presets. |
+| **SBK Colour** | *Filter.* A grade: exposure, white balance, contrast, vibrance, lift/gamma/gain. Seven presets, all corrections rather than looks. |
+| **SBK Punch** | *Filter.* A zoom into the picture on a hotkey — it eases in, holds, and eases back. |
+| **SBK Voice** | *Audio filter.* High-pass, gate, compressor, presence, saturation, limiter, in the right order, with presets. |
+| **SBK Radio** | *Audio filter.* Telephone, AM radio, megaphone, tannoy, walkie-talkie. |
 | **SBK Wipe** | A real transition: bar, dip, slide, push, iris, blinds, or a band of accent that takes the cut with it. |
 
 Every source shares a **Look** group — one accent colour, a scale slider that
@@ -79,6 +83,12 @@ Keys typed into a source are saved in the scene collection as plain text.
 Begin the field with `@` and a path — `@/Users/you/.youtube-key` — and the kit
 reads the key from the file instead.
 
+## Control it
+
+A **dock inside OBS** (Docks → Broadcast Kit): stream, record and mic, the
+uptime and bitrate, a button per scene, a button for every hotkey the kit
+registers, and the build actions.
+
 ## Control it from your phone
 
 `remote/serve.command` serves a remote on your own network. It drives OBS
@@ -104,7 +114,9 @@ src/sbk-audio.c       program mix, channels or any source → FFT → bands and 
 src/sbk-net.c         the polled HTTPS GET, and the JSON dot-path walk
 src/sbk-qr.c          a QR encoder: byte mode, versions 1–16, all four ECC levels
 src/source-*.c        one file per source
-src/filter-*.c        rounded corners, and the CRT treatment
+src/filter-*.c        round, scanlines, colour, punch, voice, radio
+src/sbk-dsp.h         biquads, compressor, limiter, gate — the audio filters' maths
+src/dock.cpp          the control panel; Qt headers from Homebrew, frameworks from OBS
 src/transition-wipe.c the transition
 src/scenes.c          the show, the live pack, the profile switch, the self-test
 data/effects/         card, frame, viz, backdrop, qr, wipe, blit
@@ -115,7 +127,7 @@ deps/include/         libobs headers for OBS 32.2.2 (GPL-2.0; see deps/README.md
 ```
 
 ```bash
-brew install cmake simde jansson
+brew install cmake simde jansson qt
 ./build.command          # build, install the plugin, fonts and profile (quit OBS first)
 node site/build.mjs      # the docs site → dist/
 node site/check.mjs      # what CI runs on it

@@ -32,6 +32,8 @@ These appear under **Filters** on a source or a whole scene, not in the **+** me
 
 | Filter | What it does |
 | --- | --- |
+| **SBK Colour** | A grade: exposure, contrast, temperature, tint, saturation, vibrance, faded blacks, and lift/gamma/gain per channel. Seven presets, which are corrections rather than looks — “warm room” takes the orange *out*. The order applied is exposure, contrast, white balance, saturation, vibrance, trim, and it matters: contrast pivots on middle grey, so exposing afterwards throws the pivot off. |
+| **SBK Punch** | A zoom into the picture on a hotkey: eases in, holds, eases back. The visible window is kept inside the frame so a punch near an edge slides along instead of smearing the edge pixel, and pressing again mid-move carries the current zoom across rather than snapping. Hotkeys: punch in, punch out, or one key for both. |
 | **SBK Round Corners** | Rounds the corners of the picture itself. A frame drawn on top is a rectangle with a hole in it — the camera's square corners are still there underneath, so it only looks rounded against a matching background. This cuts the picture, so anything can sit behind it. Radius as a percentage of the shorter side (one setting suits a webcam box and a full-frame share) or in pixels, plus an inner border. |
 | **SBK Scanlines** | A CRT treatment: scanline spacing, depth and roll; aperture mask and triad width; colour fringing; barrel curvature; vignette, grain and mains flicker. Four presets — Fine, CRT, VHS, Arcade — each of which just fills in the sliders so you can start from one and move on. |
 
@@ -64,6 +66,23 @@ keeps the last good number rather than blinking to zero.
 Keys typed into a source are saved in the scene collection as plain text.
 Begin a key field with `@` and a path — `@/Users/you/.youtube-key` — and the kit
 reads it from the file, so a collection you share carries no secret.
+
+## Audio filters
+
+| Filter | What it does |
+| --- | --- |
+| **SBK Voice** | High-pass, gate, compressor, presence lift, saturation and limiter, in that order. OBS ships every one of these separately; the value here is that the order is right, the defaults are sane, and a preset moves all of it at once. Stream, Podcast, Noisy room, Quiet mic. Everything is per channel — a compressor whose detector is the sum of two channels pumps on anything panned. |
+| **SBK Radio** | Telephone, AM radio, megaphone, tannoy, walkie-talkie: band-limit, squash, distort, hiss. The *Amount* control blends against the untouched voice, which is usually more convincing than all of it. |
+
+## The control dock
+
+**Docks → Broadcast Kit.** The uptime and the bitrate, stream, record and mic,
+a button per scene, a button for every hotkey the kit registers — found by
+asking OBS, so one added later appears on its own — and the build actions.
+
+It is stock Qt widgets with no `Q_OBJECT` of its own, so there is no code
+generation in the build. The headers come from Homebrew and the frameworks from
+OBS.app at the same version; loading a second Qt would crash on the first widget.
 
 ## The camera and the microphone
 

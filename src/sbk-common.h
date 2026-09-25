@@ -287,6 +287,28 @@ static inline void sbk_look_read(struct sbk_look *l, obs_data_t *s)
 	obs_data_release(m);
 }
 
+/* ---- the progress ring ----------------------------------------------------- */
+
+/* Draws ring.effect at (x, y) in a d × d box. `progress` runs 0..1 from the top,
+   clockwise. Both colours are passed so the track and the fill are one draw. */
+static inline void sbk_ring(gs_effect_t *fx, float x, float y, float d, float thickness, float progress,
+			    struct vec4 track, struct vec4 fill, bool round_caps)
+{
+	if (!fx || d < 2.0f)
+		return;
+	sbk_set_vec2(fx, "size", d, d);
+	sbk_set_float(fx, "thickness", thickness);
+	sbk_set_float(fx, "progress", progress);
+	sbk_set_vec4(fx, "track", &track);
+	sbk_set_vec4(fx, "fill", &fill);
+	sbk_set_float(fx, "cap", round_caps ? 1.0f : 0.0f);
+	gs_matrix_push();
+	gs_matrix_translate3f(x, y, 0.0f);
+	while (gs_effect_loop(fx, "Draw"))
+		gs_draw_sprite(NULL, 0, (uint32_t)(d + 0.5f), (uint32_t)(d + 0.5f));
+	gs_matrix_pop();
+}
+
 /* ---- surfaces ------------------------------------------------------------- */
 
 /* The box a component sits in. Every source with a "shape" or "variant" list

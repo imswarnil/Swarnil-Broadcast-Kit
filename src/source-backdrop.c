@@ -34,6 +34,10 @@ static void bd_update(void *data, obs_data_t *s)
 		  : astrcmpi(m, "rings") == 0      ? 9.0f
 		  : astrcmpi(m, "hex") == 0        ? 10.0f
 		  : astrcmpi(m, "grain") == 0      ? 11.0f
+		  : astrcmpi(m, "aurora") == 0     ? 12.0f
+		  : astrcmpi(m, "plasma") == 0     ? 13.0f
+		  : astrcmpi(m, "stars") == 0      ? 14.0f
+		  : astrcmpi(m, "checkers") == 0   ? 15.0f
 						   : 0.0f;
 	b->color = sbk_vec((uint32_t)obs_data_get_int(s, "color"));
 	b->color2 = sbk_vec((uint32_t)obs_data_get_int(s, "color2"));
@@ -118,6 +122,10 @@ static obs_properties_t *bd_properties(void *data)
 	obs_property_list_add_string(m, "Concentric rings", "rings");
 	obs_property_list_add_string(m, "Hex grid", "hex");
 	obs_property_list_add_string(m, "Grain", "grain");
+	obs_property_list_add_string(m, "Aurora — drifting light", "aurora");
+	obs_property_list_add_string(m, "Plasma", "plasma");
+	obs_property_list_add_string(m, "Starfield", "stars");
+	obs_property_list_add_string(m, "Checkers", "checkers");
 	obs_properties_add_color_alpha(p, "color", "Colour");
 	obs_properties_add_color_alpha(p, "color2", "Second colour (gradient and patterns)");
 	obs_properties_add_float_slider(p, "reach", "Reach (scrim and vignette)", 0.1, 1.0, 0.01);

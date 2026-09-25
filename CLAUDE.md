@@ -11,9 +11,9 @@ Light source is named after.
 ## What it is, in one breath
 
 C built with CMake against `/Applications/OBS.app`, the same way every plugin in
-`~/OBS/` is built. Fifteen `sbk_*` sources in OBS's "+" menu, two filters under Filters,
-one transition in the Scene Transitions panel, five Tools-menu actions that build
-a thirteen-scene show, and a profile. Type is OBS's own `text_ft2_source` as a private child;
+`~/OBS/` is built. Fifteen `sbk_*` sources in OBS's "+" menu, four video filters and two audio ones
+under Filters, one transition in the Scene Transitions panel, a Qt control dock,
+five Tools-menu actions that build an eighteen-scene show, and a profile. Type is OBS's own `text_ft2_source` as a private child;
 every box is `card.effect`; anything that animates draws into an `sbk_stage`
 (offscreen render target) and is presented with an alpha and an offset.
 
@@ -58,6 +58,10 @@ src/source-*.c       onair lower-third ticker frame visualizer meter stats count
                      qr card backdrop chip progress clock countdown
 src/filter-round.c   rounds the SOURCE's corners, not an overlay over them
 src/filter-scanlines.c  the CRT treatment, with presets
+src/filter-colour.c  the grade; src/filter-punch.c the hotkey zoom
+src/filter-voice.c   the voice chain; src/filter-radio.c the character filters
+src/sbk-dsp.h        biquads, compressor, limiter, gate, saturation
+src/dock.cpp         the control panel (Qt, no moc)
 src/transition-wipe.c
 src/scenes.c         the show, live pack, profile, self-test
 data/effects/        card frame viz backdrop qr wipe blit
@@ -96,6 +100,15 @@ profile/Swarnil Broadcast Kit/basic.ini + profile/install.command
 - **`crypto.subtle` does not exist outside a secure context.** The remote is
   opened at `http://192.168.x.x`, which is not one, so it carries its own
   SHA-256. Do not "simplify" that back to the Web Crypto API.
+- **A filter must `obs_source_skip_video_filter` on every path where it does not
+  render**, including the "nothing to do" path, or the source disappears.
+- **Qt: headers from Homebrew, frameworks from OBS.app, same version.** Homebrew
+  ships Qt framework-only and OBS ships its frameworks without Headers, so a `-F`
+  search finds OBS's first and stops. `CMakeLists.txt` builds a shim of symlinks
+  so plain `-I` resolves. Linking Homebrew's Qt loads a second copy into the
+  process and crashes on the first widget.
+- **Audio filter state is per channel.** A compressor whose detector is the sum
+  of two channels pumps audibly on anything panned.
 - **A page served over https cannot open a `ws://` socket.** obs-websocket has no
   wss, so the remote can only ever be served over http from the user's own
   machine. The copy on the site says so when you press Connect.

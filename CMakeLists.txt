@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
-project(sbk VERSION 0.4.0 LANGUAGES C)
+project(sbk VERSION 0.5.0 LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(sbk MODULE
     src/plugin-main.c
@@ -26,9 +28,14 @@ add_library(sbk MODULE
     src/source-counter.c
     src/source-qr.c
     src/filter-round.c
+    src/filter-colour.c
+    src/filter-punch.c
+    src/filter-voice.c
+    src/filter-radio.c
     src/filter-scanlines.c
     src/transition-wipe.c
-    src/scenes.c)
+    src/scenes.c
+    src/dock.cpp)
 
 target_compile_definitions(sbk PRIVATE SBK_VERSION="${PROJECT_VERSION}")
 target_compile_options(sbk PRIVATE -Wall -Wextra -Wno-unused-parameter)
@@ -58,7 +65,26 @@ if(APPLE)
         message(FATAL_ERROR "jansson not found — run: brew install jansson")
     endif()
 
+    # Qt: headers from Homebrew, frameworks from OBS.app — the SAME version.
+    # Linking Homebrew's would load a second copy of Qt into the process and
+    # crash on the first widget. Homebrew ships Qt framework-only, and OBS ships
+    # its frameworks WITHOUT Headers, so a plain -F search finds OBS's first and
+    # stops. A shim of symlinks turns the framework layout into the ordinary
+    # include layout so -I resolves it and search order stops mattering.
+    set(QT_BREW "/opt/homebrew/opt/qt")
+    if(NOT EXISTS "${QT_BREW}/lib/QtWidgets.framework/Headers")
+        message(FATAL_ERROR "Qt headers not found — run: brew install qt")
+    endif()
+    set(QT_SHIM "${CMAKE_BINARY_DIR}/qt-shim")
+    file(MAKE_DIRECTORY "${QT_SHIM}")
+    foreach(mod QtCore QtGui QtWidgets)
+        if(NOT EXISTS "${QT_SHIM}/${mod}")
+            file(CREATE_LINK "${QT_BREW}/lib/${mod}.framework/Headers" "${QT_SHIM}/${mod}" SYMBOLIC)
+        endif()
+    endforeach()
+
     target_include_directories(sbk PRIVATE
+        "${QT_SHIM}" "${QT_SHIM}/QtCore" "${QT_SHIM}/QtGui" "${QT_SHIM}/QtWidgets"
         "${CMAKE_SOURCE_DIR}/deps/include/libobs"
         "${CMAKE_SOURCE_DIR}/deps/include"
         "${CMAKE_SOURCE_DIR}/deps/include/generated"
@@ -69,6 +95,12 @@ if(APPLE)
     target_link_libraries(sbk PRIVATE
         "${OBS_APP}/libobs.framework/Versions/Current/libobs"
         "${OBS_APP}/obs-frontend-api.dylib"
+        # by path, the same way libobs is linked: "-framework Qt*" needs a -F
+        # that CMake does not pass to the linker, and these are the frameworks
+        # already loaded in the OBS process
+        "${OBS_APP}/QtCore.framework/Versions/Current/QtCore"
+        "${OBS_APP}/QtGui.framework/Versions/Current/QtGui"
+        "${OBS_APP}/QtWidgets.framework/Versions/Current/QtWidgets"
         # curl is on every Mac; nothing to install for the live-data sources
         "curl"
         "${JANSSON_LIB}"

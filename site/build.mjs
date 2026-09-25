@@ -22,6 +22,7 @@ const copy = (from, to) => {
 	fs.mkdirSync(path.dirname(to), { recursive: true });
 	fs.copyFileSync(from, to);
 };
+const hasShot = (img) => fs.existsSync(path.join(ROOT, 'docs/screens', `${img}.jpg`));
 const esc = (s) => String(s).replace(/&(?![a-z#]+;)/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 /* the content file writes prose with inline markup already in it */
 const prose = (s) => String(s).replace(/\s+/g, ' ').trim();
@@ -91,7 +92,7 @@ ${body}
 /* ---- the pages ------------------------------------------------------------ */
 
 const sourcesByTag = () => {
-	const order = ['Indicator', 'Titles', 'Camera', 'Filter', 'Audio', 'Live data', 'Scenes', 'Transition'];
+	const order = ['Indicator', 'Titles', 'Camera', 'Filter', 'Audio filter', 'Audio', 'Live data', 'Scenes', 'Transition'];
 	const seen = new Map();
 	for (const s of SOURCES) {
 		if (!seen.has(s.tag)) seen.set(s.tag, []);
@@ -220,7 +221,9 @@ function scenes() {
 		<div class="grid grid--2">
 			${SCENES.map(
 				(s) => `<article class="scene" id="${s.img}">
-			<button class="shot" type="button" data-shot="/screens/${s.img}.jpg" data-title="${esc(s.name)}" aria-label="See the ${esc(s.name)} scene full size"><img src="/screens/${s.img}.jpg" alt="The ${esc(s.name)} scene" loading="lazy" width="1600" height="900"></button>
+			${hasShot(s.img)
+				? `<button class="shot" type="button" data-shot="/screens/${s.img}.jpg" data-title="${esc(s.name)}" aria-label="See the ${esc(s.name)} scene full size"><img src="/screens/${s.img}.jpg" alt="The ${esc(s.name)} scene" loading="lazy" width="1600" height="900"></button>`
+				: `<span class="shot shot--none">Screenshot to come</span>`}
 			<h3>${esc(s.name)}</h3><p>${prose(s.body)}</p>
 			${s.uses ? `<ul class="uses">${s.uses.map((u) => `<li>${esc(u)}</li>`).join('')}</ul>` : ''}
 		</article>`

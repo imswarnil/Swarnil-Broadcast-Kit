@@ -1,0 +1,96 @@
+// A colour grade for any source. Exposure, contrast, saturation, vibrance,
+// white balance and a lift/gamma/gain trim.
+//
+// The order is the one a colourist would use and it matters: exposure before
+// contrast (contrast pivots around middle grey, so exposing afterwards throws
+// the pivot off), white balance before saturation (otherwise saturation
+// exaggerates a cast you are about to correct), and vibrance last because it
+// depends on what the saturation left behind.
+
+uniform float4x4 ViewProj;
+uniform texture2d image;
+
+uniform float exposure;    // stops
+uniform float contrast;    // -1..1
+uniform float saturation;  // -1..1
+uniform float vibrance;    // -1..1, saturation that spares what is already vivid
+uniform float temperature; // -1..1, blue to amber
+uniform float tint;        // -1..1, green to magenta
+uniform float3 lift;
+uniform float3 gamma;
+uniform float3 gain;
+uniform float fade;        // lifts the black point, the way a print does
+
+sampler_state def_sampler {
+	Filter   = Linear;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+// Rec. 709, because that is what the picture is in
+float luma(float3 c)
+{
+	return dot(c, float3(0.2126, 0.7152, 0.0722));
+}
+
+float4 PSColour(VertInOut vert_in) : TARGET
+{
+	float4 src = image.Sample(def_sampler, vert_in.uv);
+	float3 c = src.rgb;
+
+	c *= exp2(exposure);
+
+	// pivot on middle grey so contrast does not double as a brightness control
+	c = (c - 0.18) * (1.0 + contrast) + 0.18;
+
+	if (abs(temperature) > 0.001 || abs(tint) > 0.001) {
+		c.r *= 1.0 + temperature * 0.30;
+		c.b *= 1.0 - temperature * 0.30;
+		c.g *= 1.0 + tint * 0.20;
+		c.r *= 1.0 - tint * 0.06;
+		c.b *= 1.0 - tint * 0.06;
+	}
+
+	float l = luma(c);
+	c = lerp(float3(l, l, l), c, 1.0 + saturation);
+
+	if (abs(vibrance) > 0.001) {
+		// how far this pixel already is from grey; leave the vivid alone
+		float mx = max(c.r, max(c.g, c.b));
+		float mn = min(c.r, min(c.g, c.b));
+		float sat = mx - mn;
+		float l2 = luma(c);
+		c = lerp(float3(l2, l2, l2), c, 1.0 + vibrance * (1.0 - saturate(sat)));
+	}
+
+	c = c * gain + lift;
+	c = max(c, 0.0);
+	c = pow(c, 1.0 / max(gamma, 0.01));
+
+	if (fade > 0.001)
+		c = lerp(c, c * (1.0 - fade) + fade * 0.16, 1.0);
+
+	return float4(saturate(c), src.a);
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSColour(vert_in);
+	}
+}

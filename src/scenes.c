@@ -531,7 +531,98 @@ int sbk_build_scenes(void)
 		n++;
 	}
 
-	/* 11. Support — the ask, with something to scan. The counters are wired
+	/* 11. Intermission — the ring timer doing the work, and nothing to read.
+	   The one to cut to when you need four minutes and do not want to explain. */
+	{
+		obs_scene_t *sc = fresh_scene("SBK · Intermission");
+		put(sc, backdrop("SBK · Backdrop aurora", "aurora", "\"color2\":4283584542,\"drift\":4.0,\"reach\":0.55"), 0, 0, TL);
+		put(sc, comp("sbk_countdown", "SBK · Intermission ring",
+			     "{\"mode\":\"duration\",\"minutes\":4,\"style\":\"ring\",\"ring_size\":420,"
+			     "\"label\":\"Back in\",\"draw_card\":false}"),
+		    MIDX, 300, TC);
+		put(sc, comp("sbk_chip", "SBK · Intermission chip",
+			     "{\"label\":\"Stay there\",\"variant\":\"outline\",\"dot\":\"pulse\"}"),
+		    MIDX, 820, TC);
+		put(sc, light(""), 1920 - EDGE, EDGE, TR);
+		obs_scene_release(sc);
+		n++;
+	}
+	/* 12. Podcast — two people, no camera, the meters doing the showing. It
+	   should be obvious at a glance which microphone is live. */
+	{
+		obs_scene_t *sc = fresh_scene("SBK · Podcast");
+		put(sc, backdrop("SBK · Backdrop plasma", "plasma", "\"color2\":4281545523,\"drift\":3.0,\"pitch\":140.0"), 0, 0, TL);
+		put(sc, comp("sbk_card", "SBK · Podcast card",
+			     card_json("Episode", "Building things in public", "", "", "none", "centre", 1300)),
+		    MIDX, 220, TC);
+		put(sc, comp("sbk_meter", "SBK · Host meter",
+			     "{\"source\":\"@mic\",\"label\":\"Host\",\"width\":700,\"style\":\"segments\","
+			     "\"segment_count\":28}"),
+		    EDGE, 560, TL);
+		put(sc, comp("sbk_meter", "SBK · Guest meter",
+			     "{\"source\":\"@mic2\",\"label\":\"Guest\",\"width\":700,\"style\":\"segments\","
+			     "\"segment_count\":28}"),
+		    1920 - EDGE, 560, TR);
+		put(sc, comp("sbk_countdown", "SBK · Episode clock",
+			     "{\"mode\":\"up\",\"minutes\":45,\"style\":\"bar\",\"label\":\"Running time\","
+			     "\"draw_card\":true}"),
+		    MIDX, 800, TC);
+		put(sc, light(""), 1920 - EDGE, EDGE, TR);
+		obs_scene_release(sc);
+		n++;
+	}
+	/* 13. Gameplay — the capture has the frame, so the camera shrinks into a
+	   corner and everything else hugs the edges. */
+	{
+		obs_scene_t *sc = fresh_scene("SBK · Gameplay");
+		put_box(sc, camera(), 1920 - EDGE, EDGE, 360, 203, TR);
+		put(sc, comp("sbk_frame", "SBK · Cam frame corner",
+			     "{\"aspect\":\"16x9\",\"size\":0.56,\"style\":\"corner-out\",\"bracket\":40.0,"
+			     "\"line\":\"accent\",\"label\":\"\"}"),
+		    1920 - EDGE, EDGE, TR);
+		put(sc, comp("sbk_chip", "SBK · Now playing chip",
+			     "{\"label\":\"Now playing\",\"value\":\"Act 2\",\"variant\":\"card\",\"dot\":\"pulse\"}"),
+		    EDGE, EDGE, TL);
+		put(sc, comp("sbk_progress", "SBK · Run progress",
+			     "{\"label\":\"Run\",\"value\":3,\"target\":10,\"style\":\"segments\","
+			     "\"segments\":10,\"width\":420,\"step\":1}"),
+		    EDGE, 1080 - EDGE, BL);
+		put(sc, comp("sbk_ticker", "SBK · Ticker", "{\"width\":1920}"), 0, 1080, BL);
+		obs_scene_release(sc);
+		n++;
+	}
+	/* 14. Highlight — one sentence, full bleed. For reading a question out, or
+	   landing a point you want people to screenshot. */
+	{
+		obs_scene_t *sc = fresh_scene("SBK · Highlight");
+		put(sc, backdrop("SBK · Backdrop stars", "stars", "\"pitch\":90.0,\"weight\":2.5"), 0, 0, TL);
+		put(sc, comp("sbk_card", "SBK · Highlight card",
+			     card_json("", "The best overlay is the one nobody notices.", "", "", "none", "centre", 1500)),
+		    MIDX, 380, TC);
+		put(sc, comp("sbk_chip", "SBK · Highlight chip",
+			     "{\"label\":\"@imswarnil\",\"variant\":\"outline\",\"dot\":\"none\"}"),
+		    MIDX, 700, TC);
+		put(sc, light("dot"), 1920 - EDGE, EDGE, TR);
+		obs_scene_release(sc);
+		n++;
+	}
+	/* 15. Music — the visualizer as the whole scene, on the program mix, so it
+	   moves to whatever is actually playing. */
+	{
+		obs_scene_t *sc = fresh_scene("SBK · Music");
+		put(sc, backdrop("SBK · Backdrop checkers", "checkers", "\"color2\":4280229663,\"pitch\":160.0,\"drift\":5.0"), 0, 0, TL);
+		put(sc, comp("sbk_visualizer", "SBK · Viz ring",
+			     "{\"style\":\"ring\",\"width\":720,\"height\":720,\"bars\":72,\"inner\":0.52}"),
+		    MIDX, 120, TC);
+		put(sc, comp("sbk_chip", "SBK · Track chip",
+			     "{\"label\":\"Now playing\",\"value\":\"—\",\"variant\":\"pill\",\"dot\":\"pulse\"}"),
+		    MIDX, 880, TC);
+		put(sc, comp("sbk_clock", "SBK · Clock", NULL), 1920 - EDGE, EDGE, TR);
+		put(sc, light(""), EDGE, EDGE, TL);
+		obs_scene_release(sc);
+		n++;
+	}
+	/* 16. Support — the ask, with something to scan. The counters are wired
 	   to nothing until you put your own key in: they show a dash and a grey
 	   lamp until then, which is the honest thing for them to do. */
 	{
@@ -558,7 +649,7 @@ int sbk_build_scenes(void)
 		obs_scene_release(sc);
 		n++;
 	}
-	/* 12. Vertical — a 9:16 crop inside the landscape canvas, for the clip
+	/* 17. Vertical — a 9:16 crop inside the landscape canvas, for the clip
 	   that becomes a Short. Frame yourself inside the box and the same take
 	   cuts both ways. */
 	{
@@ -576,7 +667,7 @@ int sbk_build_scenes(void)
 		obs_scene_release(sc);
 		n++;
 	}
-	/* 13. Desk — not for the stream. Open it as a windowed projector on a
+	/* 18. Desk — not for the stream. Open it as a windowed projector on a
 	   second monitor and it is a read-out of how the broadcast is going. */
 	{
 		obs_scene_t *sc = fresh_scene("SBK · Desk (private)");
@@ -713,11 +804,12 @@ struct walk_step {
 };
 
 static const char *const WALK[] = {
-	"SBK · Starting soon",          "SBK · Welcome",   "SBK · Live",
-	"SBK · Talking head",           "SBK · Screen share", "SBK · Interview",
-	"SBK · Q&A",                    "SBK · Support",   "SBK · Vertical",
-	"SBK · Be right back",          "SBK · Technical difficulties", "SBK · Ending",
-	"SBK · Desk (private)",
+	"SBK · Starting soon", "SBK · Welcome",      "SBK · Live",
+	"SBK · Talking head",  "SBK · Screen share", "SBK · Interview",
+	"SBK · Q&A",           "SBK · Intermission", "SBK · Podcast",
+	"SBK · Gameplay",      "SBK · Highlight",    "SBK · Music",
+	"SBK · Support",       "SBK · Vertical",     "SBK · Be right back",
+	"SBK · Technical difficulties", "SBK · Ending", "SBK · Desk (private)",
 };
 #define N_WALK (sizeof(WALK) / sizeof(WALK[0]))
 
