@@ -71,10 +71,19 @@ if(APPLE)
     # its frameworks WITHOUT Headers, so a plain -F search finds OBS's first and
     # stops. A shim of symlinks turns the framework layout into the ordinary
     # include layout so -I resolves it and search order stops mattering.
-    set(QT_BREW "/opt/homebrew/opt/qt")
-    if(NOT EXISTS "${QT_BREW}/lib/QtWidgets.framework/Headers")
+    # Homebrew lives in /opt/homebrew on Apple silicon and /usr/local on Intel,
+    # and a CI runner may be either, so look rather than assume.
+    set(QT_BREW "")
+    foreach(candidate "/opt/homebrew/opt/qt" "/usr/local/opt/qt" "$ENV{QT_PREFIX}")
+        if(candidate AND EXISTS "${candidate}/lib/QtWidgets.framework/Headers")
+            set(QT_BREW "${candidate}")
+            break()
+        endif()
+    endforeach()
+    if(NOT QT_BREW)
         message(FATAL_ERROR "Qt headers not found — run: brew install qt")
     endif()
+    message(STATUS "Qt headers: ${QT_BREW}")
     set(QT_SHIM "${CMAKE_BINARY_DIR}/qt-shim")
     file(MAKE_DIRECTORY "${QT_SHIM}")
     foreach(mod QtCore QtGui QtWidgets)

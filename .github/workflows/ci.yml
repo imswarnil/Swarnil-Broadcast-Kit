@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: brew install --cask obs
-      - run: brew install simde jansson cmake
+      - run: brew install simde jansson cmake qt
       - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - run: cmake --build build
       - name: Check every source registered
