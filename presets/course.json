@@ -1,0 +1,80 @@
+{
+	"name": "SBK · Course",
+	"look": { "accent": 4282329077, "scale": 1.0 },
+	"scenes": [
+		{ "name": "Module title", "items": [
+			{ "id": "sbk_backdrop", "name": "Course backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "gradient", "angle": "diagonal", "color2": 4281545523 } },
+			{ "id": "sbk_card", "name": "Module card", "x": 960, "y": 340, "anchor": "top-centre",
+			  "settings": { "eyebrow": "Module 3", "title": "Auth and sessions",
+			                "body": "What a session really is, and the four ways to lose one.",
+			                "align": "centre", "width": 1500, "variant": "none" } },
+			{ "id": "sbk_progress", "name": "Module progress", "x": 960, "y": 700, "anchor": "top-centre",
+			  "settings": { "label": "Modules", "value": 3, "target": 8, "style": "segments",
+			                "segments": 8, "width": 720, "step": 1, "variant": "none" } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right",
+			  "settings": { "shape": "dot" } }
+		]},
+		{ "name": "Teaching", "items": [
+			{ "id": "screen", "x": 0, "y": 0, "box": [1920, 1080] },
+			{ "id": "sbk_plate", "name": "Cam plate", "x": 1589, "y": 841, "anchor": "centre",
+			  "settings": { "aspect": "16x9", "size": 0.66, "radius": 16.0, "fill_glass": true } },
+			{ "id": "camera", "x": 1800, "y": 960, "anchor": "bottom-right", "box": [422, 238] },
+			{ "id": "sbk_frame", "name": "Cam frame", "x": 1800, "y": 960, "anchor": "bottom-right",
+			  "settings": { "aspect": "16x9", "size": 0.66, "style": "ring", "radius": 16.0,
+			                "label": "@imswarnil", "chip_at": "bottom-left" } },
+			{ "id": "sbk_chip", "name": "Chapter", "x": 120, "y": 120,
+			  "settings": { "label": "Chapter 1 — setting up", "variant": "card", "dot": "accent" } },
+			{ "id": "sbk_progress", "name": "Chapters", "x": 120, "y": 960, "anchor": "bottom-left",
+			  "settings": { "label": "Chapters", "value": 1, "target": 8, "style": "segments",
+			                "segments": 8, "width": 420, "step": 1 } },
+			{ "id": "sbk_meter", "name": "Mic", "x": 120, "y": 830, "anchor": "bottom-left",
+			  "settings": { "source": "@mic", "label": "Mic", "width": 300,
+			                "style": "segments", "segment_count": 20, "show_db": false } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right",
+			  "settings": { "shape": "badge" } }
+		]},
+		{ "name": "Questions", "items": [
+			{ "id": "screen", "x": 0, "y": 0, "box": [1920, 1080] },
+			{ "id": "sbk_chip", "name": "Q chip", "x": 1800, "y": 120, "anchor": "top-right",
+			  "settings": { "label": "Questions", "variant": "accent", "dot": "none" } },
+			{ "id": "sbk_comments", "name": "Questions panel", "x": 1800, "y": 240, "anchor": "top-right",
+			  "settings": { "width": 560, "title": "Questions", "show_count": 3,
+			                "rotate": 12.0, "variant": "card", "enter": "left" } },
+			{ "id": "sbk_plate", "name": "Corner plate", "x": 286, "y": 866, "anchor": "centre",
+			  "settings": { "aspect": "16x9", "size": 0.52, "radius": 14.0, "fill_glass": true } },
+			{ "id": "camera", "x": 120, "y": 960, "anchor": "bottom-left", "box": [332, 187] },
+			{ "id": "sbk_frame", "name": "Corner frame", "x": 120, "y": 960, "anchor": "bottom-left",
+			  "settings": { "aspect": "16x9", "size": 0.52, "style": "ring", "radius": 14.0, "label": "" } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right",
+			  "settings": { "shape": "badge" } }
+		]},
+		{ "name": "Exercise", "items": [
+			{ "id": "sbk_backdrop", "name": "Course backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "grid", "drift": 3.0, "pitch": 72.0 } },
+			{ "id": "sbk_card", "name": "Exercise card", "x": 960, "y": 280, "anchor": "top-centre",
+			  "settings": { "eyebrow": "Your turn", "title": "Break the session on purpose",
+			                "body": "Log in, delete the cookie, reload. Write down what you expected.",
+			                "align": "centre", "width": 1400, "variant": "none" } },
+			{ "id": "sbk_countdown", "name": "Exercise timer", "x": 960, "y": 640, "anchor": "top-centre",
+			  "settings": { "mode": "duration", "minutes": 10, "style": "ring", "ring_size": 300,
+			                "label": "Time left", "draw_card": false, "enter": "grow" } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right",
+			  "settings": { "shape": "dot" } }
+		]},
+		{ "name": "Wrap up", "items": [
+			{ "id": "sbk_backdrop", "name": "Course backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "rings", "drift": 2.0, "pitch": 120.0 } },
+			{ "id": "sbk_card", "name": "Wrap card", "x": 960, "y": 300, "anchor": "top-centre",
+			  "settings": { "eyebrow": "Module 3 done", "title": "Next: refresh tokens",
+			                "body": "The recording and the exercise files are in the description.",
+			                "align": "centre", "width": 1400, "variant": "none" } },
+			{ "id": "sbk_social", "name": "Handles", "x": 960, "y": 680, "anchor": "top-centre",
+			  "settings": { "mode": "bar", "variant": "card", "brand": true } },
+			{ "id": "sbk_logo", "name": "Mark", "x": 120, "y": 960, "anchor": "bottom-left",
+			  "settings": { "mark": "ring", "loop": "draw", "mark_size": 120,
+			                "variant": "none", "caption": "See you next module" } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right" }
+		]}
+	]
+}

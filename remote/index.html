@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>SBK Remote</title>
+<meta name="description" content="Control OBS from your phone: scenes, stream and record, the mic, the transition, and every hotkey Swarnil Broadcast Kit registers. Runs on your own network over OBS's own WebSocket server.">
+<style>
+	/*  Sized for a phone held in one hand while you are talking to a camera:
+	    nothing smaller than a thumb, the thing you press most at the bottom,
+	    and enough contrast to read in a dark room without lighting your face. */
+	:root {
+		--ink: #f6f6f6; --dim: rgb(246 246 246 / 62%); --faint: rgb(246 246 246 / 38%);
+		--bg: #0b0b0b; --surface: #161616; --surface-2: #202020;
+		--line: rgb(255 255 255 / 12%);
+		--accent: #f5273f; --ok: #3fcf6a; --warn: #ffc433;
+		--sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+		--mono: ui-monospace, "SF Mono", Menlo, monospace;
+	}
+	* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+	body {
+		margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans);
+		padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 1rem) env(safe-area-inset-left);
+		-webkit-font-smoothing: antialiased; overscroll-behavior: none;
+	}
+	.wrap { max-width: 34rem; margin: 0 auto; padding: 0 1rem; }
+	header {
+		display: flex; align-items: center; gap: .6rem; padding: 1rem 0 .8rem;
+		position: sticky; top: 0; background: rgb(11 11 11 / 92%); backdrop-filter: blur(12px); z-index: 5;
+	}
+	h1 { font-size: 1rem; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+	.lamp { width: 10px; height: 10px; border-radius: 50%; background: var(--faint); flex: none; }
+	.lamp[data-on="yes"] { background: var(--ok); }
+	.lamp[data-on="busy"] { background: var(--warn); }
+	.lamp[data-on="no"] { background: var(--accent); }
+	.state { margin-left: auto; font-size: .76rem; color: var(--dim); font-family: var(--mono); }
+
+	h2 { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint);
+	     margin: 1.4rem 0 .5rem; font-weight: 600; }
+	.grid { display: grid; gap: .5rem; }
+	.g2 { grid-template-columns: 1fr 1fr; }
+	.g3 { grid-template-columns: repeat(3, 1fr); }
+
+	button, input {
+		font: inherit; font-size: .95rem; color: var(--ink);
+		background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+	}
+	button {
+		min-height: 52px; padding: .6rem .8rem; cursor: pointer; text-align: left;
+		display: flex; align-items: center; gap: .55rem; transition: background .12s ease;
+	}
+	button:active { background: var(--surface-2); }
+	button[disabled] { opacity: .4; cursor: default; }
+	button[data-active="true"] { border-color: var(--accent); background: rgb(245 39 63 / 14%); }
+	button.wide { justify-content: center; text-align: center; font-weight: 600; }
+	button.live[data-on="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+	button.rec[data-on="true"] { background: #b5222f; border-color: #b5222f; color: #fff; }
+	.b-sub { display: block; font-size: .72rem; color: var(--dim); font-weight: 400; }
+	input { width: 100%; padding: .7rem .8rem; min-height: 48px; }
+	label { display: block; font-size: .74rem; color: var(--dim); margin: .55rem 0 .25rem; }
+	.row { display: grid; grid-template-columns: 2fr 1fr; gap: .5rem; }
+	.note { font-size: .78rem; color: var(--dim); line-height: 1.5; margin: .7rem 0 0; }
+	.err { color: var(--accent); }
+	dialog {
+		border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+		border-radius: 16px; padding: 1.1rem; width: min(92vw, 26rem);
+	}
+	dialog::backdrop { background: rgb(0 0 0 / 70%); }
+	.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+	<header>
+		<span class="lamp" id="lamp" data-on="no"></span>
+		<h1>SBK Remote</h1>
+		<span class="state" id="state">not connected</span>
+	</header>
+
+	<div id="setup">
+		<h2>Connect to OBS</h2>
+		<p class="note">In OBS: <strong>Tools → WebSocket Server Settings</strong>, tick <em>Enable</em>,
+		and copy the port and password. Then put this machine's address in below — the one your
+		phone can reach, not <code>localhost</code>.</p>
+		<div class="row">
+			<div><label for="host">Address</label><input id="host" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="192.168.1.20"></div>
+			<div><label for="port">Port</label><input id="port" inputmode="numeric" value="4455"></div>
+		</div>
+		<label for="pass">Password (blank if authentication is off)</label>
+		<input id="pass" type="password" autocomplete="off">
+		<div class="grid" style="margin-top:.8rem">
+			<button class="wide" id="connect">Connect</button>
+		</div>
+		<p class="note err hidden" id="err"></p>
+	</div>
+
+	<div id="panel" class="hidden">
+		<h2>On air</h2>
+		<div class="grid g2">
+			<button class="wide live" id="stream" data-on="false">Go live</button>
+			<button class="wide rec" id="record" data-on="false">Record</button>
+		</div>
+		<div class="grid g2" style="margin-top:.5rem">
+			<button class="wide" id="mic">Mic</button>
+			<button class="wide" id="disconnect">Disconnect</button>
+		</div>
+
+		<h2>Scenes</h2>
+		<div class="grid" id="scenes"></div>
+
+		<h2>Transition</h2>
+		<div class="grid g2" id="transitions"></div>
+
+		<h2 id="hotkeys-head" class="hidden">Kit actions</h2>
+		<div class="grid g2" id="hotkeys"></div>
+	</div>
+</div>
+
+<script type="module">
+import { authString } from './sha256.js';
+
+/*  A remote for OBS over its own WebSocket server — the one that ships with
+    OBS, not anything this project runs. The page is static: open it from a
+    plain http:// address on your own network and it talks straight to your
+    machine. Nothing is sent anywhere else, and the password is kept in this
+    browser only.
+
+    It deliberately does not hard-code the kit's hotkeys. It asks OBS what
+    hotkeys exist and shows a button for each of the kit's own, so a hotkey
+    added to the plugin later turns up here without this file changing.  */
+
+const $ = (id) => document.getElementById(id);
+const store = {
+	get(k, d) { try { return localStorage.getItem('sbk-remote-' + k) ?? d; } catch { return d; } },
+	set(k, v) { try { localStorage.setItem('sbk-remote-' + k, v); } catch {} },
+};
+
+$('host').value = store.get('host', location.hostname && location.hostname !== 'localhost' ? location.hostname : '');
+$('port').value = store.get('port', '4455');
+$('pass').value = store.get('pass', '');
+
+let ws = null, nextId = 1;
+const pending = new Map();
+let micName = null;
+
+function setState(text, lamp) {
+	$('state').textContent = text;
+	$('lamp').dataset.on = lamp;
+}
+
+function fail(msg) {
+	$('err').textContent = msg;
+	$('err').classList.remove('hidden');
+}
+
+/* one request, one promise */
+function send(requestType, requestData) {
+	return new Promise((resolve, reject) => {
+		if (!ws || ws.readyState !== WebSocket.OPEN) return reject(new Error('not connected'));
+		const requestId = String(nextId++);
+		pending.set(requestId, { resolve, reject });
+		ws.send(JSON.stringify({ op: 6, d: { requestType, requestId, requestData } }));
+		setTimeout(() => {
+			if (pending.has(requestId)) {
+				pending.delete(requestId);
+				reject(new Error(requestType + ' timed out'));
+			}
+		}, 8000);
+	});
+}
+
+function connect() {
+	const host = $('host').value.trim();
+	const port = $('port').value.trim() || '4455';
+	const pass = $('pass').value;
+	if (!host) return fail('Put in the address of the machine running OBS.');
+	store.set('host', host); store.set('port', port); store.set('pass', pass);
+	$('err').classList.add('hidden');
+	setState('connecting', 'busy');
+
+	try {
+		ws = new WebSocket(`ws://${host}:${port}`);
+	} catch (e) {
+		return fail('That address is not one a browser will open: ' + e.message);
+	}
+
+	ws.onerror = () => {
+		/* the browser never says why, so the message has to cover the two real
+		   causes: nothing listening, or an https page refusing a ws:// socket */
+		fail(location.protocol === 'https:'
+			? 'Blocked. A page served over https cannot open a plain ws:// connection — open this remote over http:// instead (see the setup notes on the site).'
+			: 'Could not reach OBS there. Check the WebSocket server is enabled, the address and port are right, and both devices are on the same network.');
+		setState('not connected', 'no');
+	};
+	ws.onclose = () => {
+		setState('not connected', 'no');
+		$('panel').classList.add('hidden');
+		$('setup').classList.remove('hidden');
+	};
+
+	ws.onmessage = async (ev) => {
+		const msg = JSON.parse(ev.data);
+		if (msg.op === 0) {
+			const d = { rpcVersion: 1, eventSubscriptions: 1 | 4 | 8 | 16 | 64 };
+			if (msg.d.authentication) {
+				if (!pass) {
+					fail('This OBS wants a password. Copy it from Tools → WebSocket Server Settings → Show Connect Info.');
+					ws.close();
+					return;
+				}
+				d.authentication = authString(pass, msg.d.authentication.salt, msg.d.authentication.challenge);
+			}
+			ws.send(JSON.stringify({ op: 1, d }));
+			return;
+		}
+		if (msg.op === 2) {
+			setState('connected', 'yes');
+			$('setup').classList.add('hidden');
+			$('panel').classList.remove('hidden');
+			await refreshAll();
+			return;
+		}
+		if (msg.op === 7) {
+			const p = pending.get(msg.d.requestId);
+			if (!p) return;
+			pending.delete(msg.d.requestId);
+			msg.d.requestStatus.result
+				? p.resolve(msg.d.responseData || {})
+				: p.reject(new Error(msg.d.requestStatus.comment || 'request failed'));
+			return;
+		}
+		if (msg.op === 5) onEvent(msg.d.eventType, msg.d.eventData);
+	};
+}
+
+function onEvent(type, data) {
+	if (type === 'CurrentProgramSceneChanged') markScene(data.sceneName);
+	else if (type === 'StreamStateChanged') setToggle('stream', data.outputActive, 'Go live', 'Stop streaming');
+	else if (type === 'RecordStateChanged') setToggle('record', data.outputActive, 'Record', 'Stop recording');
+	else if (type === 'InputMuteStateChanged' && data.inputName === micName) setMic(data.inputMuted);
+	else if (type === 'CurrentSceneTransitionChanged') markTransition(data.transitionName);
+	else if (type === 'SceneListChanged') loadScenes();
+}
+
+function setToggle(id, on, offLabel, onLabel) {
+	const b = $(id);
+	b.dataset.on = String(!!on);
+	b.textContent = on ? onLabel : offLabel;
+}
+function setMic(muted) {
+	const b = $('mic');
+	b.dataset.on = String(!muted);
+	b.textContent = muted ? 'Mic muted' : 'Mic live';
+	b.dataset.active = String(!!muted);
+}
+function markScene(name) {
+	for (const b of $('scenes').children) b.dataset.active = String(b.dataset.scene === name);
+}
+function markTransition(name) {
+	for (const b of $('transitions').children) b.dataset.active = String(b.dataset.transition === name);
+}
+
+async function loadScenes() {
+	const { scenes, currentProgramSceneName } = await send('GetSceneList');
+	const box = $('scenes');
+	box.replaceChildren();
+	/* OBS hands the list back bottom-first; the panel reads top-first */
+	for (const s of [...scenes].reverse()) {
+		const b = document.createElement('button');
+		b.dataset.scene = s.sceneName;
+		b.textContent = s.sceneName;
+		b.onclick = () => send('SetCurrentProgramScene', { sceneName: s.sceneName });
+		box.appendChild(b);
+	}
+	markScene(currentProgramSceneName);
+}
+
+async function loadTransitions() {
+	const { transitions, currentSceneTransitionName } = await send('GetSceneTransitionList');
+	const box = $('transitions');
+	box.replaceChildren();
+	for (const t of transitions) {
+		const b = document.createElement('button');
+		b.dataset.transition = t.transitionName;
+		b.textContent = t.transitionName;
+		b.onclick = () => send('SetCurrentSceneTransition', { transitionName: t.transitionName });
+		box.appendChild(b);
+	}
+	markTransition(currentSceneTransitionName);
+}
+
+async function loadHotkeys() {
+	let names = [];
+	try {
+		({ hotkeys: names } = await send('GetHotkeyList'));
+	} catch { return; }
+	const mine = names.filter((n) => n.startsWith('SBK.'));
+	if (!mine.length) return;
+	$('hotkeys-head').classList.remove('hidden');
+	const box = $('hotkeys');
+	box.replaceChildren();
+	for (const name of mine) {
+		const b = document.createElement('button');
+		/* "SBK.LowerThird.Replay" reads as "Lower Third · Replay" */
+		const parts = name.split('.').slice(1);
+		b.innerHTML = `<span>${parts.join(' · ').replace(/([a-z])([A-Z])/g, '$1 $2')}<span class="b-sub">${name}</span></span>`;
+		b.onclick = () => send('TriggerHotkeyByName', { hotkeyName: name });
+		box.appendChild(b);
+	}
+}
+
+async function loadMic() {
+	const { inputs } = await send('GetInputList');
+	/* the kit puts the microphone on Mic/Aux; fall back to the first input that
+	   looks like one so the button is useful in someone else's setup too */
+	const guess = inputs.find((i) => /mic/i.test(i.inputName)) || inputs[0];
+	if (!guess) return;
+	micName = guess.inputName;
+	const { inputMuted } = await send('GetInputMute', { inputName: micName });
+	setMic(inputMuted);
+	$('mic').onclick = () => send('ToggleInputMute', { inputName: micName });
+}
+
+async function refreshAll() {
+	await loadScenes();
+	await loadTransitions();
+	await loadHotkeys();
+	try { await loadMic(); } catch {}
+	const s = await send('GetStreamStatus');
+	setToggle('stream', s.outputActive, 'Go live', 'Stop streaming');
+	const r = await send('GetRecordStatus');
+	setToggle('record', r.outputActive, 'Record', 'Stop recording');
+}
+
+$('connect').onclick = connect;
+$('pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') connect(); });
+$('stream').onclick = () => send('ToggleStream');
+$('record').onclick = () => send('ToggleRecord');
+$('disconnect').onclick = () => ws && ws.close();
+
+/* Reconnect when the phone comes back from the lock screen, which is the normal
+   way this page gets used: pick it up, press a scene, put it down. */
+document.addEventListener('visibilitychange', () => {
+	if (!document.hidden && (!ws || ws.readyState === WebSocket.CLOSED) && $('host').value) connect();
+});
+
+if ($('host').value) connect();
+</script>
+</body>
+</html>

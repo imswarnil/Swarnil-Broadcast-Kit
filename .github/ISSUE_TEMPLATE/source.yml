@@ -1,0 +1,28 @@
+name: A source you want
+description: Something you would put on screen that the kit cannot draw.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The test is simple: **what would you put on screen, and why can none of
+        the existing sources do it?** Something that differs from an existing
+        source only in its defaults is a preset, not a source — the kit already
+        has a Look group and a variant list for that.
+  - type: textarea
+    id: what
+    attributes:
+      label: What would be on screen
+      description: Describe the picture. A rough sketch or a reference from another stream is worth more than a paragraph.
+    validations: { required: true }
+  - type: textarea
+    id: why
+    attributes:
+      label: Why the existing sources cannot
+      description: Have a look at the source list first — obs.imswarnil.com/sources/
+    validations: { required: true }
+  - type: textarea
+    id: settings
+    attributes:
+      label: What you would want to change about it
+      description: The handful of things that would actually vary between two people using it.

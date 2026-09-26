@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How do I install it?
+    url: https://obs.imswarnil.com/docs/
+    about: Installing, the display capture permission, the phone remote, and why a source might not appear.
+  - name: What can I build with it?
+    url: https://obs.imswarnil.com/make/
+    about: Five ready-made scene collections, and what the pieces combine into.

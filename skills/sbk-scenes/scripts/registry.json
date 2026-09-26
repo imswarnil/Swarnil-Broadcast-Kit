@@ -1,0 +1,2860 @@
+{
+	"generated_by": "scripts/skill-sync.mjs",
+	"source_digest": "d6a53f2edcfb",
+	"canvas": {
+		"width": 1920,
+		"height": 1080
+	},
+	"aspects": [
+		{
+			"id": "custom",
+			"w": 0,
+			"h": 0
+		},
+		{
+			"id": "16x9",
+			"w": 640,
+			"h": 360
+		},
+		{
+			"id": "9x16",
+			"w": 360,
+			"h": 640
+		},
+		{
+			"id": "1x1",
+			"w": 480,
+			"h": 480
+		},
+		{
+			"id": "4x5",
+			"w": 432,
+			"h": 540
+		},
+		{
+			"id": "4x3",
+			"w": 560,
+			"h": 420
+		},
+		{
+			"id": "21x9",
+			"w": 756,
+			"h": 324
+		}
+	],
+	"surfaces": [
+		"card",
+		"pill",
+		"outline",
+		"accent",
+		"none"
+	],
+	"glyphs": [
+		"none",
+		"play",
+		"camera",
+		"at",
+		"chat",
+		"heart",
+		"bell",
+		"star",
+		"share",
+		"globe",
+		"code",
+		"person",
+		"bookmark",
+		"plus",
+		"ring",
+		"arrow"
+	],
+	"platforms": [
+		{
+			"id": "youtube",
+			"label": "YouTube"
+		},
+		{
+			"id": "instagram",
+			"label": "Instagram"
+		},
+		{
+			"id": "x",
+			"label": "X"
+		},
+		{
+			"id": "linkedin",
+			"label": "LinkedIn"
+		},
+		{
+			"id": "github",
+			"label": "GitHub"
+		},
+		{
+			"id": "twitch",
+			"label": "Twitch"
+		},
+		{
+			"id": "tiktok",
+			"label": "TikTok"
+		},
+		{
+			"id": "discord",
+			"label": "Discord"
+		},
+		{
+			"id": "web",
+			"label": "Website"
+		},
+		{
+			"id": "news",
+			"label": "Newsletter"
+		},
+		{
+			"id": "custom",
+			"label": "Custom — set it yourself"
+		}
+	],
+	"sources": [
+		{
+			"id": "sbk_colour",
+			"name": "SBK Colour",
+			"kind": "Filter",
+			"type": "FILTER",
+			"audio": false,
+			"file": "src/filter-colour.c",
+			"hotkeys": [],
+			"settings": {
+				"preset": {
+					"type": "string",
+					"default": "custom",
+					"values": [
+						"custom"
+					]
+				},
+				"exposure": {
+					"type": "double",
+					"default": 0,
+					"min": -3,
+					"max": 3
+				},
+				"contrast": {
+					"type": "double",
+					"default": 0,
+					"min": -1,
+					"max": 1
+				},
+				"saturation": {
+					"type": "double",
+					"default": 0,
+					"min": -1,
+					"max": 1
+				},
+				"vibrance": {
+					"type": "double",
+					"default": 0,
+					"min": -1,
+					"max": 1
+				},
+				"temperature": {
+					"type": "double",
+					"default": 0,
+					"min": -1,
+					"max": 1
+				},
+				"tint": {
+					"type": "double",
+					"default": 0,
+					"min": -1,
+					"max": 1
+				},
+				"fade": {
+					"type": "double",
+					"default": 0,
+					"min": 0,
+					"max": 0.5
+				}
+			}
+		},
+		{
+			"id": "sbk_punch",
+			"name": "SBK Punch",
+			"kind": "Filter",
+			"type": "FILTER",
+			"audio": false,
+			"file": "src/filter-punch.c",
+			"hotkeys": [
+				{
+					"id": "SBK.Punch.In",
+					"label": "Broadcast Kit: punch in"
+				},
+				{
+					"id": "SBK.Punch.Out",
+					"label": "Broadcast Kit: punch out"
+				},
+				{
+					"id": "SBK.Punch.Toggle",
+					"label": "Broadcast Kit: punch in or out"
+				}
+			],
+			"settings": {
+				"zoom": {
+					"type": "double",
+					"default": 1.6,
+					"min": 1,
+					"max": 4
+				},
+				"focus_x": {
+					"type": "double",
+					"default": 50,
+					"min": 0,
+					"max": 100
+				},
+				"focus_y": {
+					"type": "double",
+					"default": 45,
+					"min": 0,
+					"max": 100
+				},
+				"in_secs": {
+					"type": "double",
+					"default": 0.45,
+					"min": 0.05,
+					"max": 3
+				},
+				"out_secs": {
+					"type": "double",
+					"default": 0.55,
+					"min": 0.05,
+					"max": 3
+				},
+				"auto_out": {
+					"type": "bool",
+					"default": false
+				},
+				"hold_secs": {
+					"type": "double",
+					"default": 6,
+					"min": 0.5,
+					"max": 30
+				}
+			}
+		},
+		{
+			"id": "sbk_radio",
+			"name": "SBK Radio",
+			"kind": "Filter",
+			"type": "FILTER",
+			"audio": true,
+			"file": "src/filter-radio.c",
+			"hotkeys": [],
+			"settings": {
+				"preset": {
+					"type": "string",
+					"default": "custom",
+					"values": [
+						"custom"
+					]
+				},
+				"low": {
+					"type": "double",
+					"min": 100,
+					"max": 1200
+				},
+				"high": {
+					"type": "double",
+					"min": 1000,
+					"max": 8000
+				},
+				"drive": {
+					"type": "double",
+					"min": 0,
+					"max": 1
+				},
+				"squash": {
+					"type": "double",
+					"min": 0,
+					"max": 1
+				},
+				"noise": {
+					"type": "double",
+					"min": 0,
+					"max": 1
+				},
+				"out": {
+					"type": "double",
+					"min": -12,
+					"max": 18
+				},
+				"mix": {
+					"type": "double",
+					"default": 1,
+					"min": 0,
+					"max": 1
+				}
+			}
+		},
+		{
+			"id": "sbk_round",
+			"name": "SBK Round Corners",
+			"kind": "Filter",
+			"type": "FILTER",
+			"audio": false,
+			"file": "src/filter-round.c",
+			"hotkeys": [],
+			"settings": {
+				"percent": {
+					"type": "bool",
+					"default": true
+				},
+				"radius": {
+					"type": "double",
+					"default": 14,
+					"min": 0,
+					"max": 100
+				},
+				"border": {
+					"type": "double",
+					"default": 0,
+					"min": 0,
+					"max": 40
+				},
+				"border_color": {
+					"type": "int",
+					"default": 4282329077
+				},
+				"inset": {
+					"type": "double",
+					"default": 0,
+					"min": 0,
+					"max": 60
+				},
+				"softness": {
+					"type": "double",
+					"default": 1,
+					"min": 0.5,
+					"max": 8
+				},
+				"fill": {
+					"type": "int",
+					"default": 0
+				}
+			}
+		},
+		{
+			"id": "sbk_scanlines",
+			"name": "SBK Scanlines",
+			"kind": "Filter",
+			"type": "FILTER",
+			"audio": false,
+			"file": "src/filter-scanlines.c",
+			"hotkeys": [],
+			"settings": {
+				"preset": {
+					"type": "string",
+					"default": "custom",
+					"values": [
+						"custom"
+					]
+				},
+				"line_height": {
+					"type": "double",
+					"min": 1,
+					"max": 16
+				},
+				"line_depth": {
+					"type": "double",
+					"min": 0,
+					"max": 0.9
+				},
+				"line_roll": {
+					"type": "double",
+					"min": -120,
+					"max": 120
+				},
+				"mask": {
+					"type": "double",
+					"min": 0,
+					"max": 1
+				},
+				"mask_width": {
+					"type": "double",
+					"min": 2,
+					"max": 12
+				},
+				"fringe": {
+					"type": "double",
+					"min": 0,
+					"max": 12
+				},
+				"curve": {
+					"type": "double",
+					"min": 0,
+					"max": 0.35
+				},
+				"vignette": {
+					"type": "double",
+					"min": 0,
+					"max": 1
+				},
+				"grain": {
+					"type": "double",
+					"min": 0,
+					"max": 1
+				},
+				"flicker": {
+					"type": "double",
+					"min": 0,
+					"max": 1
+				},
+				"bright": {
+					"type": "double",
+					"min": 0,
+					"max": 1
+				}
+			}
+		},
+		{
+			"id": "sbk_voice",
+			"name": "SBK Voice",
+			"kind": "Filter",
+			"type": "FILTER",
+			"audio": true,
+			"file": "src/filter-voice.c",
+			"hotkeys": [],
+			"settings": {
+				"preset": {
+					"type": "string",
+					"default": "custom",
+					"values": [
+						"custom"
+					]
+				},
+				"hp_on": {
+					"type": "bool",
+					"default": true
+				},
+				"hp_freq": {
+					"type": "double",
+					"min": 20,
+					"max": 250
+				},
+				"gate_on": {
+					"type": "bool",
+					"default": false
+				},
+				"gate_open": {
+					"type": "double",
+					"default": -45,
+					"min": -70,
+					"max": -10
+				},
+				"gate_close": {
+					"type": "double",
+					"default": -55,
+					"min": -80,
+					"max": -20
+				},
+				"gate_hold": {
+					"type": "double",
+					"default": 200,
+					"min": 0,
+					"max": 800
+				},
+				"comp_on": {
+					"type": "bool",
+					"default": true
+				},
+				"threshold": {
+					"type": "double",
+					"min": -60,
+					"max": 0
+				},
+				"ratio": {
+					"type": "double",
+					"min": 1,
+					"max": 20
+				},
+				"knee": {
+					"type": "double",
+					"default": 6,
+					"min": 0,
+					"max": 24
+				},
+				"attack": {
+					"type": "double",
+					"min": 0.1,
+					"max": 100
+				},
+				"release": {
+					"type": "double",
+					"min": 10,
+					"max": 1000
+				},
+				"makeup": {
+					"type": "double",
+					"min": 0,
+					"max": 30
+				},
+				"presence_on": {
+					"type": "bool",
+					"default": true
+				},
+				"presence": {
+					"type": "double",
+					"min": -6,
+					"max": 12
+				},
+				"presence_hz": {
+					"type": "double",
+					"default": 3200,
+					"min": 1500,
+					"max": 8000
+				},
+				"sat_on": {
+					"type": "bool",
+					"default": true
+				},
+				"drive": {
+					"type": "double",
+					"min": 0,
+					"max": 1
+				},
+				"limit_on": {
+					"type": "bool",
+					"default": true
+				},
+				"ceiling": {
+					"type": "double",
+					"default": -1,
+					"min": -12,
+					"max": 0
+				}
+			}
+		},
+		{
+			"id": "sbk_backdrop",
+			"name": "SBK Backdrop",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-backdrop.c",
+			"hotkeys": [],
+			"settings": {
+				"mode": {
+					"type": "string",
+					"default": "solid",
+					"values": [
+						"solid",
+						"scrim",
+						"scrim-top",
+						"vignette",
+						"gradient",
+						"grid",
+						"dots",
+						"stripes",
+						"waves",
+						"rings",
+						"hex",
+						"grain",
+						"aurora",
+						"plasma",
+						"stars",
+						"checkers"
+					]
+				},
+				"color": {
+					"type": "int",
+					"default": 4279966491
+				},
+				"color2": {
+					"type": "int",
+					"default": 352321535
+				},
+				"reach": {
+					"type": "double",
+					"default": 0.6,
+					"min": 0.1,
+					"max": 1
+				},
+				"pitch": {
+					"type": "double",
+					"default": 64,
+					"min": 8,
+					"max": 240
+				},
+				"weight": {
+					"type": "double",
+					"default": 1.5,
+					"min": 0.5,
+					"max": 24
+				},
+				"drift": {
+					"type": "double",
+					"default": 6,
+					"min": -40,
+					"max": 40
+				},
+				"angle": {
+					"type": "string",
+					"default": "diagonal",
+					"values": [
+						"vertical",
+						"diagonal",
+						"horizontal"
+					]
+				},
+				"width": {
+					"type": "int",
+					"min": 16,
+					"max": 7680
+				},
+				"height": {
+					"type": "int",
+					"min": 16,
+					"max": 4320
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_card",
+			"name": "SBK Card",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-card.c",
+			"hotkeys": [],
+			"settings": {
+				"eyebrow": {
+					"type": "string",
+					"default": "Starting soon"
+				},
+				"dot": {
+					"type": "bool",
+					"default": true
+				},
+				"title": {
+					"type": "string",
+					"default": "Building a Salesforce app live"
+				},
+				"body": {
+					"type": "string",
+					"default": "Grab a coffee. We begin at the top of the hour."
+				},
+				"chips": {
+					"type": "string",
+					"default": "@imswarnil | youtube.com/@imswarnil | imswarnil.com"
+				},
+				"width": {
+					"type": "int",
+					"default": 1100,
+					"min": 320,
+					"max": 3840
+				},
+				"variant": {
+					"type": "string",
+					"default": "card",
+					"values": [
+						"card",
+						"split",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"align": {
+					"type": "string",
+					"default": "left",
+					"values": [
+						"left",
+						"centre"
+					]
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "up",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_chip",
+			"name": "SBK Chip",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-chip.c",
+			"hotkeys": [],
+			"settings": {
+				"label": {
+					"type": "string",
+					"default": "@imswarnil"
+				},
+				"value": {
+					"type": "string",
+					"default": ""
+				},
+				"variant": {
+					"type": "string",
+					"default": "pill",
+					"values": [
+						"card",
+						"pill",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"dot": {
+					"type": "string",
+					"default": "accent",
+					"values": [
+						"none",
+						"accent",
+						"pulse",
+						"live"
+					]
+				},
+				"hide_when_off": {
+					"type": "bool",
+					"default": false
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_clock",
+			"name": "SBK Clock",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-clock.c",
+			"hotkeys": [],
+			"settings": {
+				"h24": {
+					"type": "bool",
+					"default": false
+				},
+				"seconds": {
+					"type": "bool",
+					"default": false
+				},
+				"draw_card": {
+					"type": "bool",
+					"default": true
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_comments",
+			"name": "SBK Comments",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-comments.c",
+			"hotkeys": [],
+			"settings": {
+				"from": {
+					"type": "string",
+					"default": "manual",
+					"values": [
+						"manual",
+						"youtube",
+						"json"
+					]
+				},
+				"manual": {
+					"type": "string",
+					"default": "Aarti: How do you structure an org for scale?\nDev: Does this work with managed packages?\nPriya: Can you show the deploy step again?"
+				},
+				"title": {
+					"type": "string",
+					"default": "Questions"
+				},
+				"path_list": {
+					"type": "string",
+					"default": ""
+				},
+				"path_who": {
+					"type": "string",
+					"default": "author"
+				},
+				"path_what": {
+					"type": "string",
+					"default": "text"
+				},
+				"show_count": {
+					"type": "int",
+					"default": 3
+				},
+				"rotate": {
+					"type": "double",
+					"default": 12,
+					"min": 0,
+					"max": 60
+				},
+				"newest_first": {
+					"type": "bool",
+					"default": true
+				},
+				"avatars": {
+					"type": "bool",
+					"default": true
+				},
+				"interval": {
+					"type": "double",
+					"default": 20,
+					"min": 15,
+					"max": 600
+				},
+				"variant": {
+					"type": "string",
+					"default": "card",
+					"values": [
+						"card",
+						"pill",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"width": {
+					"type": "int",
+					"default": 560,
+					"min": 240,
+					"max": 1920
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "left",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_countdown",
+			"name": "SBK Timer",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-countdown.c",
+			"hotkeys": [
+				{
+					"id": "SBK.Countdown.Restart",
+					"label": "Broadcast Kit: restart the timer"
+				},
+				{
+					"id": "SBK.Countdown.Pause",
+					"label": "Broadcast Kit: pause or resume the timer"
+				}
+			],
+			"settings": {
+				"mode": {
+					"type": "string",
+					"default": "duration",
+					"values": [
+						"duration",
+						"time",
+						"up",
+						"uptime"
+					]
+				},
+				"style": {
+					"type": "string",
+					"default": "digits",
+					"values": [
+						"digits",
+						"ring",
+						"ring-only",
+						"bar"
+					]
+				},
+				"label": {
+					"type": "string",
+					"default": ""
+				},
+				"minutes": {
+					"type": "int",
+					"default": 15,
+					"min": 0,
+					"max": 600
+				},
+				"seconds": {
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 59
+				},
+				"at": {
+					"type": "string",
+					"default": "21:30"
+				},
+				"done": {
+					"type": "string",
+					"default": "Now"
+				},
+				"show_hours": {
+					"type": "bool",
+					"default": false
+				},
+				"ring_size": {
+					"type": "int",
+					"default": 260,
+					"min": 80,
+					"max": 900
+				},
+				"restart_on_show": {
+					"type": "bool",
+					"default": true
+				},
+				"draw_card": {
+					"type": "bool",
+					"default": false
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_counter",
+			"name": "SBK Counter",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-counter.c",
+			"hotkeys": [
+				{
+					"id": "SBK.Counter.Refresh",
+					"label": "Broadcast Kit: refresh the counter"
+				}
+			],
+			"settings": {
+				"provider": {
+					"type": "string",
+					"default": "youtube",
+					"values": [
+						"youtube",
+						"ghost",
+						"json"
+					]
+				},
+				"metric": {
+					"type": "string",
+					"default": "subscriberCount",
+					"values": [
+						"subscriberCount",
+						"viewCount",
+						"videoCount",
+						"all",
+						"paid"
+					]
+				},
+				"label": {
+					"type": "string",
+					"default": "Subscribers"
+				},
+				"path": {
+					"type": "string",
+					"default": "count"
+				},
+				"compact": {
+					"type": "bool",
+					"default": true
+				},
+				"show_delta": {
+					"type": "bool",
+					"default": true
+				},
+				"show_dot": {
+					"type": "bool",
+					"default": true
+				},
+				"show_goal": {
+					"type": "bool",
+					"default": false
+				},
+				"goal": {
+					"type": "double",
+					"default": 1000,
+					"min": 1,
+					"max": 1000000000
+				},
+				"interval": {
+					"type": "double",
+					"default": 60,
+					"min": 15,
+					"max": 900
+				},
+				"variant": {
+					"type": "string",
+					"default": "card",
+					"values": [
+						"card",
+						"pill",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"width": {
+					"type": "int",
+					"default": 420,
+					"min": 160,
+					"max": 1920
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_frame",
+			"name": "SBK Cam Frame",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-frame.c",
+			"hotkeys": [],
+			"settings": {
+				"aspect": {
+					"type": "string",
+					"default": "16x9"
+				},
+				"size": {
+					"type": "double",
+					"default": 1,
+					"min": 0.25,
+					"max": 4
+				},
+				"width": {
+					"type": "int",
+					"default": 640,
+					"min": 120,
+					"max": 7680
+				},
+				"height": {
+					"type": "int",
+					"default": 360,
+					"min": 120,
+					"max": 4320
+				},
+				"radius": {
+					"type": "double",
+					"default": 20,
+					"min": 0,
+					"max": 120
+				},
+				"weight": {
+					"type": "double",
+					"default": 3,
+					"min": 1,
+					"max": 24
+				},
+				"style": {
+					"type": "string",
+					"default": "ring",
+					"values": [
+						"ring",
+						"inset",
+						"corner",
+						"corner-out",
+						"edge",
+						"glow",
+						"double",
+						"none"
+					]
+				},
+				"bracket": {
+					"type": "double",
+					"default": 56,
+					"min": 8,
+					"max": 400
+				},
+				"glow": {
+					"type": "double",
+					"default": 0,
+					"min": 0,
+					"max": 80
+				},
+				"line": {
+					"type": "string",
+					"default": "hairline",
+					"values": [
+						"hairline",
+						"accent",
+						"ink"
+					]
+				},
+				"label": {
+					"type": "string",
+					"default": "@imswarnil"
+				},
+				"chip_at": {
+					"type": "string",
+					"default": "bottom-left",
+					"values": [
+						"bottom-left",
+						"bottom-right",
+						"top-left",
+						"top-right"
+					]
+				},
+				"chip_accent": {
+					"type": "bool",
+					"default": false
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_logo",
+			"name": "SBK Logo",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-logo.c",
+			"hotkeys": [],
+			"settings": {
+				"image": {
+					"type": "string",
+					"default": ""
+				},
+				"mark": {
+					"type": "string",
+					"default": "ring",
+					"values": [
+						"none",
+						"play",
+						"camera",
+						"at",
+						"chat",
+						"heart",
+						"bell",
+						"star",
+						"share",
+						"globe",
+						"code",
+						"person",
+						"bookmark",
+						"plus",
+						"ring",
+						"arrow"
+					]
+				},
+				"loop": {
+					"type": "string",
+					"default": "orbit",
+					"values": [
+						"none",
+						"breathe",
+						"pulse",
+						"spin",
+						"orbit",
+						"draw",
+						"bob"
+					]
+				},
+				"speed": {
+					"type": "double",
+					"default": 3.2,
+					"min": 0.4,
+					"max": 12
+				},
+				"mark_size": {
+					"type": "int",
+					"default": 96,
+					"min": 24,
+					"max": 720
+				},
+				"weight": {
+					"type": "double",
+					"default": 5,
+					"min": 1,
+					"max": 16
+				},
+				"use_accent": {
+					"type": "bool",
+					"default": true
+				},
+				"colour": {
+					"type": "int",
+					"default": 4282329077
+				},
+				"caption": {
+					"type": "string",
+					"default": ""
+				},
+				"variant": {
+					"type": "string",
+					"default": "none",
+					"values": [
+						"card",
+						"pill",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "pop",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_lower_third",
+			"name": "SBK Lower Third",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-lower-third.c",
+			"hotkeys": [
+				{
+					"id": "SBK.LowerThird.Replay",
+					"label": "Broadcast Kit: play the lower third in again"
+				}
+			],
+			"settings": {
+				"name": {
+					"type": "string",
+					"default": "Swarnil Singhai"
+				},
+				"title": {
+					"type": "string",
+					"default": "Salesforce Architect · imswarnil.com"
+				},
+				"variant": {
+					"type": "string",
+					"default": "card",
+					"values": [
+						"card",
+						"pill",
+						"split",
+						"minimal",
+						"underline"
+					]
+				},
+				"bar": {
+					"type": "bool",
+					"default": true
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "up",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_meter",
+			"name": "SBK Meter",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-meter.c",
+			"hotkeys": [],
+			"settings": {
+				"source": {
+					"type": "string",
+					"default": "@mic"
+				},
+				"label": {
+					"type": "string",
+					"default": "Mic"
+				},
+				"orientation": {
+					"type": "string",
+					"default": "horizontal",
+					"values": [
+						"horizontal",
+						"vertical"
+					]
+				},
+				"style": {
+					"type": "string",
+					"default": "segments",
+					"values": [
+						"solid",
+						"segments"
+					]
+				},
+				"segment_count": {
+					"type": "int",
+					"default": 24,
+					"min": 4,
+					"max": 60
+				},
+				"show_peak": {
+					"type": "bool",
+					"default": true
+				},
+				"show_db": {
+					"type": "bool",
+					"default": true
+				},
+				"show_zones": {
+					"type": "bool",
+					"default": true
+				},
+				"warn_db": {
+					"type": "double",
+					"default": -18,
+					"min": -40,
+					"max": -1
+				},
+				"hot_db": {
+					"type": "double",
+					"default": -6,
+					"min": -20,
+					"max": 0
+				},
+				"variant": {
+					"type": "string",
+					"default": "card",
+					"values": [
+						"card",
+						"pill",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"width": {
+					"type": "int",
+					"default": 420,
+					"min": 60,
+					"max": 3840
+				},
+				"height": {
+					"type": "int",
+					"default": 320,
+					"min": 60,
+					"max": 2160
+				},
+				"gain": {
+					"type": "double",
+					"default": 1,
+					"min": 0.1,
+					"max": 20
+				},
+				"floor_db": {
+					"type": "double",
+					"default": -60,
+					"min": -96,
+					"max": -20
+				},
+				"smoothing": {
+					"type": "double",
+					"default": 0.7,
+					"min": 0,
+					"max": 0.98
+				},
+				"decay": {
+					"type": "double",
+					"default": 0.006,
+					"min": 0.001,
+					"max": 0.1
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_onair",
+			"name": "SBK Light",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-onair.c",
+			"hotkeys": [],
+			"settings": {
+				"shape": {
+					"type": "string",
+					"default": "pill",
+					"values": [
+						"pill",
+						"badge",
+						"dot",
+						"bar",
+						"edge"
+					]
+				},
+				"fill_when_live": {
+					"type": "bool",
+					"default": false
+				},
+				"width": {
+					"type": "int",
+					"min": 120,
+					"max": 7680
+				},
+				"height": {
+					"type": "int",
+					"min": 120,
+					"max": 4320
+				},
+				"word_live": {
+					"type": "string",
+					"default": "Live"
+				},
+				"word_rec": {
+					"type": "string",
+					"default": "Rec"
+				},
+				"word_both": {
+					"type": "string",
+					"default": "Live · Rec"
+				},
+				"word_off": {
+					"type": "string",
+					"default": "Off air"
+				},
+				"hide_when_off": {
+					"type": "bool",
+					"default": false
+				},
+				"breathe": {
+					"type": "bool",
+					"default": true
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_plate",
+			"name": "SBK Plate",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-plate.c",
+			"hotkeys": [],
+			"settings": {
+				"aspect": {
+					"type": "string",
+					"default": "16x9"
+				},
+				"size": {
+					"type": "double",
+					"default": 1,
+					"min": 0.25,
+					"max": 4
+				},
+				"width": {
+					"type": "int",
+					"default": 640,
+					"min": 40,
+					"max": 7680
+				},
+				"height": {
+					"type": "int",
+					"default": 360,
+					"min": 40,
+					"max": 4320
+				},
+				"radius": {
+					"type": "double",
+					"default": 20,
+					"min": 0,
+					"max": 200
+				},
+				"fill_glass": {
+					"type": "bool",
+					"default": false
+				},
+				"fill": {
+					"type": "int",
+					"default": 0
+				},
+				"shadow": {
+					"type": "int",
+					"default": 2348810240
+				},
+				"shadow_x": {
+					"type": "double",
+					"default": 0,
+					"min": -120,
+					"max": 120
+				},
+				"shadow_y": {
+					"type": "double",
+					"default": 16,
+					"min": -120,
+					"max": 120
+				},
+				"shadow_blur": {
+					"type": "double",
+					"default": 44,
+					"min": 1,
+					"max": 160
+				},
+				"shadow_grow": {
+					"type": "double",
+					"default": 2,
+					"min": 0,
+					"max": 80
+				},
+				"glow": {
+					"type": "int",
+					"default": 0
+				},
+				"glow_size": {
+					"type": "double",
+					"default": 0,
+					"min": 0,
+					"max": 200
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_progress",
+			"name": "SBK Progress",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-progress.c",
+			"hotkeys": [
+				{
+					"id": "SBK.Progress.Up",
+					"label": "Broadcast Kit: nudge the goal up"
+				},
+				{
+					"id": "SBK.Progress.Down",
+					"label": "Broadcast Kit: nudge the goal down"
+				}
+			],
+			"settings": {
+				"label": {
+					"type": "string",
+					"default": "Subscriber goal"
+				},
+				"value": {
+					"type": "double",
+					"default": 640,
+					"min": 0,
+					"max": 1000000000
+				},
+				"target": {
+					"type": "double",
+					"default": 1000,
+					"min": 1,
+					"max": 1000000000
+				},
+				"step": {
+					"type": "double",
+					"default": 1,
+					"min": 1,
+					"max": 100000
+				},
+				"show_figures": {
+					"type": "bool",
+					"default": true
+				},
+				"as_percent": {
+					"type": "bool",
+					"default": false
+				},
+				"style": {
+					"type": "string",
+					"default": "solid",
+					"values": [
+						"solid",
+						"segments",
+						"line"
+					]
+				},
+				"segments": {
+					"type": "int",
+					"default": 10,
+					"min": 2,
+					"max": 40
+				},
+				"variant": {
+					"type": "string",
+					"default": "card",
+					"values": [
+						"card",
+						"pill",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"width": {
+					"type": "int",
+					"default": 520,
+					"min": 160,
+					"max": 3840
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_prompt",
+			"name": "SBK Prompt",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-prompt.c",
+			"hotkeys": [
+				{
+					"id": "SBK.Prompt.Now",
+					"label": "Show the prompt now"
+				}
+			],
+			"settings": {
+				"lines": {
+					"type": "string",
+					"default": "heart: Enjoying this? | A like costs you nothing and helps a lot.\nbell: Subscribe | There is a new build every Thursday.\nshare: Pass it on | Send this to someone who is stuck on the same thing.\nchat: Questions | Drop them in the chat, I read all of them."
+				},
+				"edge": {
+					"type": "string",
+					"default": "right",
+					"values": [
+						"left",
+						"right",
+						"top",
+						"bottom"
+					]
+				},
+				"every": {
+					"type": "double",
+					"default": 180,
+					"min": 15,
+					"max": 900
+				},
+				"hold": {
+					"type": "double",
+					"default": 8,
+					"min": 1,
+					"max": 30
+				},
+				"travel": {
+					"type": "double",
+					"default": 0.45,
+					"min": 0.1,
+					"max": 1.5
+				},
+				"width": {
+					"type": "int",
+					"default": 520,
+					"min": 0,
+					"max": 1200
+				},
+				"only_live": {
+					"type": "bool",
+					"default": false
+				},
+				"variant": {
+					"type": "string",
+					"default": "card",
+					"values": [
+						"card",
+						"pill",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				}
+			}
+		},
+		{
+			"id": "sbk_qr",
+			"name": "SBK QR",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-qr.c",
+			"hotkeys": [],
+			"settings": {
+				"text": {
+					"type": "string",
+					"default": "https://imswarnil.com"
+				},
+				"caption": {
+					"type": "string",
+					"default": "Scan to visit"
+				},
+				"sub": {
+					"type": "string",
+					"default": "imswarnil.com"
+				},
+				"code_size": {
+					"type": "int",
+					"default": 300,
+					"min": 80,
+					"max": 1200
+				},
+				"ecc": {
+					"type": "string",
+					"default": "M",
+					"values": [
+						"L",
+						"M",
+						"Q",
+						"H"
+					]
+				},
+				"quiet": {
+					"type": "int",
+					"default": 4,
+					"min": 2,
+					"max": 8
+				},
+				"round": {
+					"type": "bool",
+					"default": true
+				},
+				"invert": {
+					"type": "bool",
+					"default": false
+				},
+				"accent_code": {
+					"type": "bool",
+					"default": false
+				},
+				"hole": {
+					"type": "double",
+					"default": 0,
+					"min": 0,
+					"max": 0.26
+				},
+				"variant": {
+					"type": "string",
+					"default": "card",
+					"values": [
+						"card",
+						"pill",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_social",
+			"name": "SBK Social",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-social.c",
+			"hotkeys": [],
+			"settings": {
+				"accounts": {
+					"type": "string",
+					"default": "youtube: @imswarnil\nx: @imswarnil\ninstagram: @imswarnil\ngithub: imswarnil\nweb: imswarnil.com"
+				},
+				"mode": {
+					"type": "string",
+					"default": "rotate",
+					"values": [
+						"rotate",
+						"bar",
+						"stack"
+					]
+				},
+				"rotate": {
+					"type": "double",
+					"default": 8,
+					"min": 0,
+					"max": 60
+				},
+				"show_name": {
+					"type": "bool",
+					"default": true
+				},
+				"brand": {
+					"type": "bool",
+					"default": true
+				},
+				"variant": {
+					"type": "string",
+					"default": "card",
+					"values": [
+						"card",
+						"pill",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "up",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_stats",
+			"name": "SBK Stats",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-stats.c",
+			"hotkeys": [],
+			"settings": {
+				"show_uptime": {
+					"type": "bool",
+					"default": true
+				},
+				"show_bitrate": {
+					"type": "bool",
+					"default": true
+				},
+				"show_dropped": {
+					"type": "bool",
+					"default": true
+				},
+				"show_fps": {
+					"type": "bool",
+					"default": false
+				},
+				"compact": {
+					"type": "bool",
+					"default": false
+				},
+				"variant": {
+					"type": "string",
+					"default": "card",
+					"values": [
+						"card",
+						"pill",
+						"outline",
+						"accent",
+						"none"
+					]
+				},
+				"width": {
+					"type": "int",
+					"default": 420,
+					"min": 200,
+					"max": 1920
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_ticker",
+			"name": "SBK Ticker",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-ticker.c",
+			"hotkeys": [],
+			"settings": {
+				"tag": {
+					"type": "string",
+					"default": "Now"
+				},
+				"text": {
+					"type": "string",
+					"default": "Building a Salesforce app live | Questions in chat | imswarnil.com"
+				},
+				"variant": {
+					"type": "string",
+					"default": "strip",
+					"values": [
+						"strip",
+						"bare",
+						"chips"
+					]
+				},
+				"direction": {
+					"type": "string",
+					"default": "left",
+					"values": [
+						"left",
+						"right"
+					]
+				},
+				"speed": {
+					"type": "double",
+					"default": 90,
+					"min": 20,
+					"max": 400
+				},
+				"width": {
+					"type": "int",
+					"default": 1920,
+					"min": 200,
+					"max": 7680
+				},
+				"fade": {
+					"type": "bool",
+					"default": true
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077,
+					"shared": "look"
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"shared": "look"
+				},
+				"tone": {
+					"type": "string",
+					"default": "glass",
+					"shared": "look"
+				},
+				"enter": {
+					"type": "string",
+					"default": "up",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_visualizer",
+			"name": "SBK Visualizer",
+			"kind": "Source",
+			"type": "INPUT",
+			"audio": false,
+			"file": "src/source-visualizer.c",
+			"hotkeys": [],
+			"settings": {
+				"source": {
+					"type": "string",
+					"default": "@program"
+				},
+				"style": {
+					"type": "string",
+					"default": "bars",
+					"values": [
+						"bars",
+						"mirror",
+						"wave",
+						"dots",
+						"ring",
+						"blocks",
+						"line"
+					]
+				},
+				"width": {
+					"type": "int",
+					"default": 1920,
+					"min": 32,
+					"max": 7680
+				},
+				"height": {
+					"type": "int",
+					"default": 240,
+					"min": 16,
+					"max": 4320
+				},
+				"bars": {
+					"type": "int",
+					"default": 48
+				},
+				"gap": {
+					"type": "double",
+					"default": 0.35,
+					"min": 0,
+					"max": 0.9
+				},
+				"radius": {
+					"type": "double",
+					"default": 4,
+					"min": 0,
+					"max": 40
+				},
+				"line_width": {
+					"type": "double",
+					"default": 3,
+					"min": 1,
+					"max": 24
+				},
+				"cell": {
+					"type": "double",
+					"default": 16,
+					"min": 6,
+					"max": 60
+				},
+				"inner": {
+					"type": "double",
+					"default": 0.45,
+					"min": 0.05,
+					"max": 0.9
+				},
+				"fill_alpha": {
+					"type": "double",
+					"default": 0.28,
+					"min": 0,
+					"max": 1
+				},
+				"peaks": {
+					"type": "bool",
+					"default": false
+				},
+				"rest": {
+					"type": "double",
+					"default": 0.045,
+					"min": 0,
+					"max": 0.2
+				},
+				"gain": {
+					"type": "double",
+					"default": 1,
+					"min": 0.1,
+					"max": 20
+				},
+				"floor_db": {
+					"type": "double",
+					"default": -60,
+					"min": -90,
+					"max": -20
+				},
+				"smoothing": {
+					"type": "double",
+					"default": 0.8,
+					"min": 0,
+					"max": 0.98
+				},
+				"decay": {
+					"type": "double",
+					"default": 0.012,
+					"min": 0.001,
+					"max": 0.1
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077
+				},
+				"mono": {
+					"type": "bool",
+					"default": false
+				},
+				"scale": {
+					"type": "double",
+					"default": 1,
+					"min": 0.5,
+					"max": 3
+				},
+				"enter": {
+					"type": "string",
+					"default": "fade",
+					"shared": "motion",
+					"values": [
+						"none",
+						"fade",
+						"up",
+						"down",
+						"left",
+						"right",
+						"pop",
+						"grow",
+						"settle"
+					]
+				},
+				"enter_secs": {
+					"type": "double",
+					"default": 0.6,
+					"shared": "motion"
+				},
+				"enter_on_show": {
+					"type": "bool",
+					"default": true,
+					"shared": "motion"
+				}
+			}
+		},
+		{
+			"id": "sbk_sting",
+			"name": "SBK Logo Sting",
+			"kind": "Transition",
+			"type": "TRANSITION",
+			"audio": false,
+			"file": "src/transition-sting.c",
+			"hotkeys": [],
+			"settings": {
+				"style": {
+					"type": "string",
+					"default": "band",
+					"values": [
+						"band",
+						"iris",
+						"curtain"
+					]
+				},
+				"direction": {
+					"type": "string",
+					"default": "left-right",
+					"values": [
+						"left-right",
+						"right-left",
+						"top-bottom",
+						"bottom-top"
+					]
+				},
+				"field": {
+					"type": "int",
+					"default": 4282329077
+				},
+				"mark": {
+					"type": "int",
+					"default": 4294967295
+				},
+				"mark_size": {
+					"type": "double",
+					"default": 110,
+					"min": 20,
+					"max": 400
+				},
+				"logo": {
+					"type": "string",
+					"default": ""
+				},
+				"hold": {
+					"type": "double",
+					"default": 0.22,
+					"min": 0,
+					"max": 0.6
+				},
+				"softness": {
+					"type": "double",
+					"default": 0.02,
+					"min": 0.002,
+					"max": 0.25
+				}
+			}
+		},
+		{
+			"id": "sbk_wipe",
+			"name": "SBK Wipe",
+			"kind": "Transition",
+			"type": "TRANSITION",
+			"audio": false,
+			"file": "src/transition-wipe.c",
+			"hotkeys": [],
+			"settings": {
+				"style": {
+					"type": "string",
+					"default": "bar",
+					"values": [
+						"bar",
+						"dip",
+						"slide",
+						"iris",
+						"blinds",
+						"push",
+						"bars"
+					]
+				},
+				"direction": {
+					"type": "string",
+					"default": "left-right",
+					"values": [
+						"left-right",
+						"right-left",
+						"top-bottom",
+						"bottom-top"
+					]
+				},
+				"accent": {
+					"type": "int",
+					"default": 4282329077
+				},
+				"bar_width": {
+					"type": "double",
+					"default": 0.12,
+					"min": 0,
+					"max": 0.5
+				},
+				"softness": {
+					"type": "double",
+					"default": 0.02,
+					"min": 0.002,
+					"max": 0.2
+				},
+				"bars": {
+					"type": "int",
+					"default": 6,
+					"min": 2,
+					"max": 24
+				}
+			}
+		}
+	]
+}

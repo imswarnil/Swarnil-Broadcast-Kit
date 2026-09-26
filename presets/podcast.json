@@ -1,0 +1,80 @@
+{
+	"name": "SBK · Podcast",
+	"look": { "accent": 4282329077, "scale": 1.0 },
+	"scenes": [
+		{ "name": "Cold open", "items": [
+			{ "id": "sbk_backdrop", "name": "Podcast backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "plasma", "drift": 3.0, "pitch": 140.0, "color2": 4281545523 } },
+			{ "id": "sbk_card", "name": "Episode card", "x": 960, "y": 300, "anchor": "top-centre",
+			  "settings": { "eyebrow": "Episode 41", "title": "Building things in public",
+			                "body": "With a guest who has done it for ten years.",
+			                "align": "centre", "width": 1400, "variant": "none" } },
+			{ "id": "sbk_countdown", "name": "Starts in", "x": 960, "y": 680, "anchor": "top-centre",
+			  "settings": { "mode": "duration", "minutes": 5, "style": "bar",
+			                "label": "Starting in", "draw_card": true } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right" }
+		]},
+		{ "name": "Two up", "items": [
+			{ "id": "sbk_backdrop", "name": "Podcast backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "plasma", "drift": 3.0, "pitch": 140.0 } },
+			{ "id": "sbk_plate", "name": "Host plate", "x": 539, "y": 535, "anchor": "centre",
+			  "settings": { "aspect": "16x9", "size": 1.31, "radius": 18.0, "fill_glass": true } },
+			{ "id": "camera", "x": 120, "y": 300, "box": [838, 471] },
+			{ "id": "sbk_frame", "name": "Host frame", "x": 120, "y": 300,
+			  "settings": { "aspect": "16x9", "size": 1.31, "style": "ring", "label": "" } },
+			{ "id": "sbk_plate", "name": "Guest plate", "x": 1381, "y": 535, "anchor": "centre",
+			  "settings": { "aspect": "16x9", "size": 1.31, "radius": 18.0, "fill_glass": true } },
+			{ "id": "external", "name": "Guest", "source_id": "window_capture",
+			  "x": 1800, "y": 300, "anchor": "top-right", "box": [838, 471] },
+			{ "id": "sbk_frame", "name": "Guest frame", "x": 1800, "y": 300, "anchor": "top-right",
+			  "settings": { "aspect": "16x9", "size": 1.31, "style": "ring", "label": "", "line": "accent" } },
+			{ "id": "sbk_lower_third", "name": "Host name", "x": 120, "y": 840,
+			  "settings": { "variant": "split", "name": "Swarnil Singhai", "title": "Host" } },
+			{ "id": "sbk_lower_third", "name": "Guest name", "x": 960, "y": 840,
+			  "settings": { "variant": "split", "name": "Your guest", "title": "Guest" } },
+			{ "id": "sbk_ticker", "name": "Ticker", "x": 0, "y": 1080, "anchor": "bottom-left",
+			  "settings": { "width": 1920 } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right" }
+		]},
+		{ "name": "Levels", "items": [
+			{ "id": "sbk_backdrop", "name": "Podcast backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "plasma", "drift": 3.0, "pitch": 140.0 } },
+			{ "id": "sbk_card", "name": "Levels card", "x": 960, "y": 220, "anchor": "top-centre",
+			  "settings": { "eyebrow": "Episode", "title": "Building things in public",
+			                "align": "centre", "width": 1300, "variant": "none" } },
+			{ "id": "sbk_meter", "name": "Host level", "x": 120, "y": 560,
+			  "settings": { "source": "@mic", "label": "Host", "width": 700,
+			                "style": "segments", "segment_count": 28 } },
+			{ "id": "sbk_meter", "name": "Guest level", "x": 1800, "y": 560, "anchor": "top-right",
+			  "settings": { "source": "@mic2", "label": "Guest", "width": 700,
+			                "style": "segments", "segment_count": 28 } },
+			{ "id": "sbk_countdown", "name": "Running time", "x": 960, "y": 800, "anchor": "top-centre",
+			  "settings": { "mode": "up", "style": "bar", "label": "Running time", "draw_card": true } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right" }
+		]},
+		{ "name": "Break", "items": [
+			{ "id": "sbk_backdrop", "name": "Break backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "aurora", "drift": 4.0, "reach": 0.55 } },
+			{ "id": "sbk_countdown", "name": "Back in", "x": 960, "y": 300, "anchor": "top-centre",
+			  "settings": { "mode": "duration", "minutes": 4, "style": "ring", "ring_size": 420,
+			                "label": "Back in", "draw_card": false, "enter": "grow" } },
+			{ "id": "sbk_chip", "name": "Stay", "x": 960, "y": 820, "anchor": "top-centre",
+			  "settings": { "label": "Stay there", "variant": "outline", "dot": "pulse" } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right" }
+		]},
+		{ "name": "Outro", "items": [
+			{ "id": "sbk_backdrop", "name": "Outro backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "stripes", "drift": 10.0, "pitch": 96.0 } },
+			{ "id": "sbk_card", "name": "Outro card", "x": 960, "y": 300, "anchor": "top-centre",
+			  "settings": { "eyebrow": "That is a wrap", "title": "Thanks for listening",
+			                "body": "New episode every Thursday.", "align": "centre",
+			                "width": 1400, "variant": "none" } },
+			{ "id": "sbk_social", "name": "Handles", "x": 960, "y": 680, "anchor": "top-centre",
+			  "settings": { "mode": "bar", "variant": "card", "brand": true } },
+			{ "id": "sbk_qr", "name": "Follow QR", "x": 1800, "y": 960, "anchor": "bottom-right",
+			  "settings": { "text": "https://imswarnil.com", "caption": "Scan to follow",
+			                "code_size": 240, "variant": "none", "invert": true } },
+			{ "id": "sbk_onair", "name": "Light", "x": 120, "y": 120 }
+		]}
+	]
+}

@@ -1,0 +1,144 @@
+// The transition. Both scenes arrive as textures; t runs 0 → 1.
+//
+// 0 bar     — a hard edge sweeps across, with a bar of the accent riding it
+// 1 dip     — through the accent colour and out again
+// 2 slide   — the new scene pushes the old one off
+// 3 iris    — a circle opens from the middle
+// 4 blinds  — several bars sweep together
+// 5 push    — both scenes move together, the old one shoved out of frame
+// 6 bars    — a band of the accent crosses the whole frame and takes the cut
+//             with it, which is a stinger without needing a video file
+
+uniform float4x4 ViewProj;
+uniform texture2d tex_a;
+uniform texture2d tex_b;
+uniform float  t;
+uniform float  style;
+uniform float4 accent;
+uniform float  bar_width;   // as a fraction of the sweep
+uniform float  softness;    // edge feather, as a fraction
+uniform float  bars;        // blinds
+uniform float  dir;         // 0 left→right, 1 right→left, 2 top→bottom, 3 bottom→top
+
+sampler_state def_sampler {
+	Filter   = Linear;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float4 over(float4 dst, float4 src)
+{
+	float a = src.a + dst.a * (1.0 - src.a);
+	if (a <= 0.0001)
+		return float4(0.0, 0.0, 0.0, 0.0);
+	return float4((src.rgb * src.a + dst.rgb * dst.a * (1.0 - src.a)) / a, a);
+}
+
+// how far along the sweep this pixel sits, 0..1, for the chosen direction
+float axis(float2 uv)
+{
+	if (dir < 0.5) return uv.x;
+	if (dir < 1.5) return 1.0 - uv.x;
+	if (dir < 2.5) return uv.y;
+	return 1.0 - uv.y;
+}
+
+float4 PSWipe(VertInOut vert_in) : TARGET
+{
+	float2 uv = vert_in.uv;
+	float4 a = tex_a.Sample(def_sampler, uv);
+	float4 b = tex_b.Sample(def_sampler, uv);
+	float soft = max(softness, 0.001);
+
+	if (style < 0.5) {                                  // bar
+		// the edge travels far enough that the bar itself clears the frame
+		float head = t * (1.0 + bar_width + soft);
+		float x = axis(uv);
+		float mix_b = 1.0 - smoothstep(head - bar_width - soft, head - bar_width, x);
+		float4 col = lerp(a, b, mix_b);
+		float band = smoothstep(head - bar_width, head - bar_width + soft, x) *
+			     (1.0 - smoothstep(head - soft, head, x));
+		return over(col, float4(accent.rgb, accent.a * band));
+	}
+
+	if (style < 1.5) {                                  // dip through the accent
+		float half_t = t < 0.5 ? t * 2.0 : (1.0 - t) * 2.0;
+		float4 col = t < 0.5 ? a : b;
+		return over(col, float4(accent.rgb, accent.a * smoothstep(0.0, 1.0, half_t)));
+	}
+
+	if (style < 2.5) {                                  // slide: b pushes a off
+		float2 off = dir < 0.5   ? float2(1.0, 0.0)
+			   : dir < 1.5   ? float2(-1.0, 0.0)
+			   : dir < 2.5   ? float2(0.0, 1.0)
+					 : float2(0.0, -1.0);
+		float4 sa = tex_a.Sample(def_sampler, uv - off * t);
+		float4 sb = tex_b.Sample(def_sampler, uv + off * (1.0 - t));
+		float x = axis(uv);
+		return lerp(sb, sa, step(t, x));
+	}
+
+	if (style < 3.5) {                                  // iris
+		float2 c = (uv - 0.5) * float2(1.0, 0.5625);    // keep the circle round on 16:9
+		float r = length(c) / 0.5;
+		float edge = t * 1.45;
+		float m = 1.0 - smoothstep(edge - soft, edge, r);
+		float4 col = lerp(a, b, m);
+		float ring = smoothstep(edge - soft * 2.0, edge - soft, r) * (1.0 - smoothstep(edge, edge + soft, r));
+		return over(col, float4(accent.rgb, accent.a * ring));
+	}
+
+	if (style < 5.5) {                                  // push
+		float2 off = dir < 0.5   ? float2(1.0, 0.0)
+			   : dir < 1.5   ? float2(-1.0, 0.0)
+			   : dir < 2.5   ? float2(0.0, 1.0)
+					 : float2(0.0, -1.0);
+		float e = smoothstep(0.0, 1.0, t);
+		float4 sa = tex_a.Sample(def_sampler, uv + off * e);
+		float4 sb = tex_b.Sample(def_sampler, uv - off * (1.0 - e));
+		return lerp(sa, sb, step(1.0 - e, axis(uv)));
+	}
+
+	if (style < 6.5) {                                  // bars — a stinger with no video
+		// the band crosses in the first half and leaves in the second, and the
+		// cut happens behind it while the frame is covered
+		float x = axis(uv);
+		float w = max(bar_width, 0.15);
+		float head = t * (1.0 + w * 2.0);
+		float band = smoothstep(head - w, head - w + soft, x) * (1.0 - smoothstep(head - soft, head, x));
+		float4 col = t < 0.5 ? a : b;
+		float4 out_col = over(col, float4(accent.rgb, accent.a * band));
+		// a thinner, brighter leading edge so the band reads as moving
+		float edge = smoothstep(head - soft * 2.0, head - soft, x) * (1.0 - smoothstep(head - soft, head, x));
+		return over(out_col, float4(1.0, 1.0, 1.0, edge * 0.5 * accent.a));
+	}
+
+	float n = max(bars, 1.0);                           // blinds
+	float x = frac(axis(uv) * n);
+	float head = t * (1.0 + soft * n);
+	float m = 1.0 - smoothstep(head * 1.0 - soft, head * 1.0, x);
+	m = saturate(m + step(1.0, t));
+	return lerp(a, b, m);
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSWipe(vert_in);
+	}
+}

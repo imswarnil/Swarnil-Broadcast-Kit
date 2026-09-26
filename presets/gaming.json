@@ -1,0 +1,73 @@
+{
+	"name": "SBK · Gaming",
+	"look": { "accent": 4282329077, "scale": 1.0 },
+	"scenes": [
+		{ "name": "Starting soon", "items": [
+			{ "id": "sbk_backdrop", "name": "Waiting backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "checkers", "drift": 5.0, "pitch": 160.0 } },
+			{ "id": "sbk_visualizer", "name": "Spectrum", "x": 0, "y": 1080, "anchor": "bottom-left",
+			  "settings": { "style": "bars", "height": 240 } },
+			{ "id": "sbk_card", "name": "Waiting card", "x": 120, "y": 300,
+			  "settings": { "eyebrow": "Starting soon", "title": "One more run",
+			                "body": "Grab a drink. We start at the top of the hour.",
+			                "variant": "card", "align": "left", "width": 1000 } },
+			{ "id": "sbk_countdown", "name": "Countdown", "x": 1800, "y": 300, "anchor": "top-right",
+			  "settings": { "mode": "duration", "minutes": 10, "style": "ring",
+			                "ring_size": 300, "label": "We begin in" } },
+			{ "id": "sbk_social", "name": "Handles", "x": 120, "y": 820, "anchor": "bottom-left",
+			  "settings": { "mode": "stack", "variant": "card", "brand": true } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right" }
+		]},
+		{ "name": "Playing", "items": [
+			{ "id": "external", "name": "Game", "source_id": "window_capture", "x": 0, "y": 0, "box": [1920, 1080] },
+			{ "id": "sbk_plate", "name": "Cam plate", "x": 1621, "y": 221, "anchor": "centre",
+			  "settings": { "aspect": "16x9", "size": 0.56, "radius": 12.0, "fill_glass": true } },
+			{ "id": "camera", "x": 1800, "y": 120, "anchor": "top-right", "box": [358, 202] },
+			{ "id": "sbk_frame", "name": "Cam frame", "x": 1800, "y": 120, "anchor": "top-right",
+			  "settings": { "aspect": "16x9", "size": 0.56, "style": "corner-out",
+			                "bracket": 40.0, "line": "accent", "label": "" } },
+			{ "id": "sbk_chip", "name": "Now playing", "x": 120, "y": 120,
+			  "settings": { "label": "Now playing", "value": "Act 2", "variant": "card", "dot": "pulse" } },
+			{ "id": "sbk_progress", "name": "Run", "x": 120, "y": 960, "anchor": "bottom-left",
+			  "settings": { "label": "Run", "value": 3, "target": 10, "style": "segments",
+			                "segments": 10, "width": 420, "step": 1 } },
+			{ "id": "sbk_prompt", "name": "Prompt", "x": 1800, "y": 360, "anchor": "top-right",
+			  "settings": { "edge": "right", "every": 300.0, "hold": 8.0, "width": 460 } },
+			{ "id": "sbk_ticker", "name": "Ticker", "x": 0, "y": 1080, "anchor": "bottom-left",
+			  "settings": { "width": 1920 } }
+		]},
+		{ "name": "Full screen", "items": [
+			{ "id": "external", "name": "Game", "source_id": "window_capture", "x": 0, "y": 0, "box": [1920, 1080] },
+			{ "id": "sbk_logo", "name": "Bug", "x": 120, "y": 100,
+			  "settings": { "mark": "ring", "loop": "orbit", "mark_size": 52, "variant": "none" } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right",
+			  "settings": { "shape": "dot" } }
+		]},
+		{ "name": "Be right back", "items": [
+			{ "id": "sbk_backdrop", "name": "Break backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "dots", "drift": -4.0, "pitch": 48.0 } },
+			{ "id": "sbk_visualizer", "name": "Waveform", "x": 0, "y": 1080, "anchor": "bottom-left",
+			  "settings": { "style": "wave", "height": 240 } },
+			{ "id": "sbk_card", "name": "Break card", "x": 120, "y": 340,
+			  "settings": { "eyebrow": "Paused", "title": "Be right back",
+			                "body": "Two minutes. Stretch your legs.",
+			                "variant": "card", "align": "left", "width": 1000 } },
+			{ "id": "sbk_countdown", "name": "Break timer", "x": 1800, "y": 340, "anchor": "top-right",
+			  "settings": { "mode": "duration", "minutes": 5, "style": "bar",
+			                "draw_card": true, "label": "Back in" } },
+			{ "id": "sbk_onair", "name": "Light", "x": 120, "y": 120 }
+		]},
+		{ "name": "Ending", "items": [
+			{ "id": "sbk_backdrop", "name": "Outro backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "stars", "pitch": 90.0, "weight": 2.5 } },
+			{ "id": "sbk_card", "name": "Outro card", "x": 960, "y": 320, "anchor": "top-centre",
+			  "settings": { "eyebrow": "That is a wrap", "title": "Thanks for hanging out",
+			                "align": "centre", "width": 1400, "variant": "none" } },
+			{ "id": "sbk_progress", "name": "Follower goal", "x": 960, "y": 620, "anchor": "top-centre",
+			  "settings": { "label": "Follower goal", "value": 640, "target": 1000, "width": 720 } },
+			{ "id": "sbk_social", "name": "Handles", "x": 960, "y": 780, "anchor": "top-centre",
+			  "settings": { "mode": "bar", "variant": "card", "brand": true } },
+			{ "id": "sbk_onair", "name": "Light", "x": 120, "y": 120 }
+		]}
+	]
+}

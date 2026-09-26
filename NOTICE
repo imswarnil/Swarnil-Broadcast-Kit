@@ -1,0 +1,31 @@
+Third-party material in Swarnil Broadcast Kit
+=============================================
+
+The kit's own code is MIT — see LICENSE. These arrive with it under their own
+terms, and this file exists so LICENSE can stay a verbatim MIT text, which is
+what lets GitHub and every other tool recognise it.
+
+
+libobs (deps/include/libobs)
+----------------------------
+
+The OBS Studio headers are vendored so the build reads nothing outside this
+folder. They are GPL-2.0. Linking them means a **compiled** plugin is
+distributed under the GPL's terms; the source in this repository is MIT and
+stays MIT. See deps/README.md.
+
+
+Geist and Geist Mono (fonts/)
+-----------------------------
+
+Geist and Geist Mono (assets/fonts, from the `geist` npm package) are
+copyright Vercel, Inc. and licensed under the SIL Open Font License 1.1.
+
+
+Everything else
+---------------
+
+Nothing in this repository is copied from a commercial theme or design system,
+and the marks drawn by data/effects/glyph.effect are generic rather than
+anybody's trademark. Both are deliberate, and both are what let you use this
+inside something you charge for.

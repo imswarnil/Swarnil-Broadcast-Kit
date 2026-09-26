@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 700" width="1280" height="700" role="img">
+<rect x="0" y="0" width="1280" height="700" rx="0" fill="#fbfbfa" stroke="none" stroke-width="1" opacity="1"/>
+<text x="64" y="50" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#16171a" text-anchor="start" letter-spacing="-0.6" opacity="1" dominant-baseline="middle">Anatomy of a scene</text>
+<text x="64" y="80" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="400" fill="#5b5c61" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">Every piece is an ordinary OBS source. Select it, open Properties, change anything.</text>
+<rect x="231" y="127" width="818" height="461" rx="13" fill="#16171a" stroke="#cfcfca" stroke-width="1" opacity="1"/>
+<line x1="232" y1="128" x2="232" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="266" y1="128" x2="266" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="300" y1="128" x2="300" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="334" y1="128" x2="334" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="368" y1="128" x2="368" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="402" y1="128" x2="402" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="436" y1="128" x2="436" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="470" y1="128" x2="470" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="504" y1="128" x2="504" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="538" y1="128" x2="538" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="572" y1="128" x2="572" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="606" y1="128" x2="606" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="640" y1="128" x2="640" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="674" y1="128" x2="674" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="708" y1="128" x2="708" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="742" y1="128" x2="742" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="776" y1="128" x2="776" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="810" y1="128" x2="810" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="844" y1="128" x2="844" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="878" y1="128" x2="878" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="912" y1="128" x2="912" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="946" y1="128" x2="946" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="980" y1="128" x2="980" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="1014" y1="128" x2="1014" y2="587" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="128" x2="1048" y2="128" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="162" x2="1048" y2="162" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="196" x2="1048" y2="196" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="230" x2="1048" y2="230" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="264" x2="1048" y2="264" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="298" x2="1048" y2="298" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="332" x2="1048" y2="332" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="366" x2="1048" y2="366" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="400" x2="1048" y2="400" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="434" x2="1048" y2="434" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="468" x2="1048" y2="468" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="502" x2="1048" y2="502" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="536" x2="1048" y2="536" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/><line x1="232" y1="570" x2="1048" y2="570" stroke="#ffffff" stroke-width="1" opacity="0.05" stroke-linecap="round"/>
+<rect x="260" y="154" width="116" height="30" rx="15" fill="#0c0c0cc7" stroke="#ffffff24" stroke-width="1" opacity="1"/>
+<circle cx="278" cy="169" r="5" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="292" y="170" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#f6f6f6" text-anchor="start" letter-spacing="0.9" opacity="1" dominant-baseline="middle">OFF AIR</text>
+<rect x="260" y="224" width="430" height="150" rx="12" fill="#0c0c0cc7" stroke="#ffffff24" stroke-width="1" opacity="1"/>
+<circle cx="282" cy="252" r="4" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="294" y="253" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="600" fill="#d81734" text-anchor="start" letter-spacing="1.2" opacity="1" dominant-baseline="middle">STARTING SOON</text>
+<text x="282" y="288" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="24" font-weight="700" fill="#f6f6f6" text-anchor="start" letter-spacing="-0.6" opacity="1" dominant-baseline="middle">Building a Salesforce app live</text>
+<text x="282" y="318" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#a8a8a8" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">Grab a coffee. We begin at the top of the hour.</text>
+<rect x="282" y="336" width="78" height="22" rx="11" fill="#ffffff1a" stroke="#ffffff24" stroke-width="1" opacity="1"/>
+<rect x="368" y="336" width="132" height="22" rx="11" fill="#ffffff1a" stroke="#ffffff24" stroke-width="1" opacity="1"/>
+<rect x="508" y="336" width="96" height="22" rx="11" fill="#ffffff1a" stroke="#ffffff24" stroke-width="1" opacity="1"/>
+<circle cx="886" cy="300" r="62" fill="none" stroke="#ffffff1f" stroke-width="9" opacity="1"/>
+<path d="M 886 238 A 62 62 0 1 1 826 317" fill="none" stroke="#d81734" stroke-width="9" stroke-linecap="round"/>
+<text x="886" y="301" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="24" font-weight="700" fill="#f6f6f6" text-anchor="middle" letter-spacing="0" opacity="1" dominant-baseline="middle">14:59</text>
+<rect x="788" y="378" width="216" height="114" rx="9" fill="none" stroke="#ffffffa0" stroke-width="2.5" opacity="1"/>
+<rect x="798" y="466" width="74" height="18" rx="9" fill="#0c0c0cc7" stroke="#ffffff24" stroke-width="1" opacity="1"/>
+<text x="808" y="476" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" font-weight="400" fill="#f6f6f6" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">@imswarnil</text>
+<rect x="256" y="524" width="7" height="6" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="269.3" y="517" width="7" height="13" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="282.6" y="510" width="7" height="20" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="295.9" y="503" width="7" height="27" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="309.2" y="520" width="7" height="10" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="322.5" y="513" width="7" height="17" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="335.8" y="506" width="7" height="24" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="349.1" y="523" width="7" height="7" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="362.4" y="516" width="7" height="14" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="375.7" y="509" width="7" height="21" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="389" y="502" width="7" height="28" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="402.3" y="519" width="7" height="11" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="415.6" y="512" width="7" height="18" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="428.9" y="505" width="7" height="25" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="442.20000000000005" y="522" width="7" height="8" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="455.5" y="515" width="7" height="15" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="468.8" y="508" width="7" height="22" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="482.1" y="501" width="7" height="29" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="495.4" y="518" width="7" height="12" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="508.70000000000005" y="511" width="7" height="19" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="522" y="504" width="7" height="26" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="535.3" y="521" width="7" height="9" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="548.6" y="514" width="7" height="16" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="561.9000000000001" y="507" width="7" height="23" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="575.2" y="524" width="7" height="6" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="588.5" y="517" width="7" height="13" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="601.8" y="510" width="7" height="20" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="615.1" y="503" width="7" height="27" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="628.4000000000001" y="520" width="7" height="10" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="641.7" y="513" width="7" height="17" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="655" y="506" width="7" height="24" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="668.3" y="523" width="7" height="7" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="681.6" y="516" width="7" height="14" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="694.9000000000001" y="509" width="7" height="21" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="708.2" y="502" width="7" height="28" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="721.5" y="519" width="7" height="11" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="734.8" y="512" width="7" height="18" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="748.1" y="505" width="7" height="25" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="761.4000000000001" y="522" width="7" height="8" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="774.7" y="515" width="7" height="15" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="788" y="508" width="7" height="22" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="801.3000000000001" y="501" width="7" height="29" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="814.6" y="518" width="7" height="12" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="827.9" y="511" width="7" height="19" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="841.2" y="504" width="7" height="26" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="854.5" y="521" width="7" height="9" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="867.8000000000001" y="514" width="7" height="16" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="881.1" y="507" width="7" height="23" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="894.4000000000001" y="524" width="7" height="6" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="907.7" y="517" width="7" height="13" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="921" y="510" width="7" height="20" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="934.3000000000001" y="503" width="7" height="27" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="947.6" y="520" width="7" height="10" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="960.9000000000001" y="513" width="7" height="17" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="974.2" y="506" width="7" height="24" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="987.5" y="523" width="7" height="7" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="1000.8000000000001" y="516" width="7" height="14" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="1014.1" y="509" width="7" height="21" rx="2" fill="#d81734" stroke="none" stroke-width="1" opacity="0.55"/>
+<rect x="246" y="542" width="788" height="30" rx="8" fill="#0c0c0cc7" stroke="#ffffff24" stroke-width="1" opacity="1"/>
+<rect x="258" y="550" width="44" height="14" rx="7" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="266" y="558" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="8" font-weight="700" fill="#fff" text-anchor="start" letter-spacing="0.6" opacity="1" dominant-baseline="middle">NOW</text>
+<text x="316" y="558" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#a8a8a8" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">Questions in chat</text>
+<circle cx="428" cy="558" r="2.5" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="492" y="558" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#a8a8a8" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">Questions in chat</text>
+<circle cx="604" cy="558" r="2.5" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="668" y="558" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#a8a8a8" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">Questions in chat</text>
+<circle cx="780" cy="558" r="2.5" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="844" y="558" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="10" font-weight="400" fill="#a8a8a8" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">Questions in chat</text>
+<line x1="260" y1="169" x2="208" y2="169" stroke="#cfcfca" stroke-width="1" opacity="1" stroke-dasharray="3 4" stroke-linecap="round"/>
+<circle cx="260" cy="169" r="3" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="200" y="169" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="500" fill="#16171a" text-anchor="end" letter-spacing="0" opacity="1" dominant-baseline="middle">Light</text>
+<line x1="260" y1="298" x2="208" y2="298" stroke="#cfcfca" stroke-width="1" opacity="1" stroke-dasharray="3 4" stroke-linecap="round"/>
+<circle cx="260" cy="298" r="3" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="200" y="298" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="500" fill="#16171a" text-anchor="end" letter-spacing="0" opacity="1" dominant-baseline="middle">Card</text>
+<line x1="948" y1="300" x2="1072" y2="300" stroke="#cfcfca" stroke-width="1" opacity="1" stroke-dasharray="3 4" stroke-linecap="round"/>
+<circle cx="948" cy="300" r="3" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="1080" y="300" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="500" fill="#16171a" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">Timer</text>
+<line x1="1004" y1="412" x2="1072" y2="412" stroke="#cfcfca" stroke-width="1" opacity="1" stroke-dasharray="3 4" stroke-linecap="round"/>
+<circle cx="1004" cy="412" r="3" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="1080" y="412" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="500" fill="#16171a" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">Cam frame</text>
+<line x1="256" y1="520" x2="208" y2="520" stroke="#cfcfca" stroke-width="1" opacity="1" stroke-dasharray="3 4" stroke-linecap="round"/>
+<circle cx="256" cy="520" r="3" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="200" y="520" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="500" fill="#16171a" text-anchor="end" letter-spacing="0" opacity="1" dominant-baseline="middle">Visualizer</text>
+<line x1="246" y1="557" x2="208" y2="557" stroke="#cfcfca" stroke-width="1" opacity="1" stroke-dasharray="3 4" stroke-linecap="round"/>
+<circle cx="246" cy="557" r="3" fill="#d81734" stroke="none" stroke-width="1" opacity="1"/>
+<text x="200" y="557" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="500" fill="#16171a" text-anchor="end" letter-spacing="0" opacity="1" dominant-baseline="middle">Ticker</text>
+<text x="64" y="632" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="400" fill="#8a8b90" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">The camera goes under the frame; the kit draws the treatment, never the capture.</text>
+<text x="64" y="656" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="400" fill="#8a8b90" text-anchor="start" letter-spacing="0" opacity="1" dominant-baseline="middle">A backdrop, a light, a card, a timer, a frame, a visualizer and a ticker — seven sources.</text>
+</svg>

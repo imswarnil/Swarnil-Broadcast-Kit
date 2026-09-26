@@ -1,0 +1,47 @@
+name: Something is wrong
+description: A source that will not appear, a filter that does nothing, a crash, a picture that is not what you set.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The log almost always contains the answer. It is in
+        `~/Library/Application Support/obs-studio/logs/`, newest file, and our
+        lines start with `[sbk]`.
+  - type: textarea
+    id: what
+    attributes:
+      label: What you did, and what happened
+      description: In that order. What you expected is usually obvious from the first half.
+    validations: { required: true }
+  - type: input
+    id: obs
+    attributes:
+      label: OBS version
+      description: Help → About in OBS.
+      placeholder: "32.2.2"
+    validations: { required: true }
+  - type: dropdown
+    id: mac
+    attributes:
+      label: Which Mac
+      description: The released bundle is Apple Silicon only. On Intel, build from source.
+      options: [Apple Silicon, Intel, Not a Mac]
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes:
+      label: Kit version
+      description: The first `[sbk]` line in the log says it.
+      placeholder: "0.7.2"
+  - type: textarea
+    id: log
+    attributes:
+      label: The log
+      description: Paste it, or drag the file in. Nothing else in this form matters until `[sbk] v… loaded` appears in it.
+      render: text
+  - type: textarea
+    id: shot
+    attributes:
+      label: A screenshot, if it is a visual problem
+      description: The overlays are drawn, so a picture of the wrong pixels beats a description of them.

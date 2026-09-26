@@ -1,0 +1,92 @@
+// The shadow that belongs UNDER something.
+//
+// A filter cannot do this. A filter is handed the source's own rectangle and
+// can only draw inside it, and a drop shadow is by definition outside — so it
+// has to be its own source, placed behind the thing it lifts. That separation
+// is the point: the shadow sits below the camera in the layer stack and the
+// frame sits above it, which is the only arrangement that actually looks right.
+//
+// The shadow is the same rounded box offset and blurred. At these radii a
+// smoothstep falloff is indistinguishable from a real gaussian and costs one
+// instruction instead of a second pass.
+
+uniform float4x4 ViewProj;
+uniform float2 size;        // the shape, px
+uniform float  pad;         // room around it for the shadow and glow
+uniform float  radius;
+
+uniform float4 fill;        // the plate itself; clear for a shadow alone
+uniform float4 shadow;
+uniform float  shadow_x;
+uniform float  shadow_y;
+uniform float  shadow_blur;
+uniform float  shadow_grow; // spread: the shadow bigger than the shape
+uniform float4 glow;
+uniform float  glow_size;
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float rounded_box(float2 p, float2 b, float r)
+{
+	float2 q = abs(p) - b + r;
+	return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+
+float4 over(float4 dst, float4 src)
+{
+	float a = src.a + dst.a * (1.0 - src.a);
+	if (a <= 0.0001)
+		return float4(0.0, 0.0, 0.0, 0.0);
+	return float4((src.rgb * src.a + dst.rgb * dst.a * (1.0 - src.a)) / a, a);
+}
+
+float4 PSPlate(VertInOut vert_in) : TARGET
+{
+	float2 quad = size + float2(pad, pad) * 2.0;
+	float2 p = vert_in.uv * quad - quad * 0.5;
+	float2 half_size = size * 0.5;
+	float r = min(radius, min(half_size.x, half_size.y));
+
+	float4 col = float4(0.0, 0.0, 0.0, 0.0);
+
+	if (glow_size > 0.5) {
+		float d = rounded_box(p, half_size, r);
+		float g = 1.0 - smoothstep(-1.0, glow_size, d);
+		col = over(col, float4(glow.rgb, glow.a * g * g));
+	}
+
+	if (shadow.a > 0.001) {
+		float2 sp = p - float2(shadow_x, shadow_y);
+		float d = rounded_box(sp, half_size + shadow_grow, r + shadow_grow);
+		float a = 1.0 - smoothstep(-shadow_blur, shadow_blur, d);
+		col = over(col, float4(shadow.rgb, shadow.a * a));
+	}
+
+	if (fill.a > 0.001) {
+		float d = rounded_box(p, half_size, r);
+		float a = 1.0 - smoothstep(-0.75, 0.75, d);
+		col = over(col, float4(fill.rgb, fill.a * a));
+	}
+
+	return col;
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSPlate(vert_in);
+	}
+}

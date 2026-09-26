@@ -1,0 +1,47 @@
+// A zoom into a point in the picture, for a filter that animates it on a
+// hotkey. The maths is one line; everything interesting is in the timing, which
+// lives in the C.
+//
+// Sampling is clamped at the edges, so a zoom that would run off the picture
+// smears the edge pixel rather than showing nothing — which is why the C keeps
+// the window inside the frame instead of relying on this.
+
+uniform float4x4 ViewProj;
+uniform texture2d image;
+
+uniform float2 focus;   // 0..1, the point that stays still
+uniform float  zoom;    // 1 = untouched
+
+sampler_state def_sampler {
+	Filter   = Linear;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float4 PSPunch(VertInOut vert_in) : TARGET
+{
+	float2 uv = (vert_in.uv - focus) / max(zoom, 0.01) + focus;
+	return image.Sample(def_sampler, uv);
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSPunch(vert_in);
+	}
+}

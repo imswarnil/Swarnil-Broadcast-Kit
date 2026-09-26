@@ -1,0 +1,90 @@
+// The treatment drawn over a camera. Seven styles out of one signed-distance
+// field, so the line keeps its weight around the corner radius instead of
+// thinning on the curve the way four stacked borders do.
+//
+// 0 none · 1 ring · 2 inset · 3 corner brackets · 4 brackets stood off
+// 5 edge rules (head and foot) · 6 glow only · 7 double line
+
+uniform float4x4 ViewProj;
+uniform float4 color;
+uniform float2 size;
+uniform float  pad;
+uniform float  radius;
+uniform float  weight;
+uniform float  bracket;   // arm length of a corner bracket, px
+uniform float  style;
+uniform float  glow_size;
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float rounded_box(float2 p, float2 b, float r)
+{
+	float2 q = abs(p) - b + r;
+	return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+
+// a stroke of the given width centred on the iso-line at `offset`
+float stroke(float d, float offset, float w)
+{
+	float band = abs(d - offset) - w * 0.5;
+	return 1.0 - smoothstep(-0.75, 0.75, band);
+}
+
+float4 PSFrame(VertInOut vert_in) : TARGET
+{
+	float2 quad = size + float2(pad, pad) * 2.0;
+	float2 p = vert_in.uv * quad - quad * 0.5;
+	float2 half_size = size * 0.5;
+	float r = min(radius, min(half_size.x, half_size.y));
+	float d = rounded_box(p, half_size, r);
+
+	float a = 0.0;
+
+	if (style < 0.5) {
+		a = 0.0;
+	} else if (style < 1.5) {                      // ring
+		a = stroke(d, -weight * 0.5, weight);
+	} else if (style < 2.5) {                      // inset, a gap inside the edge
+		a = stroke(d, -weight * 2.5, weight);
+	} else if (style < 4.5) {                      // corner brackets
+		float off = style < 3.5 ? -weight * 0.5 : weight * 1.5;
+		float line = stroke(d, off, weight);
+		float2 e = half_size - float2(bracket, bracket);
+		float near_corner = max(step(e.x, abs(p.x)), step(e.y, abs(p.y)));
+		a = line * near_corner;
+	} else if (style < 5.5) {                      // head and foot rules
+		float line = stroke(d, -weight * 0.5, weight);
+		a = line * step(half_size.y - bracket, abs(p.y));
+	} else if (style < 6.5) {                      // glow only
+		a = 1.0 - smoothstep(-1.0, max(glow_size, 1.0), d);
+		a = a * a;
+	} else {                                        // double
+		a = max(stroke(d, -weight * 0.5, weight), stroke(d, -weight * 3.5, weight));
+	}
+
+	if (glow_size > 0.5 && style > 0.5 && style < 6.5) {
+		float g = 1.0 - smoothstep(-1.0, glow_size, d);
+		a = max(a, g * g * 0.5);
+	}
+	return float4(color.rgb, color.a * a);
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSFrame(vert_in);
+	}
+}

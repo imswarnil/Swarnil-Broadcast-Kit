@@ -1,0 +1,136 @@
+name: CI
+
+# Two things are built here and they share nothing: the plugin, which is C
+# compiled against the OBS that Homebrew installs, and the documentation site,
+# which is plain Node with no dependencies at all.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  plugin:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install --cask obs
+      - run: brew install simde jansson cmake qt
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - run: cmake --build build
+      - name: Check every source registered
+        run: |
+          # every obs_source_info in src/ must be registered in plugin-main.c,
+          # or it silently will not appear in OBS
+          missing=0
+          for id in $(grep -ho '\.id = "sbk_[a-z_]*"' src/*.c | sed 's/.*"\(.*\)"/\1/'); do
+            grep -q "\"$id\"" src/plugin-main.c || { echo "::error::$id is not in plugin-main.c's self-test list"; missing=1; }
+          done
+          for sym in $(grep -ho '^struct obs_source_info sbk_[a-z_]*' src/*.c | awk '{print $3}'); do
+            grep -q "obs_register_source(&$sym)" src/plugin-main.c || { echo "::error::$sym is never registered"; missing=1; }
+          done
+          exit $missing
+      - name: Package the bundle
+        # GITHUB_REF_NAME is "1/merge" on a pull request. Using it raw put the
+        # zip in a subdirectory called sbk-1/, the glob below found nothing, and
+        # the upload passed with no artifact — so the name is built by hand and
+        # the upload is told to fail rather than shrug.
+        run: |
+          VERSION=$(sed -n 's/.*project(sbk VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            NAME="sbk-${GITHUB_REF_NAME}"
+          else
+            NAME="sbk-${VERSION}-$(git rev-parse --short HEAD)"
+          fi
+          # The runner is Apple Silicon and nothing here builds fat, so the
+          # bundle is arm64. Say so in the filename: an Intel user who downloads
+          # it gets a plugin that silently does not load, and the only clue they
+          # would otherwise have is a missing source list.
+          ARCH=$(lipo -archs build/sbk.plugin/Contents/MacOS/sbk)
+          ditto -c -k --keepParent build/sbk.plugin "${NAME}-macos-${ARCH// /-}.plugin.zip"
+          ls -lh *.plugin.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbk.plugin
+          path: '*.plugin.zip'
+          if-no-files-found: error
+          retention-days: 14
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: '*.plugin.zip'
+          generate_release_notes: true
+          body: |
+            **macOS, Apple Silicon.** The bundle is arm64: the runner that builds
+            it is Apple Silicon and the OBS frameworks it links are too. On an
+            Intel Mac, build from source — `./build.command` produces a plugin
+            for whatever machine it runs on. See
+            [docs/INSTALL.md](https://github.com/imswarnil/Swarnil-Broadcast-Kit/blob/main/docs/INSTALL.md).
+
+            Quit OBS, unzip into `~/Library/Application Support/obs-studio/plugins/`,
+            start OBS. If the sources do not appear, strip the download
+            quarantine: `xattr -dr com.apple.quarantine ~/Library/Application\ Support/obs-studio/plugins/sbk.plugin`
+
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node site/build.mjs
+        env: { SITE_URL: 'https://obs.imswarnil.com/' }
+      - name: Check the built site's links resolve
+        run: node site/check.mjs
+      - name: Check the agent skill's registry is current
+        run: node scripts/skill-sync.mjs --check
+      - name: Check every documented scene example still builds
+        run: node scripts/check-recipes.mjs
+      - uses: actions/upload-artifact@v4
+        with: { name: site, path: dist, if-no-files-found: error, retention-days: 7 }
+
+  deploy:
+    needs: [plugin, site]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://obs.imswarnil.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      # A gate that skips quietly reads as a deploy that worked. This one says so
+      # in the run summary and warns, because "deploy: success" next to a site
+      # that has not changed is worse than a red tick — it is a green one you
+      # cannot trust, and it went unnoticed here for several releases.
+      - id: gate
+        env: { T: '${{ secrets.CLOUDFLARE_API_TOKEN }}', A: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}' }
+        run: |
+          if [ -n "$T" ] && [ -n "$A" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+            echo "### Deploying to obs.imswarnil.com" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Nothing was deployed::CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are not set on this repository, so the site was built and checked but never published. obs.imswarnil.com still shows whatever was there before."
+            {
+              echo "### ⚠️ Nothing was deployed"
+              echo
+              echo "\`CLOUDFLARE_API_TOKEN\` and \`CLOUDFLARE_ACCOUNT_ID\` are not set on this"
+              echo "repository. The site was built and checked, but **obs.imswarnil.com still shows"
+              echo "whatever was there before**. Add both under Settings → Secrets and variables →"
+              echo "Actions, or deploy by hand with \`npx wrangler@4 deploy\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - if: steps.gate.outputs.ok == 'true'
+        uses: actions/download-artifact@v4
+        with: { name: site, path: dist }
+      - if: steps.gate.outputs.ok == 'true'
+        name: Publish to Cloudflare
+        run: npx --yes wrangler@4 deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

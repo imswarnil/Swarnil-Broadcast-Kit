@@ -1,0 +1,181 @@
+// The ground under an announcement scene. A solid, a scrim that fades so a
+// camera can sit behind the card, a vignette, a gradient, or one of three
+// patterns that drift slowly — which is what keeps a "starting soon" screen
+// from looking like a frozen stream.
+//
+// 0 solid · 1 scrim from the foot · 2 scrim from the head · 3 vignette
+// 4 gradient · 5 grid · 6 dot grid · 7 diagonal stripes
+// 8 waves · 9 concentric rings · 10 hex grid · 11 grain
+// 12 aurora · 13 plasma · 14 starfield · 15 checkers
+
+uniform float4x4 ViewProj;
+uniform float4 color;
+uniform float4 color2;
+uniform float  mode;
+uniform float  reach;    // how far a scrim reaches, or the vignette's softness
+uniform float  pitch;    // pattern spacing, px
+uniform float  weight;   // pattern line or dot size, px
+uniform float  angle;    // gradient direction: 0 vertical, 1 diagonal, 2 horizontal
+uniform float  time;
+uniform float  drift;    // px per second
+uniform float2 size;
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float4 PSGround(VertInOut vert_in) : TARGET
+{
+	float2 uv = vert_in.uv;
+	float2 px = uv * size;
+
+	if (mode == 4.0) {
+		float k = angle < 0.5 ? uv.y : (angle < 1.5 ? saturate((uv.x + uv.y) * 0.5) : uv.x);
+		return lerp(color, color2, k);
+	}
+
+	if (mode == 12.0) {
+		// aurora: three soft blobs drifting on different periods, so the
+		// pattern never visibly repeats. Cheap, and it reads as depth.
+		float2 a = uv * float2(size.x / max(size.y, 1.0), 1.0);
+		float t = time * 0.06 * (drift == 0.0 ? 1.0 : drift / 6.0);
+		float3 c1 = float3(0.30 + 0.22 * sin(t * 1.10), 0.32 + 0.20 * cos(t * 0.83), 0.0);
+		float3 c2 = float3(0.74 + 0.20 * sin(t * 0.71 + 2.0), 0.62 + 0.18 * cos(t * 1.31), 0.0);
+		float3 c3 = float3(0.52 + 0.26 * cos(t * 0.93 + 4.0), 0.78 + 0.16 * sin(t * 0.61), 0.0);
+		float r = max(reach, 0.15) * 0.9;
+		float g1 = exp(-dot(a - c1.xy, a - c1.xy) / (r * r));
+		float g2 = exp(-dot(a - c2.xy, a - c2.xy) / (r * r * 1.4));
+		float g3 = exp(-dot(a - c3.xy, a - c3.xy) / (r * r * 0.8));
+		float k = saturate(g1 * 0.9 + g2 * 0.7 + g3 * 0.6);
+		return lerp(color, color2, k);
+	}
+
+	if (mode == 13.0) {
+		// plasma: four sines that do not share a factor, which is what stops
+		// it turning into a visible grid
+		float t = time * 0.25 * (drift == 0.0 ? 1.0 : drift / 6.0);
+		float2 q = uv * (200.0 / max(pitch, 8.0));
+		float v = sin(q.x + t) + sin(q.y * 1.3 - t * 0.7) + sin((q.x + q.y) * 0.7 + t * 0.4) +
+			  sin(length(q - 2.0) * 1.1 - t * 0.9);
+		return lerp(color, color2, saturate(v * 0.25 + 0.5));
+	}
+
+	if (mode == 14.0) {
+		// starfield: one star per cell, placed and sized by the cell's hash,
+		// twinkling on its own phase
+		float2 cell = floor(px / max(pitch, 8.0));
+		float2 f = frac(px / max(pitch, 8.0));
+		float h1 = frac(sin(dot(cell, float2(12.9898, 78.233))) * 43758.5453);
+		float h2 = frac(sin(dot(cell, float2(39.3467, 11.135))) * 24634.6345);
+		float h3 = frac(sin(dot(cell, float2(73.1567, 52.235))) * 17325.1234);
+		float2 star = float2(0.2 + 0.6 * h1, 0.2 + 0.6 * h2);
+		float twinkle = 0.45 + 0.55 * sin(time * (0.6 + h3 * 2.2) + h1 * 12.0);
+		float d = length((f - star) * max(pitch, 8.0));
+		float r = max(weight, 0.7) * (0.35 + h3 * 0.9);
+		float a = (1.0 - smoothstep(r * 0.5, r * 0.5 + 1.1, d)) * twinkle;
+		// only some cells get a star, or it reads as a grid of dots
+		a *= step(0.55, h3);
+		float4 ink = float4(color2.rgb, color2.a * a);
+		float outa = ink.a + color.a * (1.0 - ink.a);
+		if (outa <= 0.0001)
+			return float4(0.0, 0.0, 0.0, 0.0);
+		return float4((ink.rgb * ink.a + color.rgb * color.a * (1.0 - ink.a)) / outa, outa);
+	}
+
+	if (mode == 15.0) {
+		float2 p2 = px + float2(drift, drift * 0.6) * time;
+		float2 cell = floor(p2 / max(pitch, 8.0));
+		float odd = fmod(cell.x + cell.y, 2.0);
+		return lerp(color, color2, odd);
+	}
+
+	if (mode >= 5.0) {
+		float2 p = px + float2(drift, drift * 0.6) * time;
+		float a = 0.0;
+		float w = max(weight, 0.5);
+		if (mode == 5.0) {                    // grid
+			float2 g = abs(frac(p / pitch) - 0.5) * pitch;
+			float line = min(g.x, g.y);
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, line);
+		} else if (mode == 6.0) {             // dots
+			float2 g = (frac(p / pitch) - 0.5) * pitch;
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, length(g));
+		} else if (mode == 7.0) {             // diagonal stripes
+			float s = frac((p.x + p.y) / pitch);
+			float d = abs(s - 0.5) * pitch;
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, d);
+		} else if (mode == 8.0) {             // waves
+			// three sines at different rates, so the crests never line
+			// up into an obvious repeat
+			float y = p.y / pitch;
+			float wave = sin(p.x / pitch * 2.2 + time * 0.6) * 0.30
+				   + sin(p.x / pitch * 1.3 - time * 0.4) * 0.22
+				   + sin(p.x / pitch * 3.7 + time * 0.9) * 0.10;
+			float d = abs(frac(y - wave) - 0.5) * pitch;
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, d);
+		} else if (mode == 9.0) {             // concentric rings
+			float2 c = p - size * 0.5;
+			float r = length(c);
+			float d = abs(frac(r / pitch) - 0.5) * pitch;
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, d);
+			a *= 1.0 - smoothstep(0.0, max(size.x, size.y) * 0.75, r);
+		} else if (mode == 10.0) {            // hex grid
+			// a hex lattice is two offset rectangular lattices; the
+			// distance to the nearer centre gives both the cell and its
+			// outline for free
+			float2 q = p / pitch;
+			float2 r1 = float2(1.0, 1.7320508);
+			float2 h = r1 * 0.5;
+			float2 a1 = fmod(q, r1) - h;
+			float2 a2 = fmod(q - h, r1) - h;
+			float2 gv = dot(a1, a1) < dot(a2, a2) ? a1 : a2;
+			float2 ab = abs(gv);
+			float hexd = max(dot(ab, normalize(float2(1.0, 1.7320508))), ab.x);
+			float d = abs(0.5 - hexd) * pitch;
+			a = 1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, d);
+		} else {                              // grain
+			float2 g = floor(p / max(w, 1.0));
+			float n = frac(sin(dot(g, float2(12.9898, 78.233)) + floor(time * 12.0)) * 43758.5453);
+			a = smoothstep(0.55, 1.0, n);
+		}
+		// the pattern sits on the base colour, so one source is a whole backdrop
+		float4 base = color;
+		float4 ink = float4(color2.rgb, color2.a * a);
+		float outa = ink.a + base.a * (1.0 - ink.a);
+		if (outa <= 0.0001)
+			return float4(0.0, 0.0, 0.0, 0.0);
+		return float4((ink.rgb * ink.a + base.rgb * base.a * (1.0 - ink.a)) / outa, outa);
+	}
+
+	float a = 1.0;
+	if (mode == 1.0) {
+		float t = saturate((uv.y - (1.0 - reach)) / max(reach, 0.001));
+		a = t * t;
+	} else if (mode == 2.0) {
+		float t = saturate((reach - uv.y) / max(reach, 0.001));
+		a = t * t;
+	} else if (mode == 3.0) {
+		float2 c = uv - 0.5;
+		float r = length(c * float2(1.0, size.y / size.x)) * 2.0;
+		a = smoothstep(1.0 - reach, 1.25, r);
+	}
+	return float4(color.rgb, color.a * a);
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSGround(vert_in);
+	}
+}

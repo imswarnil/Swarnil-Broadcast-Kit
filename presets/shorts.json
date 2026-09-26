@@ -1,0 +1,42 @@
+{
+	"name": "SBK · Vertical",
+	"look": { "accent": 4282329077, "scale": 1.0 },
+	"scenes": [
+		{ "name": "Hook", "items": [
+			{ "id": "sbk_backdrop", "name": "Vertical backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "hex", "drift": 3.0, "pitch": 60.0 } },
+			{ "id": "sbk_card", "name": "Hook card", "x": 960, "y": 56, "anchor": "top-centre",
+			  "settings": { "eyebrow": "Short", "title": "One idea, sixty seconds",
+			                "align": "centre", "width": 760, "variant": "none" } },
+			{ "id": "sbk_plate", "name": "Cam plate", "x": 960, "y": 660, "anchor": "centre",
+			  "settings": { "aspect": "9x16", "size": 1.22, "radius": 24.0, "fill_glass": true } },
+			{ "id": "camera", "x": 960, "y": 1050, "anchor": "bottom-centre", "box": [439, 781] },
+			{ "id": "sbk_frame", "name": "Cam frame", "x": 960, "y": 1050, "anchor": "bottom-centre",
+			  "settings": { "aspect": "9x16", "size": 1.22, "style": "ring", "radius": 24.0,
+			                "label": "@imswarnil", "chip_at": "bottom-left" } }
+		]},
+		{ "name": "Point", "items": [
+			{ "id": "sbk_backdrop", "name": "Vertical backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "hex", "drift": 3.0, "pitch": 60.0 } },
+			{ "id": "sbk_plate", "name": "Cam plate", "x": 960, "y": 660, "anchor": "centre",
+			  "settings": { "aspect": "9x16", "size": 1.22, "radius": 24.0, "fill_glass": true } },
+			{ "id": "camera", "x": 960, "y": 1050, "anchor": "bottom-centre", "box": [439, 781] },
+			{ "id": "sbk_frame", "name": "Cam frame", "x": 960, "y": 1050, "anchor": "bottom-centre",
+			  "settings": { "aspect": "9x16", "size": 1.22, "style": "ring", "radius": 24.0, "label": "" } },
+			{ "id": "sbk_chip", "name": "Point chip", "x": 960, "y": 120, "anchor": "top-centre",
+			  "settings": { "label": "The bit nobody tells you", "variant": "accent",
+			                "dot": "none", "enter": "pop" } }
+		]},
+		{ "name": "Call to action", "items": [
+			{ "id": "sbk_backdrop", "name": "Vertical backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "hex", "drift": 3.0, "pitch": 60.0 } },
+			{ "id": "sbk_plate", "name": "Cam plate", "x": 960, "y": 660, "anchor": "centre",
+			  "settings": { "aspect": "9x16", "size": 1.22, "radius": 24.0, "fill_glass": true } },
+			{ "id": "camera", "x": 960, "y": 1050, "anchor": "bottom-centre", "box": [439, 781] },
+			{ "id": "sbk_frame", "name": "Cam frame", "x": 960, "y": 1050, "anchor": "bottom-centre",
+			  "settings": { "aspect": "9x16", "size": 1.22, "style": "ring", "radius": 24.0, "label": "" } },
+			{ "id": "sbk_prompt", "name": "Prompt", "x": 960, "y": 120, "anchor": "top-centre",
+			  "settings": { "edge": "top", "every": 20.0, "hold": 6.0, "width": 620 } }
+		]}
+	]
+}

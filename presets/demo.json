@@ -1,0 +1,59 @@
+{
+	"name": "SBK · Product demo",
+	"look": { "accent": 4282329077, "scale": 1.0 },
+	"scenes": [
+		{ "name": "Title", "items": [
+			{ "id": "sbk_backdrop", "name": "Demo backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "gradient", "angle": "diagonal" } },
+			{ "id": "sbk_card", "name": "Title card", "x": 960, "y": 340, "anchor": "top-centre",
+			  "settings": { "eyebrow": "Walkthrough", "title": "Ship it in four minutes",
+			                "body": "From an empty repository to something on the internet.",
+			                "align": "centre", "width": 1500, "variant": "none" } },
+			{ "id": "sbk_logo", "name": "Mark", "x": 960, "y": 700, "anchor": "top-centre",
+			  "settings": { "mark": "ring", "loop": "draw", "mark_size": 120, "variant": "none" } }
+		]},
+		{ "name": "Screen and me", "items": [
+			{ "id": "sbk_backdrop", "name": "Demo backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "grid", "drift": 3.0, "pitch": 72.0 } },
+			{ "id": "sbk_plate", "name": "Screen plate", "x": 649, "y": 487, "anchor": "centre",
+			  "settings": { "aspect": "21x9", "size": 1.40, "radius": 18.0, "fill_glass": true } },
+			{ "id": "screen", "x": 120, "y": 260, "box": [1058, 454] },
+			{ "id": "sbk_frame", "name": "Screen frame", "x": 120, "y": 260,
+			  "settings": { "aspect": "21x9", "size": 1.40, "style": "ring", "radius": 18.0,
+			                "label": "Screen", "chip_at": "top-left" } },
+			{ "id": "sbk_plate", "name": "Cam plate", "x": 1658, "y": 513, "anchor": "centre",
+			  "settings": { "aspect": "9x16", "size": 0.79, "radius": 18.0, "fill_glass": true } },
+			{ "id": "camera", "x": 1800, "y": 260, "anchor": "top-right", "box": [284, 506] },
+			{ "id": "sbk_frame", "name": "Cam frame", "x": 1800, "y": 260, "anchor": "top-right",
+			  "settings": { "aspect": "9x16", "size": 0.79, "style": "ring", "radius": 18.0,
+			                "label": "@imswarnil", "chip_at": "bottom-left" } },
+			{ "id": "sbk_chip", "name": "Step", "x": 120, "y": 120,
+			  "settings": { "label": "Step 1 — the repository", "variant": "card", "dot": "accent" } },
+			{ "id": "sbk_social", "name": "Handles", "x": 960, "y": 960, "anchor": "bottom-centre",
+			  "settings": { "mode": "bar", "variant": "card", "brand": true } },
+			{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right",
+			  "settings": { "shape": "badge" } }
+		]},
+		{ "name": "Close up", "items": [
+			{ "id": "screen", "x": 0, "y": 0, "box": [1920, 1080] },
+			{ "id": "sbk_chip", "name": "Step", "x": 120, "y": 120,
+			  "settings": { "label": "Step 1 — the repository", "variant": "card", "dot": "accent" } },
+			{ "id": "sbk_logo", "name": "Bug", "x": 1800, "y": 100, "anchor": "top-right",
+			  "settings": { "mark": "ring", "loop": "orbit", "mark_size": 52, "variant": "none" } }
+		]},
+		{ "name": "The ask", "items": [
+			{ "id": "sbk_backdrop", "name": "Ask backdrop", "x": 0, "y": 0,
+			  "settings": { "mode": "rings", "drift": 2.0, "pitch": 120.0 } },
+			{ "id": "sbk_card", "name": "Ask card", "x": 120, "y": 240,
+			  "settings": { "eyebrow": "Try it", "title": "It is free and it is open",
+			                "body": "Everything in this demo is in the repository.",
+			                "variant": "none", "align": "left", "width": 900 } },
+			{ "id": "sbk_qr", "name": "Repo QR", "x": 1800, "y": 240, "anchor": "top-right",
+			  "settings": { "text": "https://github.com/imswarnil", "caption": "Scan for the code",
+			                "sub": "github.com/imswarnil", "code_size": 300,
+			                "variant": "card", "enter": "pop" } },
+			{ "id": "sbk_social", "name": "Handles", "x": 120, "y": 700,
+			  "settings": { "mode": "stack", "variant": "card", "brand": true } }
+		]}
+	]
+}

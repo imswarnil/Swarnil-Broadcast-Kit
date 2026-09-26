@@ -1,0 +1,93 @@
+// The one shape Tally draws: a rounded box with a fill, a hairline just inside
+// its edge, and a glow outside it. Glass panels, pills, chips, the accent bar,
+// the recording-light dot (radius = half the size) and progress bars are all
+// this shader with different numbers.
+//
+// A signed distance to the rounded box gives every edge the same anti-aliasing
+// and keeps the hairline the same width around the corner, where four stacked
+// rectangles would thin out.
+//
+// The fill may be a gradient: grad 1 vertical, 2 diagonal, 3 horizontal. A flat
+// fill is grad 0, which is what most callers want.
+
+uniform float4x4 ViewProj;
+uniform float2 size;       // the box, px
+uniform float  pad;        // room around it for the glow, px (the quad is size + 2·pad)
+uniform float  radius;
+uniform float4 fill;
+uniform float4 fill2;      // the far end of the gradient
+uniform float  grad;       // 0 flat, 1 vertical, 2 diagonal, 3 horizontal
+uniform float4 line;
+uniform float  line_width; // 0 = none
+uniform float4 glow;
+uniform float  glow_size;  // 0 = none
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float rounded_box(float2 p, float2 b, float r)
+{
+	float2 q = abs(p) - b + r;
+	return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+
+float4 over(float4 dst, float4 src)
+{
+	float a = src.a + dst.a * (1.0 - src.a);
+	if (a <= 0.0001)
+		return float4(0.0, 0.0, 0.0, 0.0);
+	return float4((src.rgb * src.a + dst.rgb * dst.a * (1.0 - src.a)) / a, a);
+}
+
+float4 PSCard(VertInOut vert_in) : TARGET
+{
+	float2 quad = size + float2(pad, pad) * 2.0;
+	float2 p = vert_in.uv * quad - quad * 0.5;
+	float2 half_size = size * 0.5;
+	float r = min(radius, min(half_size.x, half_size.y));
+	float d = rounded_box(p, half_size, r);
+
+	float4 col = float4(0.0, 0.0, 0.0, 0.0);
+
+	if (glow_size > 0.5) {
+		float g = 1.0 - smoothstep(-1.0, glow_size, d);
+		g = g * g;
+		col = over(col, float4(glow.rgb, glow.a * g));
+	}
+
+	float4 body = fill;
+	if (grad > 0.5) {
+		float2 uv = (p / max(size, float2(1.0, 1.0))) + 0.5;
+		float k = grad < 1.5 ? uv.y : (grad < 2.5 ? saturate((uv.x + uv.y) * 0.5) : uv.x);
+		body = lerp(fill, fill2, saturate(k));
+	}
+
+	float inside = 1.0 - smoothstep(-0.75, 0.75, d);
+	col = over(col, float4(body.rgb, body.a * inside));
+
+	if (line_width > 0.05) {
+		float inner = 1.0 - smoothstep(-0.75, 0.75, d + line_width);
+		float ring = max(inside - inner, 0.0);
+		col = over(col, float4(line.rgb, line.a * ring));
+	}
+	return col;
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSCard(vert_in);
+	}
+}

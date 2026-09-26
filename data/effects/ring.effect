@@ -1,0 +1,83 @@
+// A progress arc: a ring with a portion of it filled, starting at the top and
+// going clockwise, with rounded ends.
+//
+// Drawn as a distance field rather than a triangle fan so the ends are round at
+// any thickness and the edge is smooth at any size, and so the track and the
+// fill are one draw rather than two.
+
+uniform float4x4 ViewProj;
+uniform float2 size;
+uniform float  thickness;  // px
+uniform float  progress;   // 0..1
+uniform float4 track;
+uniform float4 fill;
+uniform float  cap;        // 0 flat, 1 round
+
+struct VertInOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertInOut VSDefault(VertInOut vert_in)
+{
+	VertInOut vert_out;
+	vert_out.pos = mul(float4(vert_in.pos.xyz, 1.0), ViewProj);
+	vert_out.uv  = vert_in.uv;
+	return vert_out;
+}
+
+float4 over(float4 dst, float4 src)
+{
+	float a = src.a + dst.a * (1.0 - src.a);
+	if (a <= 0.0001)
+		return float4(0.0, 0.0, 0.0, 0.0);
+	return float4((src.rgb * src.a + dst.rgb * dst.a * (1.0 - src.a)) / a, a);
+}
+
+float4 PSRing(VertInOut vert_in) : TARGET
+{
+	float2 p = vert_in.uv * size - size * 0.5;
+	float half_min = min(size.x, size.y) * 0.5;
+	float r = half_min - thickness * 0.5 - 1.0;
+	float dist = length(p);
+
+	// how far this pixel is from the ring's centre line
+	float band = abs(dist - r) - thickness * 0.5;
+	float on_ring = 1.0 - smoothstep(-0.75, 0.75, band);
+	if (on_ring <= 0.001)
+		return float4(0.0, 0.0, 0.0, 0.0);
+
+	float4 col = float4(track.rgb, track.a * on_ring);
+
+	float t = saturate(progress);
+	if (t <= 0.0001)
+		return col;
+
+	// angle from the top, clockwise, 0..1
+	float ang = atan2(p.x, -p.y) / 6.2831853;
+	if (ang < 0.0)
+		ang += 1.0;
+
+	float swept = step(ang, t);
+
+	if (cap > 0.5 && t < 0.999) {
+		// round both ends by adding a disc at each, so the fill does not stop
+		// on a hard radial edge
+		float2 start = float2(0.0, -r);
+		float end_a = t * 6.2831853;
+		float2 end = float2(sin(end_a), -cos(end_a)) * r;
+		float caps = min(length(p - start), length(p - end)) - thickness * 0.5;
+		swept = max(swept, 1.0 - smoothstep(-0.75, 0.75, caps));
+	}
+
+	return over(col, float4(fill.rgb, fill.a * on_ring * swept));
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(vert_in);
+		pixel_shader  = PSRing(vert_in);
+	}
+}
