@@ -151,6 +151,19 @@ in `~/Library/Application Support/obs-studio/logs/`: `[sbk] v… loaded`, no
 The QR round-trips: crop a rendered frame and decode it with `CIDetector`
 (a small Swift tool does this; see the CHANGELOG entry for 0.3.0).
 
+## The agent skill
+
+`skills/sbk-scenes/` is an Agent Skill: install it with
+`cp -R skills/sbk-scenes ~/.claude/skills/` and an agent can build scene
+collections out of the kit. `docs/SKILL.md` documents it.
+
+**`references/sources.md` and `scripts/registry.json` are generated** by
+`scripts/skill-sync.mjs`, which parses `src/*.c` for ids, defaults, property
+lists and slider ranges. Never hand-edit them; run `node scripts/skill-sync.mjs`
+after adding or renaming a setting. CI runs it with `--check` and fails on a
+stale copy, and `scripts/check-recipes.mjs` runs every documented example
+through the generator's validator.
+
 ## The site
 
 Live at **https://obs.imswarnil.com** — Cloudflare Worker `sbk-obs`, static

@@ -1,0 +1,41 @@
+{
+	"name": "Teaching",
+	"look": { "accent": 4282329077, "scale": 1.0 },
+	"scenes": [
+		{
+			"name": "Lesson title",
+			"items": [
+				{ "id": "sbk_backdrop", "name": "Backdrop", "x": 0, "y": 0,
+				  "settings": { "mode": "gradient", "angle": "diagonal" } },
+				{ "id": "sbk_card", "name": "Title card", "x": 960, "y": 340, "anchor": "top-centre",
+				  "settings": { "eyebrow": "Module 3", "title": "Auth and sessions",
+				                "body": "What a session really is, and the four ways to lose one.",
+				                "align": "centre", "width": 1500, "variant": "none" } },
+				{ "id": "sbk_progress", "name": "Module progress", "x": 960, "y": 700, "anchor": "top-centre",
+				  "settings": { "label": "Modules", "value": 3, "target": 8, "style": "segments",
+				                "segments": 8, "width": 720, "variant": "none" } },
+				{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right",
+				  "settings": { "shape": "dot" } }
+			]
+		},
+		{
+			"name": "Teaching",
+			"items": [
+				{ "id": "sbk_plate", "name": "Cam plate", "x": 1639, "y": 841, "anchor": "centre",
+				  "settings": { "aspect": "16x9", "size": 0.66, "radius": 16.0, "fill_glass": true } },
+				{ "id": "camera", "x": 1800, "y": 960, "anchor": "bottom-right", "box": [422, 238] },
+				{ "id": "sbk_frame", "name": "Cam frame", "x": 1800, "y": 960, "anchor": "bottom-right",
+				  "settings": { "aspect": "16x9", "size": 0.66, "style": "ring", "radius": 16.0,
+				                "label": "@imswarnil", "chip_at": "bottom-left" } },
+				{ "id": "sbk_comments", "name": "Questions", "x": 1800, "y": 240, "anchor": "top-right",
+				  "settings": { "width": 560, "title": "Questions", "show_count": 3, "rotate": 12.0 } },
+				{ "id": "sbk_chip", "name": "Topic chip", "x": 120, "y": 120,
+				  "settings": { "label": "Chapter 1 — setting up", "variant": "card", "dot": "accent" } },
+				{ "id": "sbk_prompt", "name": "Prompt", "x": 120, "y": 300,
+				  "settings": { "edge": "left", "every": 240.0, "hold": 7.0, "width": 460 } },
+				{ "id": "sbk_onair", "name": "Light", "x": 1800, "y": 120, "anchor": "top-right",
+				  "settings": { "shape": "badge" } }
+			]
+		}
+	]
+}

@@ -19,6 +19,24 @@ a scene collection you can import straight into OBS.
 
 ---
 
+## What it looks like
+
+Real frames, straight off the plugin's own self-test — nothing here is a
+mock-up, and the camera is hidden so these are the overlays alone.
+
+| | |
+| --- | --- |
+| <img src="docs/screens/starting-soon.jpg" alt="A starting-soon screen: a title card on a drifting grid, a countdown ring to the right, a stack of social handles, a clock, and a spectrum along the foot." width="100%"> | <img src="docs/screens/two-up.jpg" alt="A two-up layout: a wide 21:9 screen capture on the left, a 9:16 camera column on the right, an orbiting logo bug and a bar of social handles." width="100%"> |
+| **Starting soon.** The screen people sit on. A countdown that restarts every time you cut to it. | **Two up.** A 21:9 screen and a 9:16 camera. Two aspect ratios, because matching them wastes half the picture. |
+| <img src="docs/screens/three-up.jpg" alt="A three-up layout: a 16:9 screen capture across the top, a square host camera left and a 4:5 guest camera right, each with a level meter under it." width="100%"> | <img src="docs/screens/comments.jpg" alt="A questions panel down the right of the frame, three questions with lettered avatars, an accent chip above it and a camera frame bottom left." width="100%"> |
+| **Three up.** A screen, a square host and a 4:5 guest, with a meter under each so a silent guest is obvious. | **Comments.** Questions on screen — typed, or read from your YouTube live chat. |
+| <img src="docs/screens/ending.jpg" alt="An ending screen: a thanks-for-watching card, a subscriber goal bar, a subscribe chip, a bar of social handles, a drawing ring mark and a QR code." width="100%"> | <img src="docs/screens/desk.jpg" alt="A private desk view: stats, a program meter, a mic meter, a questions queue and a large on-air timer." width="100%"> |
+| **Ending.** The ask, with the goal it is asking for, and a QR that actually scans. | **Desk.** Not for the stream. Open it as a projector on a second monitor. |
+
+**[Every one of the twenty-two →](https://obs.imswarnil.com/scenes/)**
+
+---
+
 ## Why a plugin
 
 <picture>
@@ -174,6 +192,74 @@ node docs/art/build.mjs  # regenerate the illustrations
 Nothing is downloaded at build time. CI builds the plugin on a clean Mac with
 OBS from Homebrew, checks that every source is registered, builds the site and
 deploys it; a `v*` tag attaches the bundle to a release.
+
+## Build scenes with an agent
+
+The kit ships an **agent skill**. Install it and Claude Code (or anything that
+reads the Agent Skills format) can design a scene, or a whole show, out of these
+sources and hand back a collection OBS will import.
+
+```bash
+git clone https://github.com/imswarnil/Swarnil-Broadcast-Kit.git
+mkdir -p ~/.claude/skills
+cp -R Swarnil-Broadcast-Kit/skills/sbk-scenes ~/.claude/skills/
+```
+
+Then ask for what you want:
+
+> *Build me a screen-share scene with the camera bottom-right on a plate, a
+> chapter chip, a mic meter, and a questions panel down the right.*
+
+It knows every source and every setting because its reference is **generated
+from the plugin's own C** — a key it has not been told about is a key no source
+reads. It validates a spec before writing anything and reports the near misses
+for a setting you mistyped, which matters because OBS silently ignores a setting
+it does not recognise: a typo gives you a scene that looks almost right and
+nobody can say why.
+
+You can drive the generator yourself, without an agent:
+
+```bash
+node skills/sbk-scenes/scripts/build-collection.mjs my-show.json --check
+node skills/sbk-scenes/scripts/build-collection.mjs my-show.json -o my-show.collection.json
+```
+
+Then **OBS → Scene Collection → Import**. It adds one beside the collection you
+are on rather than replacing it.
+
+Full documentation: **[docs/SKILL.md](docs/SKILL.md)**. Six worked scenes:
+[`skills/sbk-scenes/references/recipes.md`](skills/sbk-scenes/references/recipes.md).
+
+## Use it, change it, sell what you make with it
+
+MIT. Use it on a monetised channel, fork it, rename it, ship it inside something
+you charge for. No attribution is required, though a link is always welcome.
+
+The one thing to know is in the licence section at the foot of this page: a
+*compiled* plugin links libobs, which is GPL-2.0, so a binary you distribute
+carries the GPL's terms with it. The source in this repository is MIT and stays
+MIT.
+
+## Contribute
+
+Issues and pull requests are both welcome, and a good bug report is worth as
+much as a patch. **[CONTRIBUTING.md](CONTRIBUTING.md)** has the whole of it; the
+short version:
+
+- **Something is wrong** — open an issue with the OBS version, your platform, and
+  the newest log from `~/Library/Application Support/obs-studio/logs/`. The log
+  usually contains the answer.
+- **You want a source** — say what you would put on screen and why the existing
+  ones cannot. A source that only differs in its defaults is a preset, not a
+  source.
+- **You are sending code** — one source per file, the shared helpers, every
+  length as a multiple of `u`. Run `./build.command`, add the thing in OBS, move
+  every slider, then run the self-test and look at the pictures.
+
+Two rules are not negotiable, because they are what keeps the kit
+redistributable: **no code from any commercial theme or design system**, and
+**no trademarked logos** — the marks in `glyph.effect` are generic on purpose,
+and a platform is identified by its colour and its name in type.
 
 ## Design
 

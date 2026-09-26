@@ -3,6 +3,46 @@
 All notable changes to Swarnil Broadcast Kit (called Tally until 0.3.0). The format follows [Keep a Changelog](https://keepachangelog.com/);
 versions follow [SemVer](https://semver.org/).
 
+## [0.7.1] — 2026-09-26
+
+An agent skill, pictures in the README, and a value that was wrong in six places.
+
+### Added
+- **An agent skill**, `skills/sbk-scenes/`. Copy it into `~/.claude/skills/` and
+  Claude Code — or anything else that reads the Agent Skills format — can design
+  a scene, or a whole show, out of these sources and hand back a collection OBS
+  will import. There is a generator you can run yourself without an agent, and
+  `docs/SKILL.md` explains the whole of it.
+- **Its reference is generated from the plugin's own C** by
+  `scripts/skill-sync.mjs`: ids from each `obs_source_info`, names from the
+  locale, keys and defaults from each `*_defaults()`, allowed values from the
+  property lists, ranges from the sliders, and the shared Look and Motion groups
+  from the headers that define them. Twenty-eight registrations, 387 settings.
+  Written by hand that list would be wrong within a release; CI fails if the
+  checked-in copy is stale. Anything the parser cannot resolve is printed as
+  *set at runtime* rather than guessed at.
+- **A scene-collection generator**, `build-collection.mjs`, which validates a
+  spec before it writes anything: an unknown id or key with the near misses
+  offered, a string outside an enumerated list with the list printed, a position
+  off the canvas, and an item named after a scene — which OBS accepts and then
+  silently never draws, because scenes and sources share one namespace. Its
+  output is a strict subset of what OBS itself writes, checked by diffing
+  against a real collection and by loading a generated one and reading the scene
+  tree out of the log.
+- **Pictures in the README**: six real self-test frames with a line each, and a
+  section on using the kit commercially and on contributing to it.
+- `scripts/check-recipes.mjs`, which runs every JSON block in the skill's
+  documentation through the same validator the skill tells an agent to use. Both
+  new checks run in CI.
+
+### Fixed
+- **`variant: "glass"` is not a surface and never was.** The five are `card`,
+  `pill`, `outline`, `accent` and `none`; anything else falls back to `card`, so
+  four scenes in `scenes.c` and two entries in the web builder's palette had
+  been quietly asking for something that does not exist and getting away with
+  it. Found by the new example check on its first run, which is the argument for
+  having written it.
+
 ## [0.7.0] — 2026-09-26
 
 The mark, the handles, the ask, and two layouts that put a screen and a camera

@@ -456,6 +456,29 @@ function setup() {
 
 <section>
 	<div class="wrap wide">
+		<h2>Build scenes with an agent</h2>
+		<p class="sub">The kit ships an <strong>agent skill</strong>. Install it and Claude Code — or
+		anything else that reads the Agent Skills format — can design a scene, or a whole show, out of
+		these sources and hand back a collection OBS will import.</p>
+		<pre><code>git clone ${REPO}.git
+mkdir -p ~/.claude/skills
+cp -R Swarnil-Broadcast-Kit/skills/sbk-scenes ~/.claude/skills/</code></pre>
+		<p class="sub" style="margin-top:1rem">Then ask for what you want: <em>a screen-share scene
+		with the camera bottom-right on a plate, a chapter chip, a mic meter and a questions panel down
+		the right.</em> It knows every source and every setting because its reference is generated from
+		the plugin&rsquo;s own C, and it validates a spec before writing anything — which matters,
+		because OBS silently ignores a setting it does not recognise, so a typo gives you a scene that
+		looks almost right and nobody can say why.</p>
+		<p class="sub">You can drive the generator yourself, without an agent:</p>
+		<pre><code>node skills/sbk-scenes/scripts/build-collection.mjs my-show.json --check
+node skills/sbk-scenes/scripts/build-collection.mjs my-show.json -o my-show.collection.json</code></pre>
+		<p class="btns" style="margin-top:1.25rem"><a class="btn" href="${REPO}/blob/main/docs/SKILL.md">How the skill works</a>
+		<a class="btn btn--ghost" href="${REPO}/blob/main/skills/sbk-scenes/references/recipes.md">Six worked scenes</a></p>
+	</div>
+</section>
+
+<section>
+	<div class="wrap wide">
 		<h2>Building it yourself</h2>
 		<p class="sub">Nothing is downloaded at build time. The libobs headers are vendored; the rest
 		is Homebrew and what macOS already has.</p>

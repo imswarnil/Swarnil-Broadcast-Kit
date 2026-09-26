@@ -57,7 +57,7 @@ export const PALETTE = [
 			['mode', 'Shape', ['rotate', 'bar', 'stack']],
 			['rotate', 'Change every (seconds)', 'number'],
 			['brand', 'Each platform\u2019s own colour', 'bool'],
-			['variant', 'Variant', ['card', 'glass', 'none', 'accent', 'outline']],
+			['variant', 'Variant', ['card', 'pill', 'outline', 'accent', 'none']],
 		],
 	},
 	{
@@ -102,7 +102,7 @@ export const PALETTE = [
 			['manual', 'Questions, one per line as Name: question', 'text'],
 			['show_count', 'Show at once', 'number'],
 			['rotate', 'Rotate every (seconds)', 'number'],
-			['variant', 'Variant', ['card', 'glass', 'none', 'accent', 'outline']],
+			['variant', 'Variant', ['card', 'pill', 'outline', 'accent', 'none']],
 		],
 	},
 	{

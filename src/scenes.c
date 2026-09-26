@@ -426,7 +426,7 @@ static void scene_starting(obs_scene_t *sc)
 			       "@imswarnil | youtube.com/@imswarnil | imswarnil.com", "card", "left", 1100)),
 	    EDGE, 300, TL);
 	put(sc, comp("sbk_social", "SBK · Social stack",
-		     "{\"mode\":\"stack\",\"variant\":\"glass\",\"brand\":true}"),
+		     "{\"mode\":\"stack\",\"variant\":\"card\",\"brand\":true}"),
 	    EDGE, 820, BL);
 	put(sc, comp("sbk_countdown", "SBK · Countdown",
 		     "{\"mode\":\"duration\",\"minutes\":15,\"style\":\"ring\",\"ring_size\":300,\"label\":\"We begin in\"}"),
@@ -487,7 +487,7 @@ static void scene_screen_share(obs_scene_t *sc)
 		     "\"segment_count\":20,\"show_db\":false}"),
 	    EDGE, 1080 - EDGE - 130, BL);
 	put(sc, comp("sbk_prompt", "SBK · Prompt left",
-		     "{\"edge\":\"left\",\"every\":240.0,\"hold\":7.0,\"width\":460,\"variant\":\"glass\"}"),
+		     "{\"edge\":\"left\",\"every\":240.0,\"hold\":7.0,\"width\":460,\"variant\":\"card\"}"),
 	    EDGE, 300, TL);
 	put(sc, light("badge"), 1920 - EDGE, EDGE, TR);
 }
@@ -562,7 +562,7 @@ static void scene_two_up(obs_scene_t *sc)
 		     "{\"label\":\"Chapter 1 — setting up\",\"variant\":\"card\",\"dot\":\"accent\"}"),
 	    EDGE + 130, EDGE, TL);
 	put(sc, comp("sbk_social", "SBK · Social bar",
-		     "{\"mode\":\"bar\",\"variant\":\"glass\",\"brand\":true}"),
+		     "{\"mode\":\"bar\",\"variant\":\"card\",\"brand\":true}"),
 	    MIDX, 1080 - EDGE, OBS_ALIGN_BOTTOM | OBS_ALIGN_CENTER);
 	put(sc, light("badge"), 1920 - EDGE, EDGE, TR);
 }
@@ -847,7 +847,7 @@ static void scene_ending(obs_scene_t *sc)
 		     "{\"label\":\"youtube.com/@imswarnil\",\"variant\":\"accent\",\"dot\":\"none\"}"),
 	    MIDX, 760, TC);
 	put(sc, comp("sbk_social", "SBK · Social bar",
-		     "{\"mode\":\"bar\",\"variant\":\"glass\",\"brand\":true}"),
+		     "{\"mode\":\"bar\",\"variant\":\"card\",\"brand\":true}"),
 	    MIDX, 900, TC);
 	put(sc, comp("sbk_logo", "SBK · Sign off mark",
 		     "{\"mark\":\"ring\",\"loop\":\"draw\",\"mark_size\":120,\"speed\":4.0,"

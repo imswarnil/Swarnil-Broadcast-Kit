@@ -585,6 +585,22 @@ export const APIS = [
 
 export const FAQ = [
 	{
+		q: 'Can I use this on a channel I make money from, or inside something I sell?',
+		a: `Yes, and you owe nobody a credit. The source is MIT: fork it, rename it, ship it inside a
+		paid product. The one thing to know is that a *compiled* plugin links libobs, which is GPL-2.0,
+		so a binary you hand out carries the GPL's terms with it. The source in the repository is MIT
+		and stays MIT. The marks the kit draws are generic rather than trademarked logos, and it shares
+		no code with any commercial design system — both of those are deliberate, and they are what
+		make the first sentence of this answer true.`,
+	},
+	{
+		q: 'Can an AI agent build scenes with this?',
+		a: `Yes. The repository ships an agent skill — copy \`skills/sbk-scenes\` into
+		\`~/.claude/skills/\` and ask for the scene you want. Its reference is generated from the
+		plugin's own C, so it cannot claim a setting that does not exist, and it validates a spec
+		before writing anything. There is a generator you can run yourself too, without an agent.`,
+	},
+	{
 		q: 'Can I design a scene without installing anything?',
 		a: `Yes — the <a href="/builder/">builder</a> runs in the browser. Place the pieces, set the
 		words, and export a scene collection. What comes out is the real thing: the same source ids

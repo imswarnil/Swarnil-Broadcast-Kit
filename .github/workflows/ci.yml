@@ -70,6 +70,10 @@ jobs:
         env: { SITE_URL: 'https://obs.imswarnil.com/' }
       - name: Check the built site's links resolve
         run: node site/check.mjs
+      - name: Check the agent skill's registry is current
+        run: node scripts/skill-sync.mjs --check
+      - name: Check every documented scene example still builds
+        run: node scripts/check-recipes.mjs
       - uses: actions/upload-artifact@v4
         with: { name: site, path: dist, if-no-files-found: error, retention-days: 7 }
 
