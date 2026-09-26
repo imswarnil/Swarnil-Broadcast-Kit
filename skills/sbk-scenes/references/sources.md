@@ -2,7 +2,9 @@
 
 # Every source, and every setting it takes
 
-Read out of the C at `b2f0db0`. A key that is not here is a key no source reads.
+Read out of the C. A key that is not here is a key no source reads.
+
+<sub>sources digest `d6a53f2edcfb` — regenerate with <code>node scripts/skill-sync.mjs</code></sub>
 
 Colours are **ABGR** integers, not hex strings: `0xFF3F27F5` is the accent red.
 In JSON write them as decimal, which is what OBS itself stores.

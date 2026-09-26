@@ -36,6 +36,12 @@ An agent skill, pictures in the README, and a value that was wrong in six places
   new checks run in CI.
 
 ### Fixed
+- **The skill registry was stamped with the git commit, so it invalidated
+  itself.** Regenerating after the commit that carried the last regeneration
+  produced a different file, the check failed on a clean tree, and CI could
+  never be green. It is stamped with a digest of the source files the parser
+  actually read instead, which changes exactly when the answer changes — the
+  only thing the stamp was ever for.
 - **`variant: "glass"` is not a surface and never was.** The five are `card`,
   `pill`, `outline`, `accent` and `none`; anything else falls back to `card`, so
   four scenes in `scenes.c` and two entries in the web builder's palette had

@@ -19,7 +19,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import crypto from 'node:crypto';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SKILL = path.join(ROOT, 'skills/sbk-scenes');
@@ -202,17 +202,30 @@ function collect() {
 /* ---- write it out ---------------------------------------------------------- */
 
 const entries = collect();
-const head = (() => {
-	try {
-		return execSync('git rev-parse --short HEAD', { cwd: ROOT }).toString().trim();
-	} catch {
-		return 'unknown';
-	}
-})();
+
+/*  Stamped with a digest of the sources, not with the git commit.
+
+    A commit stamp invalidates itself: regenerating after the commit that
+    carried the last regeneration produces a different file, so the check fails
+    on a clean tree and CI can never be green. A digest of the files the parser
+    actually read changes exactly when the answer changes, which is the only
+    thing the stamp was ever for.  */
+const head = crypto
+	.createHash('sha256')
+	.update(
+		entries
+			.map((e) => e.file)
+			.concat(['src/sbk-common.h', 'src/sbk-anim.h', 'src/sbk-glyph.h', 'data/locale/en-US.ini'])
+			.sort()
+			.map((f) => `${f}\n${read(f)}`)
+			.join('\n')
+	)
+	.digest('hex')
+	.slice(0, 12);
 
 const registry = {
 	generated_by: 'scripts/skill-sync.mjs',
-	commit: head,
+	source_digest: head,
 	canvas: { width: 1920, height: 1080 },
 	aspects: ASPECTS,
 	surfaces: SURFACES,
@@ -227,7 +240,9 @@ function markdown() {
 	L.push('');
 	L.push('# Every source, and every setting it takes');
 	L.push('');
-	L.push(`Read out of the C at \`${head}\`. A key that is not here is a key no source reads.`);
+	L.push('Read out of the C. A key that is not here is a key no source reads.');
+L.push('');
+L.push(`<sub>sources digest \`${head}\` — regenerate with <code>node scripts/skill-sync.mjs</code></sub>`);
 	L.push('');
 	L.push('Colours are **ABGR** integers, not hex strings: `0xFF3F27F5` is the accent red.');
 	L.push('In JSON write them as decimal, which is what OBS itself stores.');

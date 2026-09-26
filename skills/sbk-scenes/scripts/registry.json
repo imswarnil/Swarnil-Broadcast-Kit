@@ -1,6 +1,6 @@
 {
 	"generated_by": "scripts/skill-sync.mjs",
-	"commit": "b2f0db0",
+	"source_digest": "d6a53f2edcfb",
 	"canvas": {
 		"width": 1920,
 		"height": 1080
